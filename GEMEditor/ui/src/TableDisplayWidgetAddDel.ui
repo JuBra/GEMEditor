@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>TableDisplayWidgetAddDel</class>
+ <widget class="QWidget" name="TableDisplayWidgetAddDel">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>251</width>
+    <height>167</height>
+   </rect>
+  </property>
+  <property name="contextMenuPolicy">
+   <enum>Qt::CustomContextMenu</enum>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <layout class="QHBoxLayout" name="horizontalLayout">
+   <item>
+    <widget class="ElementTableView" name="dataView">
+     <property name="contextMenuPolicy">
+      <enum>Qt::CustomContextMenu</enum>
+     </property>
+     <property name="editTriggers">
+      <set>QAbstractItemView::NoEditTriggers</set>
+     </property>
+     <attribute name="horizontalHeaderStretchLastSection">
+      <bool>true</bool>
+     </attribute>
+     <attribute name="verticalHeaderVisible">
+      <bool>false</bool>
+     </attribute>
+    </widget>
+   </item>
+   <item>
+    <layout class="QVBoxLayout" name="buttonLayout">
+     <item>
+      <widget class="QPushButton" name="add_button">
+       <property name="text">
+        <string/>
+       </property>
+       <property name="icon">
+        <iconset resource="../../icons/icons.qrc">
+         <normaloff>:/add_icon</normaloff>:/add_icon</iconset>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="delete_button">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="icon">
+        <iconset resource="../../icons/icons.qrc">
+         <normaloff>:/remove_icon</normaloff>:/remove_icon</iconset>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="buttonSpacer">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>20</width>
+         <height>40</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+    </layout>
+   </item>
+  </layout>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>ElementTableView</class>
+   <extends>QTableView</extends>
+   <header>GEMEditor.widgets.views</header>
+  </customwidget>
+ </customwidgets>
+ <resources>
+  <include location="../../icons/icons.qrc"/>
+ </resources>
+ <connections>
+  <connection>
+   <sender>add_button</sender>
+   <signal>clicked()</signal>
+   <receiver>TableDisplayWidgetAddDel</receiver>
+   <slot>add_item()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>226</x>
+     <y>21</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>125</x>
+     <y>83</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>dataView</sender>
+   <signal>doubleClicked(QModelIndex)</signal>
+   <receiver>TableDisplayWidgetAddDel</receiver>
+   <slot>edit_item()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>186</x>
+     <y>131</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>290</x>
+     <y>174</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>dataView</sender>
+   <signal>customContextMenuRequested(QPoint)</signal>
+   <receiver>TableDisplayWidgetAddDel</receiver>
+   <slot>showContextMenu(QPoint)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>60</x>
+     <y>117</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>128</x>
+     <y>225</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>delete_button</sender>
+   <signal>clicked()</signal>
+   <receiver>TableDisplayWidgetAddDel</receiver>
+   <slot>delete_item()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>232</x>
+     <y>58</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>243</x>
+     <y>124</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <slot>add_item()</slot>
+  <slot>edit_item()</slot>
+  <slot>showContextMenu(QPoint)</slot>
+  <slot>delete_item()</slot>
+ </slots>
+</ui>

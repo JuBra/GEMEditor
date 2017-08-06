@@ -1,0 +1,20 @@
+<listOfEvidences>
+    <evidence property="Catalyzed by" baseItem="R_asd" baseItemType="Reaction">
+        <method type="Experimental" subtype="Characterization enzyme" description="Gel purification of enzyme and activity testing using in XY assay"/>
+        <listOfLinkedItems>
+            <linkedItem type="Gene" id="Test"/>
+        </listOfLinkedItems>
+        <listOfReferences>
+            <refLink refId="reftest"/>
+        </listOfReferences>
+    </evidence>
+</listOfEvidences>
+
+<listOfEvidences>
+    <evidence property="Catalyzed by" baseItem="R_asd" baseItemType="Reaction" linkedItem="Test" linkedItemType="Gene">
+        <method type="In silico" subtype="Sequence similarity" description="Gel purification of enzyme and activity testing using in XY assay" linkedItem="Test2" linkedItemType="Gene"/>
+        <listOfReferences>
+            <refLink refId="reftest"/>
+        </listOfReferences>
+    </evidence>
+</listOfEvidences>

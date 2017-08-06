@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>EditTestDialog</class>
+ <widget class="QDialog" name="EditTestDialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>447</width>
+    <height>307</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Edit case</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout_7">
+   <item>
+    <layout class="QGridLayout" name="gridLayout">
+     <item row="0" column="0">
+      <widget class="QLabel" name="nameLabel">
+       <property name="text">
+        <string>Name:</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="1">
+      <widget class="QLineEdit" name="nameLineEdit"/>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_3">
+     <item>
+      <widget class="QGroupBox" name="groupBox">
+       <property name="title">
+        <string>Conditions:</string>
+       </property>
+       <layout class="QVBoxLayout" name="verticalLayout">
+        <item>
+         <widget class="QTabWidget" name="tabWidget">
+          <property name="currentIndex">
+           <number>0</number>
+          </property>
+          <widget class="ReactionSettingDisplayWidget" name="reactionTab">
+           <attribute name="title">
+            <string>Reactions</string>
+           </attribute>
+          </widget>
+          <widget class="GeneSettingDisplayWidget" name="geneTab">
+           <attribute name="title">
+            <string>Genes</string>
+           </attribute>
+          </widget>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </item>
+     <item>
+      <widget class="QGroupBox" name="groupBox_2">
+       <property name="title">
+        <string>Outcomes:</string>
+       </property>
+       <layout class="QVBoxLayout" name="verticalLayout_2">
+        <item>
+         <widget class="QTabWidget" name="tabWidget2">
+          <property name="currentIndex">
+           <number>0</number>
+          </property>
+          <widget class="OutcomeDisplayWidget" name="outcomeTab">
+           <attribute name="title">
+            <string>Outcomes</string>
+           </attribute>
+          </widget>
+          <widget class="ReferenceDisplayWidget" name="referenceTab">
+           <attribute name="title">
+            <string>References</string>
+           </attribute>
+          </widget>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="groupBox_3">
+     <property name="title">
+      <string>Comment</string>
+     </property>
+     <layout class="QVBoxLayout" name="verticalLayout_3">
+      <item>
+       <widget class="CommentDisplayWidget" name="commentWidget" native="true"/>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QDialogButtonBox" name="buttonBox">
+     <property name="styleSheet">
+      <string notr="true"/>
+     </property>
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="standardButtons">
+      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>ReactionSettingDisplayWidget</class>
+   <extends>QWidget</extends>
+   <header>GEMEditor.widgets.model</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>GeneSettingDisplayWidget</class>
+   <extends>QWidget</extends>
+   <header>GEMEditor.widgets.model</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ReferenceDisplayWidget</class>
+   <extends>QWidget</extends>
+   <header>GEMEditor.widgets.model</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>OutcomeDisplayWidget</class>
+   <extends>QWidget</extends>
+   <header>GEMEditor.widgets.model</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>CommentDisplayWidget</class>
+   <extends>QWidget</extends>
+   <header>GEMEditor.widgets.model</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
+ <resources>
+  <include location="../../icons/icons.qrc"/>
+ </resources>
+ <connections>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>accepted()</signal>
+   <receiver>EditTestDialog</receiver>
+   <slot>accept()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>236</x>
+     <y>284</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>157</x>
+     <y>274</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>rejected()</signal>
+   <receiver>EditTestDialog</receiver>
+   <slot>reject()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>304</x>
+     <y>284</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>286</x>
+     <y>274</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <slot>activate_button()</slot>
+  <slot>save_state()</slot>
+  <slot>add_setting()</slot>
+  <slot>add_outcome()</slot>
+  <slot>save_dialog_geometry()</slot>
+  <slot>add_current()</slot>
+ </slots>
+</ui>

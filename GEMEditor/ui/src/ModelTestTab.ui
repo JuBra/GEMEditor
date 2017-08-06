@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>ModelTestTab</class>
+ <widget class="QWidget" name="ModelTestTab">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>448</width>
+    <height>366</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <item>
+      <widget class="QLabel" name="label_status_description">
+       <property name="text">
+        <string>Status:</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="label_status">
+       <property name="font">
+        <font>
+         <italic>true</italic>
+        </font>
+       </property>
+       <property name="text">
+        <string>Unknown</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QLabel" name="label">
+       <property name="minimumSize">
+        <size>
+         <width>15</width>
+         <height>15</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>15</width>
+         <height>15</height>
+        </size>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="pixmap">
+        <pixmap resource="../../icons/icons.qrc">:/search_icon</pixmap>
+       </property>
+       <property name="scaledContents">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="ButtonLineEdit" name="searchInput">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <widget class="GeneTreeView" name="dataView">
+     <property name="contextMenuPolicy">
+      <enum>Qt::CustomContextMenu</enum>
+     </property>
+     <property name="editTriggers">
+      <set>QAbstractItemView::NoEditTriggers</set>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_2">
+     <item>
+      <spacer name="horizontalSpacer_2">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QPushButton" name="addItemButton">
+       <property name="text">
+        <string>Add Test</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="editItemButton">
+       <property name="text">
+        <string>Edit Test</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="deleteItemButton">
+       <property name="text">
+        <string>Delete Test</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+  </layout>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>ButtonLineEdit</class>
+   <extends>QLineEdit</extends>
+   <header>GEMEditor.widgets.gui</header>
+  </customwidget>
+  <customwidget>
+   <class>GeneTreeView</class>
+   <extends>QTreeView</extends>
+   <header>GEMEditor.widgets.views</header>
+  </customwidget>
+ </customwidgets>
+ <resources>
+  <include location="../../icons/icons.qrc"/>
+ </resources>
+ <connections>
+  <connection>
+   <sender>addItemButton</sender>
+   <signal>clicked()</signal>
+   <receiver>ModelTestTab</receiver>
+   <slot>addItemSlot()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>239</x>
+     <y>341</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>254</x>
+     <y>359</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>editItemButton</sender>
+   <signal>clicked()</signal>
+   <receiver>ModelTestTab</receiver>
+   <slot>editItemSlot()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>309</x>
+     <y>340</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>352</x>
+     <y>364</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>deleteItemButton</sender>
+   <signal>clicked()</signal>
+   <receiver>ModelTestTab</receiver>
+   <slot>deleteItemSlot()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>429</x>
+     <y>354</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>463</x>
+     <y>364</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <slot>addItemSlot()</slot>
+  <slot>editItemSlot()</slot>
+  <slot>deleteItemSlot()</slot>
+  <slot>showContextMenu(QPoint)</slot>
+ </slots>
+</ui>

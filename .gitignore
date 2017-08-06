@@ -1,0 +1,9 @@
+__pycache__
+*.pdf
+*.svg
+*.txt
+*.log
+.cache
+*.db
+
+/dist/

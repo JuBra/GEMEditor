@@ -1,0 +1,473 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>PubmedBrowser</class>
+ <widget class="QDialog" name="PubmedBrowser">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>916</width>
+    <height>754</height>
+   </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
+  <property name="windowTitle">
+   <string>Pubmed Browser</string>
+  </property>
+  <layout class="QHBoxLayout" name="horizontalLayout_2">
+   <item>
+    <widget class="QPushButton" name="buttonPrevious">
+     <property name="text">
+      <string/>
+     </property>
+     <property name="icon">
+      <iconset resource="../../icons/icons.qrc">
+       <normaloff>:/left_arrow_icon</normaloff>:/left_arrow_icon</iconset>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>20</width>
+       <height>20</height>
+      </size>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <layout class="QVBoxLayout" name="verticalLayout">
+     <property name="spacing">
+      <number>0</number>
+     </property>
+     <item>
+      <widget class="QGroupBox" name="searchBox">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="title">
+        <string>Search</string>
+       </property>
+       <layout class="QVBoxLayout" name="verticalLayout_3">
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout">
+          <property name="spacing">
+           <number>0</number>
+          </property>
+          <item>
+           <widget class="QLineEdit" name="searchInput"/>
+          </item>
+          <item>
+           <widget class="QPushButton" name="buttonSearch">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="text">
+             <string>Go</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+       </layout>
+      </widget>
+     </item>
+     <item>
+      <widget class="QGroupBox" name="resultsBox">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="title">
+        <string>Results</string>
+       </property>
+       <layout class="QVBoxLayout" name="verticalLayout_2">
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_3">
+          <item>
+           <widget class="QLabel" name="numCurrent">
+            <property name="text">
+             <string>currentNum</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="ofLabel">
+            <property name="text">
+             <string>of</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="numTotal">
+            <property name="text">
+             <string>totalNum</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="horizontalSpacer_3">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeType">
+             <enum>QSizePolicy::Minimum</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>20</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="skipKnowns">
+            <property name="text">
+             <string>Skip knowns</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="horizontalSpacer">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <widget class="QPushButton" name="buttonLoadKnowns">
+            <property name="text">
+             <string>Load visited</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="buttonSaveKnowns">
+            <property name="text">
+             <string>Save visited</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="horizontalSpacer_2">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeType">
+             <enum>QSizePolicy::Minimum</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <widget class="QPushButton" name="buttonAdd">
+            <property name="text">
+             <string/>
+            </property>
+            <property name="icon">
+             <iconset resource="../../icons/icons.qrc">
+              <normaloff>:/add_icon</normaloff>:/add_icon</iconset>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="buttonNonAdd">
+            <property name="text">
+             <string/>
+            </property>
+            <property name="icon">
+             <iconset resource="../../icons/icons.qrc">
+              <normaloff>:/no_download_icon</normaloff>:/no_download_icon</iconset>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <widget class="QWebEngineView" name="webView" native="true">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="url" stdset="0">
+           <url>
+            <string>about:blank</string>
+           </url>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QProgressBar" name="progressBar">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>16777215</width>
+            <height>5</height>
+           </size>
+          </property>
+          <property name="value">
+           <number>0</number>
+          </property>
+          <property name="textVisible">
+           <bool>false</bool>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <widget class="QPushButton" name="buttonNext">
+     <property name="text">
+      <string/>
+     </property>
+     <property name="icon">
+      <iconset resource="../../icons/icons.qrc">
+       <normaloff>:/right_arrow_icon</normaloff>:/right_arrow_icon</iconset>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>20</width>
+       <height>20</height>
+      </size>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>QWebEngineView</class>
+   <extends>QWidget</extends>
+   <header>QtWebEngineWidgets.QWebEngineView</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
+ <resources>
+  <include location="../../icons/icons.qrc"/>
+ </resources>
+ <connections>
+  <connection>
+   <sender>buttonSearch</sender>
+   <signal>clicked()</signal>
+   <receiver>PubmedBrowser</receiver>
+   <slot>search_pubmed()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>824</x>
+     <y>44</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>916</x>
+     <y>65</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>buttonNext</sender>
+   <signal>clicked()</signal>
+   <receiver>PubmedBrowser</receiver>
+   <slot>next_entry()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>886</x>
+     <y>380</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>890</x>
+     <y>409</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>buttonPrevious</sender>
+   <signal>clicked()</signal>
+   <receiver>PubmedBrowser</receiver>
+   <slot>previous_entry()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>24</x>
+     <y>375</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>24</x>
+     <y>420</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>searchInput</sender>
+   <signal>returnPressed()</signal>
+   <receiver>PubmedBrowser</receiver>
+   <slot>search_pubmed()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>336</x>
+     <y>39</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>565</x>
+     <y>4</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>webView</sender>
+   <signal>loadStarted()</signal>
+   <receiver>PubmedBrowser</receiver>
+   <slot>show_progressbar()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>832</x>
+     <y>534</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>895</x>
+     <y>531</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>webView</sender>
+   <signal>loadFinished(bool)</signal>
+   <receiver>PubmedBrowser</receiver>
+   <slot>hide_progressbar()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>818</x>
+     <y>614</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>897</x>
+     <y>616</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>buttonAdd</sender>
+   <signal>clicked()</signal>
+   <receiver>PubmedBrowser</receiver>
+   <slot>add_publication()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>803</x>
+     <y>101</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>892</x>
+     <y>203</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>buttonNonAdd</sender>
+   <signal>clicked()</signal>
+   <receiver>PubmedBrowser</receiver>
+   <slot>push_publication_to_nonread()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>851</x>
+     <y>104</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>890</x>
+     <y>149</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>searchInput</sender>
+   <signal>textChanged(QString)</signal>
+   <receiver>PubmedBrowser</receiver>
+   <slot>toggle_search_button(QString)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>719</x>
+     <y>52</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>891</x>
+     <y>15</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>buttonLoadKnowns</sender>
+   <signal>clicked()</signal>
+   <receiver>PubmedBrowser</receiver>
+   <slot>load_knowns()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>623</x>
+     <y>108</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>889</x>
+     <y>270</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>buttonSaveKnowns</sender>
+   <signal>clicked()</signal>
+   <receiver>PubmedBrowser</receiver>
+   <slot>save_knowns()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>701</x>
+     <y>111</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>888</x>
+     <y>242</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <slot>search_pubmed()</slot>
+  <slot>next_entry()</slot>
+  <slot>previous_entry()</slot>
+  <slot>add_publication()</slot>
+  <slot>push_publication_to_nonread()</slot>
+  <slot>show_progressbar()</slot>
+  <slot>hide_progressbar()</slot>
+  <slot>toggle_search_button(QString)</slot>
+  <slot>load_knowns()</slot>
+  <slot>save_knowns()</slot>
+ </slots>
+</ui>

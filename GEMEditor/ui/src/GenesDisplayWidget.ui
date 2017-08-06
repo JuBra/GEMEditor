@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>GenesDisplayWidget</class>
+ <widget class="QWidget" name="GenesDisplayWidget">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>400</width>
+    <height>300</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <widget class="GeneTreeView" name="geneView" native="true">
+     <property name="contextMenuPolicy">
+      <enum>Qt::CustomContextMenu</enum>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>GeneTreeView</class>
+   <extends>QWidget</extends>
+   <header>GEMEditor.widgets.views</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>geneView</sender>
+   <signal>customContextMenuRequested(QPoint)</signal>
+   <receiver>GenesDisplayWidget</receiver>
+   <slot>show_gene_contextmenu(QPoint)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>296</x>
+     <y>168</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>403</x>
+     <y>187</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <slot>show_gene_contextmenu(QPoint)</slot>
+ </slots>
+</ui>

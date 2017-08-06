@@ -1,0 +1,277 @@
+from uuid import uuid4
+from copy import copy
+from GEMEditor.base_classes import BaseReferenceElement
+from GEMEditor.cobraClasses import GeneGroup
+
+
+def add_gene_to_reaction(evidence):
+    gene, reaction = evidence.entity, evidence.target
+    if len(reaction._children) == 1:
+        child = reaction._children[0]
+        if isinstance(child, GeneGroup) and child.type == "or":
+            child.add_child(gene)
+            return
+    reaction.add_child(gene)
+
+
+def check_localization(evidence):
+    """ Check that all reactions
+
+    Parameters
+    ----------
+    gene
+    compartment
+
+    Returns
+    -------
+
+    """
+    for reaction in evidence.entity.reactions:
+        if not any(metabolite.compartment == evidence.target.id for metabolite in reaction.metabolites):
+            return False
+    return True
+
+
+def fix_gene_not_catalyzing_reaction(evidence):
+    entity = evidence.entity
+    if not hasattr(entity, "_parents"):
+        return
+
+    for parent in entity._parents.copy():
+        if parent is evidence.target:
+            parent.remove_child(entity, all=True)
+        elif evidence.target in parent.reactions:
+            parent.remove_child(entity, all=True)
+
+
+class Evidence(BaseReferenceElement):
+
+    assertions = {"Localization": check_localization,
+                  "Catalyzing reaction": lambda evidence: evidence.target in evidence.entity.reactions,
+                  "Not catalyzing reaction": lambda evidence: evidence.target not in evidence.entity.reactions,
+                  "Reversible": lambda evidence: evidence.entity.reversibility,
+                  "Irreversible": lambda evidence: not evidence.entity.reversibility,
+                  "Present": lambda *args: True,
+                  "Presence": lambda *args: True}
+
+    fixes = {"Catalyzing reaction": add_gene_to_reaction,
+             "Not catalyzing reaction": fix_gene_not_catalyzing_reaction}
+
+    def __init__(self, internal_id=None, entity=None, link=None, term=None, eco=None, assertion=None, comment=None,
+                 target=None):
+        super(Evidence, self).__init__()
+        self.internal_id = internal_id or str(uuid4())
+        self.entity = None
+        self.assertion = None
+        self.eco = None
+        self.comment = None
+        self.link = None
+        self.term = None
+        self.target = None
+
+        self.set_entity(entity)
+        self.set_linked_item(link)
+        self.set_eco(eco)
+        self.set_assertion(assertion)
+        self.set_comment(comment)
+        self.set_term(term)
+        self.set_target(target)
+
+    def set_entity(self, new_entity, reciprocal=True):
+        """ Set the model entity that is the basis for the evidence
+
+        Parameters
+        ----------
+        new_entity :
+        reciprocal : bool
+
+        Returns
+        -------
+        None
+        """
+
+        # Remove link from old entity to this evidence
+        if self.entity:
+            self.entity.remove_evidence(self)
+
+        self.entity = new_entity
+        # Set the link from the new entity to this evidence
+        if reciprocal and new_entity:
+            new_entity.add_evidence(self)
+
+    def set_linked_item(self, new_item, reciprocal=True):
+        """ Set the model entity that is the linked for the assertion
+
+        Parameters
+        ----------
+        new_entity :
+        reciprocal : bool
+
+        Returns
+        -------
+        None
+        """
+        # Remove reference from old link to this evidence
+        if self.link is not None:
+            self.link.remove_evidence(self)
+
+        self.link = new_item
+        # Set the reference from the new link to this evidence
+        if reciprocal and new_item:
+            new_item.add_evidence(self)
+
+    def set_assertion(self, assertion):
+        self.assertion = assertion or ""
+
+    def set_target(self, new_target, reciprocal=True):
+        """ Set the model entity that is the linked for the assertion
+
+        Parameters
+        ----------
+        new_entity :
+        reciprocal : bool
+
+        Returns
+        -------
+        None
+        """
+        # Remove reference from old link to this evidence
+        if self.target is not None:
+            self.target.remove_evidence(self)
+
+        self.target = new_target
+        # Set the reference from the new link to this evidence
+        if reciprocal and new_target:
+            new_target.add_evidence(self)
+
+    def set_eco(self, eco):
+        self.eco = eco or ""
+
+    def set_term(self, term):
+        self.term = term or ""
+
+    def set_comment(self, comment):
+        self.comment = comment or ""
+
+    def add_reference(self, reference, reciprocal=True):
+        super(Evidence, self).add_reference(reference)
+        if reciprocal:
+            reference.add_evidence(self)
+
+    def remove_reference(self, reference, reciprocal=True):
+        super(Evidence, self).remove_reference(reference)
+        if reciprocal:
+            reference.remove_evidence(self)
+
+    def delete_links(self):
+        # Delete references
+        for x in self.references:
+            x.remove_evidence(self)
+        self.references.clear()
+
+        # Remove from items
+        if self.entity:
+            self.entity.remove_evidence(self)
+            self.entity = None
+
+        if self.link:
+            self.link.remove_evidence(self)
+            self.link = None
+
+        if self.target:
+            self.target.remove_evidence(self)
+            self.target = None
+
+    def setup_links(self):
+        """ Method that is used to establish the links from
+        all linked items to this evidence instance
+
+        Use this on copies created with the copy method in order
+        to get proper cross referencing """
+
+        # Set link for references
+        for x in self.references:
+            x.add_evidence(self)
+
+        if self.entity:
+            self.entity.add_evidence(self)
+
+        if self.link:
+            self.link.add_evidence(self)
+
+        if self.target:
+            self.target.add_evidence(self)
+
+    def copy(self):
+        """ Return a copy of the evidence instance that links
+        the same items as the original, but is not linked
+        reciprocally by the items """
+
+        new_evidence = self.__class__(internal_id=self.internal_id, assertion=self.assertion,
+                                      eco=self.eco, comment=self.comment)
+        # Don't set in constructor in order to allow non cross linked
+        # copy
+        new_evidence.set_entity(self.entity, reciprocal=False)
+        new_evidence.set_linked_item(self.link, reciprocal=False)
+        new_evidence.set_target(self.target, reciprocal=False)
+        new_evidence.references = copy(self.references)
+
+        return new_evidence
+
+    def is_valid(self):
+        """ Check if the evidence is hold"""
+        try:
+            return self.assertions[self.assertion](self)
+        except (AttributeError, KeyError):
+            return None
+
+    def fix(self):
+        # Check if the evidence is still invalid
+        validity = self.is_valid()
+        if validity is None:
+            return None, "At least one of the needed attributes are missing: 'entity', 'target', 'assertion'"
+        elif validity is True:
+            return True, ""
+
+        try:
+            self.fixes[self.assertion](self)
+        except KeyError:
+            return False, "Unknown fix for assertion {}".format(self.assertion)
+        except AttributeError:
+            return False, "Error in evidence. Is the target set?"
+        else:
+            return True, "Successfully changed!"
+
+    def __str__(self):
+        return "ID: {id}\nEntity: {entity}\nAssertion: {assertion}\n" \
+               "ECO: {eco}\nComment: {comment}\nLink: {link}\nTerm: {term}\n" \
+               "Ref: {ref}".format(id=self.internal_id,
+                                   entity=self.entity,
+                                   assertion=self.assertion,
+                                   eco=self.eco,
+                                   comment=self.comment,
+                                   link=self.link,
+                                   term=self.term,
+                                   ref=";".join(x.reference_string for x in self.references))
+
+    def __eq__(self, other):
+        if (isinstance(other, Evidence) and
+                    self.internal_id == other.internal_id and
+                    self.entity is other.entity and
+                    self.link is other.link and
+                    self.target is other.target and
+                    self.eco == other.eco and
+                    self.assertion == other.assertion and
+                    self.comment == other.comment and
+                    self.term == other.term and
+                    self.references == other.references):
+            return True
+        else:
+            return False
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
+
+    def __hash__(self):
+        return id(self)
+

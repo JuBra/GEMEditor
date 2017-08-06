@@ -1,0 +1,3 @@
+include GEMEditor/evidence/eco.obo
+include README.rst
+include GEMEditor/GEMEditor.cfg

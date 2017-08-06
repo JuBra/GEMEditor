@@ -1,0 +1,2 @@
+from .AnnotationSettingsDialog import Ui_AnnotationSettingsDialog
+from .DatabaseSelectionDialog import Ui_DatabaseSelectionDialog

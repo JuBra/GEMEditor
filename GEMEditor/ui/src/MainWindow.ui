@@ -1,0 +1,418 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>800</width>
+    <height>637</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>MainWindow</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QVBoxLayout" name="verticalLayout">
+    <property name="leftMargin">
+     <number>0</number>
+    </property>
+    <property name="topMargin">
+     <number>0</number>
+    </property>
+    <property name="rightMargin">
+     <number>0</number>
+    </property>
+    <property name="bottomMargin">
+     <number>0</number>
+    </property>
+    <item>
+     <widget class="QTabWidget" name="tabWidget">
+      <property name="currentIndex">
+       <number>0</number>
+      </property>
+      <widget class="ModelInfoTab" name="modelTab">
+       <attribute name="title">
+        <string>Model</string>
+       </attribute>
+      </widget>
+      <widget class="ReactionTab" name="reactionTab">
+       <attribute name="title">
+        <string>Reactions</string>
+       </attribute>
+      </widget>
+      <widget class="MetaboliteTab" name="metaboliteTab">
+       <attribute name="title">
+        <string>Metabolites</string>
+       </attribute>
+      </widget>
+      <widget class="GeneTab" name="geneTab">
+       <attribute name="title">
+        <string>Genes</string>
+       </attribute>
+      </widget>
+      <widget class="ModelTestsTab" name="testsTab">
+       <attribute name="title">
+        <string>Tests</string>
+       </attribute>
+      </widget>
+      <widget class="ReferenceTab" name="referenceTab">
+       <attribute name="title">
+        <string>References</string>
+       </attribute>
+      </widget>
+      <widget class="AnalysesTab" name="analysesTab">
+       <attribute name="title">
+        <string>Analyses</string>
+       </attribute>
+      </widget>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>800</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuFile">
+    <property name="title">
+     <string>File</string>
+    </property>
+    <addaction name="actionNewModel"/>
+    <addaction name="actionOpenModel"/>
+    <addaction name="actionLoadTestModel"/>
+    <addaction name="actionSaveModel"/>
+    <addaction name="actionCloseModel"/>
+    <addaction name="separator"/>
+    <addaction name="actionCloseEditor"/>
+   </widget>
+   <widget class="QMenu" name="menuEdit">
+    <property name="title">
+     <string>Edit</string>
+    </property>
+    <addaction name="actionEditSettings"/>
+   </widget>
+   <widget class="QMenu" name="menuHelp">
+    <property name="title">
+     <string>Help</string>
+    </property>
+    <addaction name="actionAbout"/>
+   </widget>
+   <widget class="QMenu" name="menuModel">
+    <property name="title">
+     <string>Model</string>
+    </property>
+    <widget class="QMenu" name="menuQuality_Control">
+     <property name="title">
+      <string>Quality Control</string>
+     </property>
+     <addaction name="actionFin_duplicated_metabolites"/>
+     <addaction name="actionFind_duplicated_reactions"/>
+     <addaction name="separator"/>
+     <addaction name="actionCheck_evidences"/>
+     <addaction name="actionPrune_Gene_Trees"/>
+     <addaction name="separator"/>
+     <addaction name="actionRun_all_tests"/>
+    </widget>
+    <widget class="QMenu" name="menuEvidences">
+     <property name="title">
+      <string>Evidences</string>
+     </property>
+     <addaction name="actionAdd_batch"/>
+    </widget>
+    <addaction name="actionMaps"/>
+    <addaction name="menuQuality_Control"/>
+    <addaction name="menuEvidences"/>
+    <addaction name="actionBrowsePubmed"/>
+    <addaction name="separator"/>
+    <addaction name="actionStatistics"/>
+   </widget>
+   <widget class="QMenu" name="menuSimulation">
+    <property name="title">
+     <string>Simulation</string>
+    </property>
+    <widget class="QMenu" name="menuRun">
+     <property name="title">
+      <string>Run</string>
+     </property>
+     <addaction name="actionFBA"/>
+     <addaction name="actionPFBA"/>
+    </widget>
+    <addaction name="menuRun"/>
+    <addaction name="separator"/>
+    <addaction name="actionHistory"/>
+   </widget>
+   <widget class="QMenu" name="menuMetaNetX">
+    <property name="title">
+     <string>MetaNetX</string>
+    </property>
+    <addaction name="actionAdd_Metabolite"/>
+    <addaction name="actionAdd_Reactions"/>
+    <addaction name="separator"/>
+    <addaction name="actionAuto_annotate"/>
+    <addaction name="actionCheck_consistency"/>
+    <addaction name="separator"/>
+    <addaction name="actionUpdate_database"/>
+   </widget>
+   <addaction name="menuFile"/>
+   <addaction name="menuEdit"/>
+   <addaction name="menuModel"/>
+   <addaction name="menuMetaNetX"/>
+   <addaction name="menuSimulation"/>
+   <addaction name="menuHelp"/>
+  </widget>
+  <action name="actionNewModel">
+   <property name="text">
+    <string>New model</string>
+   </property>
+  </action>
+  <action name="actionOpenModel">
+   <property name="text">
+    <string>Open model</string>
+   </property>
+  </action>
+  <action name="actionLoadTestModel">
+   <property name="text">
+    <string>Load Test model</string>
+   </property>
+  </action>
+  <action name="actionSaveModel">
+   <property name="text">
+    <string>Save Model</string>
+   </property>
+  </action>
+  <action name="actionCloseModel">
+   <property name="text">
+    <string>Close Model</string>
+   </property>
+  </action>
+  <action name="actionCloseEditor">
+   <property name="text">
+    <string>Close Editor</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::QuitRole</enum>
+   </property>
+  </action>
+  <action name="actionEditSettings">
+   <property name="text">
+    <string>Settings</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::PreferencesRole</enum>
+   </property>
+  </action>
+  <action name="actionBrowsePubmed">
+   <property name="text">
+    <string>Browse Pubmed</string>
+   </property>
+  </action>
+  <action name="actionOpenTestdialog">
+   <property name="text">
+    <string>Open testdialog</string>
+   </property>
+  </action>
+  <action name="actionAbout">
+   <property name="icon">
+    <iconset resource="../../icons/icons.qrc">
+     <normaloff>:/information_icon</normaloff>:/information_icon</iconset>
+   </property>
+   <property name="text">
+    <string>About</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::AboutRole</enum>
+   </property>
+  </action>
+  <action name="actionStatistics">
+   <property name="icon">
+    <iconset resource="../../icons/icons.qrc">
+     <normaloff>:/statistics_icon</normaloff>:/statistics_icon</iconset>
+   </property>
+   <property name="text">
+    <string>Statistics</string>
+   </property>
+  </action>
+  <action name="actionAuto_annotate">
+   <property name="icon">
+    <iconset resource="../../icons/icons.qrc">
+     <normaloff>:/add_from_database</normaloff>:/add_from_database</iconset>
+   </property>
+   <property name="text">
+    <string>Auto annotate</string>
+   </property>
+  </action>
+  <action name="actionCheck_consistency">
+   <property name="icon">
+    <iconset resource="../../icons/icons.qrc">
+     <normaloff>:/check_consistency_icon</normaloff>:/check_consistency_icon</iconset>
+   </property>
+   <property name="text">
+    <string>Check consistency</string>
+   </property>
+  </action>
+  <action name="actionAdd_Metabolite">
+   <property name="icon">
+    <iconset resource="../../icons/icons.qrc">
+     <normaloff>:/add_metabolite</normaloff>:/add_metabolite</iconset>
+   </property>
+   <property name="text">
+    <string>Add Metabolite</string>
+   </property>
+  </action>
+  <action name="actionGenerate_map">
+   <property name="text">
+    <string>Generate map</string>
+   </property>
+  </action>
+  <action name="actionAdd_cofactors">
+   <property name="text">
+    <string>Add cofactors</string>
+   </property>
+  </action>
+  <action name="actionShow_maps">
+   <property name="text">
+    <string>Show maps</string>
+   </property>
+  </action>
+  <action name="actionHistory">
+   <property name="text">
+    <string>History</string>
+   </property>
+  </action>
+  <action name="actionFind_duplicated_reactions">
+   <property name="text">
+    <string>Find duplicated reactions</string>
+   </property>
+  </action>
+  <action name="actionLoad_maps">
+   <property name="text">
+    <string>Load maps</string>
+   </property>
+  </action>
+  <action name="actionMaps">
+   <property name="text">
+    <string>Maps</string>
+   </property>
+  </action>
+  <action name="actionCheck_gene_location">
+   <property name="text">
+    <string>Check gene location</string>
+   </property>
+  </action>
+  <action name="actionCheck_evidences">
+   <property name="text">
+    <string>Check evidences</string>
+   </property>
+  </action>
+  <action name="actionRun_all_tests">
+   <property name="text">
+    <string>Run all tests</string>
+   </property>
+  </action>
+  <action name="actionPrune_Gene_Trees">
+   <property name="text">
+    <string>Prune Gene Trees</string>
+   </property>
+  </action>
+  <action name="actionAdd_batch">
+   <property name="text">
+    <string>Add batch</string>
+   </property>
+  </action>
+  <action name="actionAdd_Metabolites">
+   <property name="text">
+    <string>Add Metabolites</string>
+   </property>
+  </action>
+  <action name="actionAdd_Reactions">
+   <property name="text">
+    <string>Add Reactions</string>
+   </property>
+  </action>
+  <action name="actionUpdate_database">
+   <property name="text">
+    <string>Update database</string>
+   </property>
+  </action>
+  <action name="actionAuto_annotation">
+   <property name="text">
+    <string>Auto annotation</string>
+   </property>
+  </action>
+  <action name="actionCheck_consistency_2">
+   <property name="text">
+    <string>Check consistency</string>
+   </property>
+  </action>
+  <action name="actionFin_duplicated_metabolites">
+   <property name="text">
+    <string>Find duplicated metabolites</string>
+   </property>
+  </action>
+  <action name="actionFBA">
+   <property name="text">
+    <string>FBA</string>
+   </property>
+  </action>
+  <action name="actionPFBA">
+   <property name="text">
+    <string>pFBA</string>
+   </property>
+  </action>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>ReactionTab</class>
+   <extends>QWidget</extends>
+   <header>GEMEditor.tabs</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>GeneTab</class>
+   <extends>QWidget</extends>
+   <header>GEMEditor.tabs</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ReferenceTab</class>
+   <extends>QWidget</extends>
+   <header>GEMEditor.tabs</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>AnalysesTab</class>
+   <extends>QWidget</extends>
+   <header>GEMEditor.tabs</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ModelInfoTab</class>
+   <extends>QWidget</extends>
+   <header>GEMEditor.tabs</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>MetaboliteTab</class>
+   <extends>QWidget</extends>
+   <header>GEMEditor.tabs</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ModelTestsTab</class>
+   <extends>QWidget</extends>
+   <header>GEMEditor.tabs</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
+ <resources>
+  <include location="../../icons/icons.qrc"/>
+ </resources>
+ <connections/>
+</ui>

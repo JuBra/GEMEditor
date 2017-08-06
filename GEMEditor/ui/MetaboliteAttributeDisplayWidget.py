@@ -1,0 +1,95 @@
+# -*- coding: utf-8 -*-
+
+# Form implementation generated from reading ui file 'MetaboliteAttributeDisplayWidget.ui'
+#
+# Created by: PyQt5 UI code generator 5.8.2
+#
+# WARNING! All changes made in this file will be lost!
+
+from PyQt5 import QtCore, QtGui, QtWidgets
+
+class Ui_MetaboliteAttributeDisplayWidget(object):
+    def setupUi(self, MetaboliteAttributeDisplayWidget):
+        MetaboliteAttributeDisplayWidget.setObjectName("MetaboliteAttributeDisplayWidget")
+        MetaboliteAttributeDisplayWidget.resize(227, 148)
+        self.formLayout = QtWidgets.QFormLayout(MetaboliteAttributeDisplayWidget)
+        self.formLayout.setObjectName("formLayout")
+        self.iDLabel = QtWidgets.QLabel(MetaboliteAttributeDisplayWidget)
+        self.iDLabel.setObjectName("iDLabel")
+        self.formLayout.setWidget(0, QtWidgets.QFormLayout.LabelRole, self.iDLabel)
+        self.horizontalLayout = QtWidgets.QHBoxLayout()
+        self.horizontalLayout.setObjectName("horizontalLayout")
+        self.iDLineEdit = QtWidgets.QLineEdit(MetaboliteAttributeDisplayWidget)
+        self.iDLineEdit.setObjectName("iDLineEdit")
+        self.horizontalLayout.addWidget(self.iDLineEdit)
+        self.labelIdStatus = QtWidgets.QLabel(MetaboliteAttributeDisplayWidget)
+        self.labelIdStatus.setMaximumSize(QtCore.QSize(20, 20))
+        self.labelIdStatus.setStyleSheet("padding: 1;")
+        self.labelIdStatus.setText("")
+        self.labelIdStatus.setPixmap(QtGui.QPixmap(":/status_error"))
+        self.labelIdStatus.setScaledContents(True)
+        self.labelIdStatus.setObjectName("labelIdStatus")
+        self.horizontalLayout.addWidget(self.labelIdStatus)
+        self.formLayout.setLayout(0, QtWidgets.QFormLayout.FieldRole, self.horizontalLayout)
+        self.nameLabel = QtWidgets.QLabel(MetaboliteAttributeDisplayWidget)
+        self.nameLabel.setObjectName("nameLabel")
+        self.formLayout.setWidget(1, QtWidgets.QFormLayout.LabelRole, self.nameLabel)
+        self.nameLineEdit = QtWidgets.QLineEdit(MetaboliteAttributeDisplayWidget)
+        self.nameLineEdit.setObjectName("nameLineEdit")
+        self.formLayout.setWidget(1, QtWidgets.QFormLayout.FieldRole, self.nameLineEdit)
+        self.formulaLabel = QtWidgets.QLabel(MetaboliteAttributeDisplayWidget)
+        self.formulaLabel.setObjectName("formulaLabel")
+        self.formLayout.setWidget(2, QtWidgets.QFormLayout.LabelRole, self.formulaLabel)
+        self.horizontalLayout_2 = QtWidgets.QHBoxLayout()
+        self.horizontalLayout_2.setObjectName("horizontalLayout_2")
+        self.formulaLineEdit = QtWidgets.QLineEdit(MetaboliteAttributeDisplayWidget)
+        self.formulaLineEdit.setObjectName("formulaLineEdit")
+        self.horizontalLayout_2.addWidget(self.formulaLineEdit)
+        self.labelFormulaStatus = QtWidgets.QLabel(MetaboliteAttributeDisplayWidget)
+        self.labelFormulaStatus.setMaximumSize(QtCore.QSize(20, 20))
+        self.labelFormulaStatus.setStyleSheet("padding: 1;")
+        self.labelFormulaStatus.setText("")
+        self.labelFormulaStatus.setPixmap(QtGui.QPixmap(":/status_error"))
+        self.labelFormulaStatus.setScaledContents(True)
+        self.labelFormulaStatus.setObjectName("labelFormulaStatus")
+        self.horizontalLayout_2.addWidget(self.labelFormulaStatus)
+        self.formLayout.setLayout(2, QtWidgets.QFormLayout.FieldRole, self.horizontalLayout_2)
+        self.chargeLabel = QtWidgets.QLabel(MetaboliteAttributeDisplayWidget)
+        self.chargeLabel.setObjectName("chargeLabel")
+        self.formLayout.setWidget(3, QtWidgets.QFormLayout.LabelRole, self.chargeLabel)
+        self.chargeSpinBox = QtWidgets.QSpinBox(MetaboliteAttributeDisplayWidget)
+        self.chargeSpinBox.setMinimum(-99)
+        self.chargeSpinBox.setObjectName("chargeSpinBox")
+        self.formLayout.setWidget(3, QtWidgets.QFormLayout.FieldRole, self.chargeSpinBox)
+        self.compartmentLabel = QtWidgets.QLabel(MetaboliteAttributeDisplayWidget)
+        self.compartmentLabel.setObjectName("compartmentLabel")
+        self.formLayout.setWidget(4, QtWidgets.QFormLayout.LabelRole, self.compartmentLabel)
+        self.horizontalLayout_3 = QtWidgets.QHBoxLayout()
+        self.horizontalLayout_3.setObjectName("horizontalLayout_3")
+        self.compartmentComboBox = QtWidgets.QComboBox(MetaboliteAttributeDisplayWidget)
+        self.compartmentComboBox.setCurrentText("")
+        self.compartmentComboBox.setObjectName("compartmentComboBox")
+        self.horizontalLayout_3.addWidget(self.compartmentComboBox)
+        self.labelCompartmentStatus = QtWidgets.QLabel(MetaboliteAttributeDisplayWidget)
+        self.labelCompartmentStatus.setMaximumSize(QtCore.QSize(20, 20))
+        self.labelCompartmentStatus.setStyleSheet("padding: 1;")
+        self.labelCompartmentStatus.setText("")
+        self.labelCompartmentStatus.setPixmap(QtGui.QPixmap(":/status_error"))
+        self.labelCompartmentStatus.setScaledContents(True)
+        self.labelCompartmentStatus.setObjectName("labelCompartmentStatus")
+        self.horizontalLayout_3.addWidget(self.labelCompartmentStatus)
+        self.formLayout.setLayout(4, QtWidgets.QFormLayout.FieldRole, self.horizontalLayout_3)
+
+        self.retranslateUi(MetaboliteAttributeDisplayWidget)
+        QtCore.QMetaObject.connectSlotsByName(MetaboliteAttributeDisplayWidget)
+
+    def retranslateUi(self, MetaboliteAttributeDisplayWidget):
+        _translate = QtCore.QCoreApplication.translate
+        MetaboliteAttributeDisplayWidget.setWindowTitle(_translate("MetaboliteAttributeDisplayWidget", "Form"))
+        self.iDLabel.setText(_translate("MetaboliteAttributeDisplayWidget", "ID:"))
+        self.nameLabel.setText(_translate("MetaboliteAttributeDisplayWidget", "Name:"))
+        self.formulaLabel.setText(_translate("MetaboliteAttributeDisplayWidget", "Formula:"))
+        self.chargeLabel.setText(_translate("MetaboliteAttributeDisplayWidget", "Charge:"))
+        self.compartmentLabel.setText(_translate("MetaboliteAttributeDisplayWidget", "Compartment:"))
+
+from GEMEditor.icons_rc import *

@@ -1,0 +1,687 @@
+import logging
+from cobra.core import Reaction as cobraReaction
+from cobra.core import Gene as cobraGene
+from cobra.core import Metabolite as cobraMetabolite
+from cobra.core import Model as cobraModel
+from weakref import WeakValueDictionary
+from PyQt5 import QtGui, QtCore
+from collections import defaultdict
+from GEMEditor.widgets.tables import ReactionTable, MetaboliteTable, GeneTable, ReferenceTable, ModelTestTable, LinkedItem
+from GEMEditor.data_classes import ReactionSetting, CleaningDict, Compartment
+from GEMEditor.base_classes import BaseEvidenceElement
+from six import string_types, iteritems
+from difflib import SequenceMatcher
+import uuid
+
+
+LOGGER = logging.getLogger(__name__)
+
+
+class BaseTreeElement:
+
+    def __init__(self):
+        self._children = []
+        self._parents = []
+        super(BaseTreeElement, self).__init__()
+
+    def _add_child(self, child):
+        self._children.append(child)
+
+    def _remove_child(self, child, all=False):
+        if all:
+            self._children[:] = [x for x in self._children if x is not child]
+        else:
+            self._children.remove(child)
+
+    def _add_parent(self, parent):
+        self._parents.append(parent)
+
+    def _remove_parent(self, parent, all=False):
+        if all:
+            self._parents[:] = [x for x in self._parents if x is not parent]
+        else:
+            self._parents.remove(parent)
+
+    def add_child(self, child):
+        self._add_child(child)
+        child._add_parent(self)
+
+    def remove_child(self, child, all=False):
+        self._remove_child(child, all=all)
+        child._remove_parent(self, all=all)
+
+    def add_parent(self, parent):
+        self._add_parent(parent)
+        parent._add_child(self)
+
+    def remove_parent(self, parent, all=False):
+        self._remove_parent(parent, all=all)
+        parent._remove_child(self, all=all)
+
+    @property
+    def genes(self):
+        gene_set = set()
+        for x in self._children:
+            gene_set.update(x.genes)
+        return gene_set
+
+    @property
+    def reactions(self):
+        reaction_set = set()
+        for x in self._parents:
+            reaction_set.update(x.reactions)
+        return reaction_set
+
+    def delete_children(self, parent=None):
+        for x in self._children:
+            x.delete_children(self)
+        self._children[:] = []
+        if parent is not None:
+            self._parents[:] = [x for x in self._parents if x is not parent]
+
+    def prepare_deletion(self):
+        """ Prepare the deletion of the object from the model.
+
+        Unlink all parents and children"""
+
+        # Delete all parents
+        for parent in set(self._parents):
+            self.remove_parent(parent, all=True)
+
+        # Delete all child elements
+        self.delete_children()
+
+        try:
+            super(BaseTreeElement, self).prepare_deletion()
+        except AttributeError:
+            pass
+
+
+class Reaction(BaseTreeElement, BaseEvidenceElement, cobraReaction):
+
+    def __init__(self, id="", name='', subsystem='', lower_bound=0.,
+                 upper_bound=1000., comment=""):
+
+        self._model = None
+        self._subsystem = None
+        super(Reaction, self).__init__()
+
+        self.id = id or ""
+        self.name = name or ""
+        self.subsystem = subsystem or ""
+        self.lower_bound = lower_bound or 0.
+        self.upper_bound = 1000. if upper_bound is None else upper_bound
+        self.comment = comment or ""
+        self.elements_balanced = None
+        self.charge_balanced = None
+        self.balanced = None
+
+        self._metabolites = {}
+        self._gene_reaction_rule = ''
+
+        self.annotation = set()
+        self.variable_kind = 'continuous'
+
+    @property
+    def functional(self):
+        status = set(child.functional for child in self._children)
+        if True in status:
+            return True
+        elif False in status:
+            return False
+        else:
+            return True
+
+    @property
+    def _genes(self):
+        return self.genes
+
+    @_genes.setter
+    def _genes(self, value):
+        if value != set():
+            raise ValueError("_genes should not be set!")
+        pass
+
+    @property
+    def gene_reaction_rule(self):
+        if self._children:
+            return self._children[0].gem_reaction_rule
+        else:
+            return ""
+
+    @gene_reaction_rule.setter
+    def gene_reaction_rule(self, new_rule):
+        raise NotImplementedError("Setting gene reaction rule is not supported!")
+
+    def _dissociate_gene(self, cobra_gene):
+        """Dissociates a cobra.Gene object with a cobra.Reaction.
+
+        cobra_gene : :class:`~cobra.core.Gene.Gene`
+
+        """
+        self.remove_child(cobra_gene)
+
+    def add_annotation(self, Annotation):
+        self.annotation.add(Annotation)
+
+    def get_setting(self):
+        return ReactionSetting(reaction=self,
+                               upper_bound=self.upper_bound,
+                               lower_bound=self.lower_bound,
+                               objective_coefficient=self.objective_coefficient)
+
+    @property
+    def reactions(self):
+        return set([self])
+
+    def add_parent(self, parent):
+        raise NotImplementedError
+
+    def remove_parent(self, parent, **kwargs):
+        raise NotImplementedError
+
+    @property
+    def subsystem(self):
+        return self._subsystem
+
+    @subsystem.setter
+    def subsystem(self, value):
+        if self.model is not None:
+            self.model.subsystems.remove_reaction(self._subsystem, self)
+            self.model.subsystems[value].add(self)
+        self._subsystem = value
+
+    def update_balancing_status(self):
+        self.charge_balanced, self.elements_balanced, self.balanced = reaction_balance(self.metabolites)
+
+    def remove_from_model(self):
+        if self._model:
+            items = self._model.QtReactionTable.findItems(self.id)
+            for x in items:
+                if x.link is self:
+                    index = self._model.QtReactionTable.indexFromItem(x)
+                    self._model.QtReactionTable.removeRow(index.row())
+            super(Reaction, self).remove_from_model()
+
+    def add_metabolites(self, *args, **kwargs):
+        super(Reaction, self).add_metabolites(*args, **kwargs)
+        self.update_balancing_status()
+
+    def get_annotation_by_collection(self, *args):
+        return set([x.identifier for x in self.annotation if x.collection in args])
+
+    def prepare_deletion(self):
+        """ Prepare reaction for deletion from model
+
+        Remove reaction subsystem from model list
+        """
+
+        # Remove subsystem
+        if self.model:
+            self.model.subsystems.remove_reaction(self.subsystem, self)
+
+        super(Reaction, self).prepare_deletion()
+
+
+class Gene(BaseTreeElement, cobraGene, BaseEvidenceElement):
+
+    def __init__(self, id="", name="", genome="", functional=True):
+        super(Gene, self).__init__()
+        BaseEvidenceElement.__init__(self)
+
+        self.id = id or ""
+        self.name = name or ""
+        self.genome = genome or ""
+        self._functional = functional
+        self.annotation = set()
+
+    @property
+    def _reaction(self):
+        return self._parents
+
+    @_reaction.setter
+    def _reaction(self, reaction_set):
+        self._reaction.extend(reaction_set)
+
+    @property
+    def genes(self):
+        return set([self])
+
+    def add_child(self, child):
+        raise NotImplementedError
+
+    def remove_child(self, child):
+        raise NotImplementedError
+
+    @property
+    def gem_reaction_rule(self):
+        return self.id
+
+
+class GeneGroup(BaseTreeElement, BaseEvidenceElement):
+
+    def __init__(self, id=None, genes=None, type="and"):
+        super(GeneGroup, self).__init__()
+        BaseEvidenceElement.__init__(self)
+
+        self.id = id or str(uuid.uuid4())
+        # Genes might appear more than once in the group
+        self._reference = set()
+        self.type = type
+
+        # Check if genes is a list
+        if not isinstance(genes, string_types):
+            try:
+                iter(genes)
+            except TypeError:
+                pass
+            else:
+                for gene in genes:
+                    self.add_child(gene)
+
+    @property
+    def functional(self):
+        if not self._children:
+            return None
+        elif self.type == "and":
+            return all(child.functional for child in self._children)
+        elif self.type == "or":
+            return any(child.functional for child in self._children)
+        else:
+            raise ValueError("Unknown group type '{}'".format(self.type))
+
+    @property
+    def gem_reaction_rule(self):
+        base = " {} ".format(self.type)
+        substrings = []
+        for x in self._children:
+            child_gpr = x.gem_reaction_rule
+            if ("and" in child_gpr or "or" in child_gpr) and not (child_gpr.startswith("(") and child_gpr.endswith(")")):
+                substrings.append("({})".format(child_gpr))
+            elif child_gpr:
+                substrings.append(child_gpr)
+        return base.join(substrings)
+
+    def __contains__(self, item):
+        return item in self._children
+
+
+class Model(QtCore.QObject, BaseEvidenceElement, cobraModel):
+
+    modelChanged = QtCore.pyqtSignal()
+
+    def __init__(self, *args, **kwargs):
+        super(Model, self).__init__()
+
+        self.QtReactionTable = ReactionTable(self)
+        self.QtMetaboliteTable = MetaboliteTable(self)
+        self.QtGeneTable = GeneTable(self)
+        self.QtReferenceTable = ReferenceTable(self)
+        self.QtTestsTable = ModelTestTable(self)
+        self.subsystems = CleaningDict()
+        self.references = {}
+        self.all_evidences = WeakValueDictionary()
+        self.tests = []
+        self.dialogs = WindowManager()
+        self.setup_tables()
+        self.setup_connections()
+
+    def setup_connections(self):
+        # Connect the changes in the reaction table to the modelChanged signal
+        self.QtReactionTable.rowsInserted.connect(self.modelChanged.emit)
+        self.QtReactionTable.rowsRemoved.connect(self.modelChanged.emit)
+        self.QtReactionTable.dataChanged.connect(self.modelChanged.emit)
+
+        # Connect the changes in the metabolite table to the modelChanged signal
+        self.QtMetaboliteTable.rowsInserted.connect(self.modelChanged.emit)
+        self.QtMetaboliteTable.rowsRemoved.connect(self.modelChanged.emit)
+        self.QtMetaboliteTable.dataChanged.connect(self.modelChanged.emit)
+
+        # Connect the changes in the gene table to the modelChanged signal
+        self.QtGeneTable.rowsInserted.connect(self.modelChanged.emit)
+        self.QtGeneTable.rowsRemoved.connect(self.modelChanged.emit)
+        self.QtGeneTable.dataChanged.connect(self.modelChanged.emit)
+
+        # Connect the changes in the reference table to the modelChanged signal
+        self.QtReferenceTable.rowsInserted.connect(self.modelChanged.emit)
+        self.QtReferenceTable.rowsRemoved.connect(self.modelChanged.emit)
+        self.QtReferenceTable.dataChanged.connect(self.modelChanged.emit)
+
+        # Connect the changes in the reference table to the modelChanged signal
+        self.QtTestsTable.rowsInserted.connect(self.modelChanged.emit)
+        self.QtTestsTable.rowsRemoved.connect(self.modelChanged.emit)
+        self.QtTestsTable.dataChanged.connect(self.modelChanged.emit)
+
+    def setup_tables(self):
+        self.setup_reaction_table()
+        self.setup_metabolite_table()
+        self.setup_gene_table()
+        self.setup_tests_table()
+        self.setup_reference_table()
+
+    def setup_reaction_table(self):
+        self.QtReactionTable.populate_table(self.reactions)
+
+    def setup_metabolite_table(self):
+        self.QtMetaboliteTable.populate_table(self.metabolites)
+
+    def setup_gene_table(self):
+        self.QtGeneTable.populate_table(self.genes)
+
+    def setup_tests_table(self):
+        self.QtTestsTable.populate_table(self.tests)
+
+    def setup_reference_table(self):
+        self.QtReferenceTable.populate_table(self.references.values())
+
+    def add_reference(self, reference):
+        self.references[reference.id] = reference
+
+    def add_gene(self, gene):
+        self.genes.append(gene)
+
+    def add_test(self, test):
+        self.tests.append(test)
+
+    def add_evidence(self, evidence):
+        self.all_evidences[evidence.internal_id] = evidence
+
+    def copy_metabolite(self, metabolite, compartment):
+        new_metabolite = Metabolite(id=generate_copy_id(metabolite.id, self.metabolites),
+                                    formula=metabolite.formula,
+                                    name=metabolite.name,
+                                    charge=metabolite.charge,
+                                    compartment=compartment)
+        new_metabolite.annotation = metabolite.annotation.copy()
+        self.add_metabolites([new_metabolite])
+        self.QtMetaboliteTable.update_row_from_item(new_metabolite)
+        return new_metabolite
+
+    def optimize(self, *args, refresh_dialogs=False, **kwargs):
+        solution = super(Model, self).optimize(*args, **kwargs)
+        if refresh_dialogs:
+            self.update_dialogs(solution)
+
+        return solution
+
+    def update_dialogs(self, solution):
+        for dialog in self.dialogs.windows:
+            try:
+                dialog.set_reaction_data(solution.x_dict)
+            except AttributeError:
+                pass
+
+    def add_metabolites(self, metabolite_list):
+        if not hasattr(metabolite_list, '__iter__'):
+            metabolite_list = [metabolite_list]
+
+        for metabolite in metabolite_list:
+            if metabolite.compartment not in self.compartments:
+                self.compartments[metabolite.compartment] = Compartment(metabolite.compartment)
+
+        super(Model, self).add_metabolites(metabolite_list)
+
+    def remove_metabolites(self, list_of_metabolites, destructive=False):
+
+        # Remove GEMEditor specific links
+        for metabolite in list_of_metabolites:
+            metabolite.prepare_deletion()
+
+        # Remove metabolites from model
+        super(Model, self).remove_metabolites(list_of_metabolites, destructive)
+
+    def add_reactions(self, list_of_reactions):
+
+        # Add reactions to model
+        super(Model, self).add_reactions(list_of_reactions)
+
+        # Add subsystems
+        for reaction in list_of_reactions:
+            self.subsystems[reaction.subsystem].add(reaction)
+
+    def remove_reactions(self, list_of_reactions, remove_orphans=False):
+
+        # Remove GEMEditor specific links
+        for reaction in list_of_reactions:
+            reaction.prepare_deletion()
+
+        # Remove reactions from model
+        super(Model, self).remove_reactions(list_of_reactions)
+
+    def add_genes(self, genes):
+        for gene in genes:
+            self.genes.add(gene)
+
+    def remove_genes(self, list_of_genes):
+
+        # Remove GEMEditor specific links
+        for gene in list_of_genes:
+            gene.prepare_deletion()
+
+            # Remove gene from model
+            self.genes.remove(gene)
+
+        # Remove all test cases that link to gene from model
+        for testcase in self.tests.copy():
+            if any(x.gene in list_of_genes for x in testcase.gene_settings):
+                self.remove_test(testcase)
+
+    def remove_test(self, test):
+        """ Remove the test from the model"""
+
+        try:
+            index = self.tests.index(test)
+        except ValueError:
+            return
+        else:
+            self.tests.pop(index)
+            self.QtTestsTable.removeRow(index)
+
+    def remove_references(self, list_of_references):
+        for reference in list_of_references:
+            # Unlink reference
+            reference.prepare_deletion()
+            del self.references[reference.id]
+
+    def close(self):
+        self.dialogs.remove_all()
+
+
+class Metabolite(cobraMetabolite, BaseEvidenceElement):
+
+    def __init__(self, id="", formula="", name="",
+                 charge=0, compartment=""):
+        BaseEvidenceElement.__init__(self)
+
+        self.id = id or ""
+        self.name = name or ""
+        self.formula = formula or ""
+        self.compartment = compartment or ""
+        self.charge = charge or 0
+
+        self.annotation = set()
+
+        self._constraint_sense = 'E'
+        self._bound = 0.
+        self._model = None
+        self._reaction = set()
+
+
+class WindowManager(QtCore.QObject):
+
+    def __init__(self):
+        super(WindowManager, self).__init__()
+        self.windows = set()
+
+    def add(self, dialog):
+        self.windows.add(dialog)
+        dialog.finished.connect(self.delete_window)
+
+    def remove(self, dialog):
+        self.windows.discard(dialog)
+
+    def remove_all(self):
+        for window in self.windows.copy():
+            window.close()
+
+    @QtCore.pyqtSlot()
+    def delete_window(self):
+        sender = self.sender()
+        self.windows.discard(sender)
+
+
+def iterate_tree(standard_item, data_item):
+    for n, element in enumerate(data_item._children):
+        if isinstance(element, Gene):
+            gene_item = LinkedItem(element.id, element)
+            gene_item.setEditable(False)
+            standard_item.setChild(n, gene_item)
+        elif isinstance(element, GeneGroup):
+            new_item = LinkedItem(str(element.type).upper(), element)
+            new_item.setEditable(False)
+            iterate_tree(new_item, element)
+            standard_item.setChild(n, new_item)
+
+
+def check_charge_balance(metabolites):
+    """ Check charge balance of the reaction """
+    # Check that charge is set for all metabolites
+    if not all(x.charge is not None for x in metabolites.keys()):
+        return None
+    else:
+        return sum([metabolite.charge * coefficient for metabolite, coefficient in iteritems(metabolites)])
+
+
+def check_element_balance(metabolites):
+    """ Check that the reaction is elementally balanced """
+    # Check that a formula is set for all metabolites
+    if not all(x.formula for x in metabolites.keys()):
+        return None
+    else:
+        metabolite_elements = defaultdict(int)
+        for metabolite, coefficient in iteritems(metabolites):
+            for element, amount in iteritems(metabolite.elements):
+                metabolite_elements[element] += coefficient * amount
+        return {k: v for k, v in iteritems(metabolite_elements) if v != 0}
+
+
+def reaction_string(stoichiometry, use_metabolite_names=True):
+    """Generate the reaction string """
+
+    attrib = "id"
+    if use_metabolite_names:
+        attrib = "name"
+
+    educts = [(str(abs(value)), getattr(key, attrib)) for key, value in iteritems(stoichiometry) if value < 0.]
+    products = [(str(abs(value)), getattr(key, attrib)) for key, value in iteritems(stoichiometry) if value > 0.]
+
+    return " + ".join([" ".join(x) for x in educts])+" --> "+" + ".join([" ".join(x) for x in products])
+
+
+def unbalanced_metabolites_to_string(in_dict):
+    substrings = ['{0}: {1:.1f}'.format(*x) for x in in_dict.items()]
+    return "<br>".join(substrings)
+
+
+def reaction_balance(metabolites):
+    """ Check the balancing status of the stoichiometry
+
+    Parameters
+    ----------
+    metabolites : dict - Dictionary of metabolites with stoichiometric coefficnets
+
+    Returns
+    -------
+    charge_str : str or bool
+    element_str : str or bool
+    balanced : str or bool
+    """
+    element_result = check_element_balance(metabolites)
+    charge_result = check_charge_balance(metabolites)
+
+    if charge_result is None:
+        charge_str = "Unknown"
+    elif charge_result == 0:
+        charge_str = "OK"
+    else:
+        charge_str = str(charge_result)
+
+    if element_result is None:
+        element_str = "Unknown"
+    elif element_result == {}:
+        element_str = "OK"
+    else:
+        element_str = unbalanced_metabolites_to_string(element_result)
+
+    if len(metabolites) < 2:
+        balanced = None
+    elif element_str == "OK" and charge_str == "OK":
+        balanced = True
+    elif element_str not in ("OK", "Unknown") or charge_str not in ("OK", "Unknown"):
+        balanced = False
+    else:
+        balanced = "Unknown"
+
+    return charge_str, element_str, balanced
+
+
+def generate_copy_id(source_id, collection, suffix="_copy"):
+    base_id = str(source_id) + suffix
+    new_id = base_id
+    n = 0
+    # Make sure there is no metabolite with the same id
+    while new_id in collection:
+        n += 1
+        new_id = base_id + str(n)
+    return new_id
+
+
+def find_duplicate_metabolite(metabolite, collection, same_compartment=True, cutoff=0.):
+    duplicates = []
+    for entry in collection:
+        similarity = 0
+        if entry.charge != metabolite.charge:
+            continue
+        elif same_compartment and entry.compartment != metabolite.compartment:
+            continue
+
+        if entry.formula and metabolite.formula:
+            if entry.formula != metabolite.formula:
+                continue
+            else:
+                similarity += 1
+
+        similarity += len(metabolite.annotation.intersection(entry.annotation)) * 2
+        similarity += SequenceMatcher(a=metabolite.name, b=entry.name).quick_ratio()
+        if similarity > cutoff:
+            duplicates.append((entry, similarity))
+
+    return sorted(duplicates, key=lambda tup: tup[1], reverse=True)
+
+
+def prune_gene_tree(input_element, parent=None):
+    """ Simplify gene tree
+
+    Parameters
+    ----------
+    input_element
+
+    Returns
+    -------
+
+    """
+
+    # Remove gene groups with 0 or one children, or nested or groups
+    if len(input_element._children) <= 1 and isinstance(input_element, GeneGroup) or \
+        (isinstance(input_element, GeneGroup) and input_element.type == "or" and
+             isinstance(parent, GeneGroup) and parent.type == "or"):
+        for child in input_element._children.copy():
+            input_element.remove_child(child)
+            parent.add_child(child)
+            prune_gene_tree(child, parent)
+        parent.remove_child(input_element)
+    # Try to prune all downstream branches
+    else:
+        for child in input_element._children:
+            prune_gene_tree(child, input_element)
+

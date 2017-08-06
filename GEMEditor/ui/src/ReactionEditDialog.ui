@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>ReactionEditDialog</class>
+ <widget class="QDialog" name="ReactionEditDialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>383</width>
+    <height>200</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Edit reaction</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <widget class="ReactionAttributesDisplayWidget" name="attributeWidget" native="true"/>
+   </item>
+   <item>
+    <widget class="QTabWidget" name="tabWidget">
+     <property name="tabShape">
+      <enum>QTabWidget::Rounded</enum>
+     </property>
+     <property name="currentIndex">
+      <number>0</number>
+     </property>
+     <widget class="StoichiometryDisplayWidget" name="metaboliteTab">
+      <attribute name="title">
+       <string>Metabolites</string>
+      </attribute>
+      <layout class="QHBoxLayout" name="horizontalLayout_2"/>
+     </widget>
+     <widget class="GenesDisplayWidget" name="geneTab">
+      <attribute name="title">
+       <string>Genes</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_3"/>
+     </widget>
+     <widget class="AnnotationDisplayWidget" name="annotationTab">
+      <attribute name="title">
+       <string>Annotations</string>
+      </attribute>
+      <layout class="QHBoxLayout" name="horizontalLayout_4"/>
+     </widget>
+     <widget class="EvidenceDisplayWidget" name="evidenceTab">
+      <attribute name="title">
+       <string>Evidence</string>
+      </attribute>
+      <layout class="QHBoxLayout" name="horizontalLayout_5"/>
+     </widget>
+     <widget class="CommentDisplayWidget" name="commentTab">
+      <attribute name="title">
+       <string>Comment</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_6"/>
+     </widget>
+    </widget>
+   </item>
+   <item>
+    <widget class="QDialogButtonBox" name="buttonBox">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="standardButtons">
+      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>AnnotationDisplayWidget</class>
+   <extends>QWidget</extends>
+   <header>GEMEditor.widgets.model</header>
+   <container>1</container>
+   <slots>
+    <signal>changed()</signal>
+    <slot>save_state()</slot>
+   </slots>
+  </customwidget>
+  <customwidget>
+   <class>GenesDisplayWidget</class>
+   <extends>QWidget</extends>
+   <header>GEMEditor.widgets.model</header>
+   <container>1</container>
+   <slots>
+    <signal>changed()</signal>
+    <slot>save_state()</slot>
+   </slots>
+  </customwidget>
+  <customwidget>
+   <class>StoichiometryDisplayWidget</class>
+   <extends>QWidget</extends>
+   <header>GEMEditor.widgets.model</header>
+   <container>1</container>
+   <slots>
+    <signal>changed()</signal>
+    <slot>save_state()</slot>
+   </slots>
+  </customwidget>
+  <customwidget>
+   <class>CommentDisplayWidget</class>
+   <extends>QWidget</extends>
+   <header>GEMEditor.widgets.model</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>EvidenceDisplayWidget</class>
+   <extends>QWidget</extends>
+   <header>GEMEditor.widgets.model</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ReactionAttributesDisplayWidget</class>
+   <extends>QWidget</extends>
+   <header>GEMEditor.widgets.model</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
+ <resources>
+  <include location="../../icons/icons.qrc"/>
+ </resources>
+ <connections>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>accepted()</signal>
+   <receiver>ReactionEditDialog</receiver>
+   <slot>accept()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>275</x>
+     <y>401</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>157</x>
+     <y>274</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>rejected()</signal>
+   <receiver>ReactionEditDialog</receiver>
+   <slot>reject()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>343</x>
+     <y>401</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>286</x>
+     <y>274</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <slot>activate_button()</slot>
+  <slot>show_gene_contextmenu(QPoint)</slot>
+  <slot>set_range_upper_bound()</slot>
+  <slot>set_range_lower_bound()</slot>
+  <slot>add_metabolite()</slot>
+  <slot>delete_metabolite()</slot>
+  <slot>save_state()</slot>
+  <slot>save_dialog_geometry()</slot>
+ </slots>
+</ui>
