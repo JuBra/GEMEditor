@@ -5,5 +5,8 @@ __pycache__
 *.log
 .cache
 *.db
+*.tsv
+*.bat
+*.qrc
 
 /dist/
