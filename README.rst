@@ -15,19 +15,20 @@ Installation
 
 You can download and install the latest version of GEM Editor from pip.
 
-Installation:
-::
-pip install GEMEditor
+Installation::
 
-Updating GEMEditor
-::
-pip install GEMEditor --upgrade
+    pip install GEMEditor
+
+Updating GEMEditor::
+
+    pip install GEMEditor --upgrade
 
 Usage
 =====
 
-::
-python -m GEMEditor.run [options]
+Run::
+
+    python -m GEMEditor.run [options]
 
 Options
 =======
