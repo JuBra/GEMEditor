@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 setup(
     name="GEMEditor",
-    version="0.0.6",
+    version="0.0.7",
     packages=find_packages(),
     install_requirements=['cobra', 'escher', 'PyQt5', 'lxml', 'networkx', 'numpy', 'sqlalchemy'],
     description="A graphical editor for the reconstruction, annotation and testing of genome-scale models",
