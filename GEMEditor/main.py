@@ -7,7 +7,7 @@ from GEMEditor.dialogs.model import EditModelDialog
 from GEMEditor.dialogs.reference import PubmedBrowser
 from GEMEditor.dialogs.standard import MetaboliteSelectionDialog
 from GEMEditor.dialogs.qualitychecks import DuplicateDialog, LocalizationCheck, FailingEvidencesDialog
-from GEMEditor.dialogs.map import MapDialog, MapListDialog
+from GEMEditor.map.escher import MapListDialog
 from GEMEditor.dialogs import UpdateAvailableDialog, BatchEvidenceDialog
 from GEMEditor import __projectpage__
 import GEMEditor.rw.sbml3 as sbml3
@@ -34,7 +34,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.thread = None
         self.worker = None
         self.model = None
-        self.maps = []
+        self.maps = {}
         self.model_path = None
 
         # Check if there is a new version of the software
@@ -325,15 +325,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.testsTab.set_model(model)
         self.referenceTab.set_model(model)
         self.analysesTab.set_model(model)
-
-    @QtCore.pyqtSlot()
-    def generate_map(self):
-        if self.model:
-            reactions = self.reactionTab.dataView.get_selected_items()
-            self.mapdialog = MapDialog(self, reactions)
-            self.mapdialog.setWindowFlags(QtCore.Qt.Window)
-            self.mapdialog.setModal(False)
-            self.mapdialog.show()
 
     @QtCore.pyqtSlot()
     def show_map_list(self):

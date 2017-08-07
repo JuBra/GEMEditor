@@ -522,6 +522,9 @@ class WindowManager(QtCore.QObject):
 
     def remove_all(self):
         for window in self.windows.copy():
+            # Remove c object before deleting dialog otherwise warnings
+            # are thrown due to external deletion of object
+            window.deleteLater()
             window.close()
 
     @QtCore.pyqtSlot()

@@ -7,7 +7,7 @@ from GEMEditor.ui.ResultDialog import Ui_Dialog
 from GEMEditor.widgets.proxymodels import FluxTableProxyFilter
 from GEMEditor.data_classes import EscherMapGenerator
 from GEMEditor.analysis.networks import setup_turnover_map
-from GEMEditor.dialogs.map import MapDisplayDialog
+from GEMEditor.map.escher import MapDisplayDialog
 
 
 class ResultDialog(CustomStandardDialog, Ui_Dialog):
