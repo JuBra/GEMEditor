@@ -375,11 +375,13 @@ class ReactionTab(StandardTab):
                                         subsystem=reaction.subsystem,
                                         lower_bound=reaction.lower_bound,
                                         upper_bound=reaction.upper_bound,
-                                        objective_coefficient=reaction.objective_coefficient,
                                         comment=reaction.comment)
                 new_reaction.annotation = reaction.annotation.copy()
                 new_reaction.add_metabolites(metabolites)
                 self.model.add_reactions([new_reaction])
+
+                # Set objective coefficient after adding reaction to model
+                new_reaction.objective_coefficient = reaction.objective_coefficient
                 self.model.QtReactionTable.update_row_from_item(new_reaction)
 
             # Update existing reactions with new metabolites if moving
