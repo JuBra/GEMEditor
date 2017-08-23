@@ -134,11 +134,7 @@ class DatabaseSelectionDialog(CustomStandardDialog, Ui_DatabaseSelectionDialog):
             if not status:
                 return
 
-            progress = QProgressDialog("Inserting metabolites", None, 0, len(rows), self)
             for i, row in enumerate(rows):
-                # Update progress dialog
-                progress.setValue(i)
-                QApplication.processEvents()
 
                 # Get info from database
                 metabolite_id = self.databaseModel.data(self.databaseModel.index(row, 0))
@@ -146,8 +142,22 @@ class DatabaseSelectionDialog(CustomStandardDialog, Ui_DatabaseSelectionDialog):
                 charge = int(self.databaseModel.data(self.databaseModel.index(row, 3)))
                 formula = self.databaseModel.data(self.databaseModel.index(row, 2))
 
+                # Generate new metabolite from database entry
                 new_metabolite = Metabolite(id=generate_copy_id("New", self.model.metabolites, suffix=""),
                                             formula=formula, charge=charge, name=name, compartment=compartment_id)
+
+                # Add annotations
+                self.query_ids.addBindValue(metabolite_id)
+                self.query_ids.exec_()
+                while self.query_ids.next():
+                    identifier = self.query_ids.value(1)
+                    collection = self.query_ids.value(2)
+
+                    # Exclude identifier from resources not in MIRIAM registry
+                    if identifier and collection:
+                        annotation = Annotation(collection=self.query_ids.value(2),
+                                                identifier=self.query_ids.value(1))
+                        new_metabolite.annotation.add(annotation)
 
                 # Check for possible duplicates
                 potential_duplicates = find_duplicate_metabolite(metabolite=new_metabolite,
@@ -166,16 +176,6 @@ class DatabaseSelectionDialog(CustomStandardDialog, Ui_DatabaseSelectionDialog):
                     if response == QDialogButtonBox.No:
                         continue
 
-                # Get identifiers
-                self.query_ids.addBindValue(metabolite_id)
-                self.query_ids.exec_()
-                while self.query_ids.next():
-                    identifier = self.query_ids.value(1)
-                    collection = self.query_ids.value(2)
-                    if identifier and collection:
-                        annotation = Annotation(collection=self.query_ids.value(2),
-                                                identifier=self.query_ids.value(1))
-                        new_metabolite.annotation.add(annotation)
                 self.model.add_metabolites([new_metabolite])
                 self.model.QtMetaboliteTable.update_row_from_item(new_metabolite)
             progress.close()
