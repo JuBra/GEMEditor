@@ -24,6 +24,7 @@ from GEMEditor.dialogs.annotation import EditAnnotationDialog
 from GEMEditor.dialogs.evidence import EditEvidenceDialog
 from GEMEditor.widgets.baseWidgets import TableDisplayWidget
 from GEMEditor.ui.SettingDisplayWiget import Ui_SettingsDisplayWidget
+from GEMEditor.ui.MetaboliteDisplayWidget import Ui_Form as Ui_MetDisplayWidget
 
 
 class ModelDisplayWidget(QWidget, Ui_modelDisaplayWidget):
@@ -1390,3 +1391,47 @@ class OutcomeDisplayWidget(QWidget, Ui_SettingsDisplayWidget):
     def save_state(self):
         self.model_test.outcomes = self.dataTable.get_items()
 
+
+class MetaboliteDisplayWidget(QWidget, Ui_MetDisplayWidget):
+
+    def __init__(self, parent=None, metabolite=None):
+        super(MetaboliteDisplayWidget, self).__init__(parent)
+        self.setupUi(self)
+        self.metabolite = None
+        self.set_metabolite(metabolite)
+
+    def set_metabolite(self, metabolite):
+        self.metabolite = metabolite
+        self.update_display()
+
+    def update_display(self):
+        """ Update labels with information from model item
+
+        Returns
+        -------
+        None
+        """
+
+        # Clear all information
+        self.clear_all()
+
+        # Update labels
+        if self.metabolite:
+            self.label_id.setText(str(self.metabolite.id))
+            self.label_names.setText(str(self.metabolite.name))
+            self.label_formula.setText(str(self.metabolite.formula))
+            self.label_charge.setText(str(self.metabolite.charge))
+            self.label_compartment.setText(str(self.metabolite.compartment))
+
+    def clear_all(self):
+        """ Clear information from widget
+
+        Returns
+        -------
+        None
+        """
+        self.label_id.clear()
+        self.label_names.clear()
+        self.label_formula.clear()
+        self.label_charge.clear()
+        self.label_compartment.clear()

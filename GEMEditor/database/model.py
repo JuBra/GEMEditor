@@ -7,6 +7,7 @@ from GEMEditor.database import database_path
 from PyQt5.QtWidgets import QMessageBox, QDialogButtonBox, QDialog, QVBoxLayout, QCheckBox, QApplication, QProgressDialog
 from PyQt5 import QtSql
 from GEMEditor.database.create import create_database_de_novo, get_database_connection
+from GEMEditor.database.query import DatabaseWrapper
 from GEMEditor.database.ui import Ui_AnnotationSettingsDialog
 from GEMEditor.cobraClasses import Reaction, Metabolite
 from GEMEditor.data_classes import Annotation
@@ -149,6 +150,73 @@ def get_model_object_from_id(cursor, id, cls):
 
     """
     return cls(**get_model_object_attributes(cursor, id, cls.__name__))
+
+
+def get_metabolite_to_entry_mapping(model, parent=None):
+    """ Map all metabolites to database entries
+
+    Parameters
+    ----------
+    model: GEMEditor.cobraClasses.Model
+
+    Returns
+    -------
+    dict
+    """
+
+    # Resulting metabolite to database mapping
+    mapping = dict()
+
+    # Setup database connection
+    database = DatabaseWrapper()
+
+    # Set up the progress dialog
+    progress = QProgressDialog(parent)
+    progress.setMinimumDuration(0.5)
+    progress.setWindowTitle("Updating annotations..")
+    progress.setLabelText("Updating metabolites..")
+    progress.setRange(0, len(model.metabolites))
+    QApplication.processEvents()
+
+    # Run the annotation
+    for i, metabolite in enumerate(model.metabolites):
+        if progress.wasCanceled():
+            # Map all remaining items to None
+            mapping[metabolite] = None
+            continue
+
+        progress.setValue(i)
+        QApplication.processEvents()
+
+        # Database entries that the metabolite maps to
+        entries = set()
+
+        # Find matches from annotations
+        for annotation in metabolite.annotation:
+            entries.update(database.get_ids_from_annotation(identifier=annotation.identifier,
+                                                            collection=annotation.collection))
+
+        # Metabolite has not been matched by annotation
+        if not entries and metabolite.name:
+            entries.update(database.get_ids_from_name(name=metabolite.name,
+                                                      entry_type="Metabolite"))
+
+        # Find matches by formula
+        if not entries and metabolite.formula:
+            entries.update(database.get_ids_from_formula(formula=metabolite.formula))
+
+        # Add found entries to mapping
+        if len(entries) == 1:
+            mapping[metabolite] = entries.pop()
+        elif len(entries) > 1:
+            mapping[metabolite] = list(entries)
+        else:
+            mapping[metabolite] = None
+
+    # Close connection
+    database.close()
+
+    return mapping
 
 
 def run_auto_annotation(model, parent):
