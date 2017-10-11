@@ -1,8 +1,9 @@
 import os.path
 from PyQt5.QtWidgets import QMessageBox, QDialogButtonBox
-from GEMEditor.database import miriam_databases, database_path
+from GEMEditor.database import miriam_databases
+from GEMEditor.database.base import DatabaseWrapper
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import create_engine, Column, String, Integer, Float, ForeignKey
+from sqlalchemy import create_engine, Column, String, Integer, Float, ForeignKey, Boolean
 from sqlalchemy.orm import sessionmaker
 
 
@@ -18,6 +19,7 @@ class Resource(Base):
     type = Column(String)
     miriam_collection = Column(String)
     validator = Column(String)
+    use_resource = Column(Boolean)
 
 
 class Compartment(Base):
@@ -128,12 +130,16 @@ def setup_resources(session):
                                 miriam_collection=database.miriam_collection,
                                 validator=database.validator,
                                 mnx_prefix=database.mnx_prefix,
-                                type=database.type)
+                                type=database.type,
+                                use_resource=True)
         session.add(new_resource)
     session.commit()
 
 
-def setup_empty_database(parent=None):
+def setup_empty_database(parent=None, database_path=None):
+
+    if database_path is None:
+        database_path = DatabaseWrapper.get_database_path()
 
     # Database already exists
     if os.path.isfile(database_path):
@@ -162,7 +168,6 @@ def setup_empty_database(parent=None):
     setup_resources(session)
     session.close()
     return True
-
 
 if __name__ == '__main__':
     from PyQt5 import QtWidgets

@@ -2,8 +2,9 @@ import sip
 sip.setapi('QVariant', 2)
 sip.setapi('QString', 2)
 import cobra
+from GEMEditor.base.functions import generate_copy_id
 from GEMEditor.data_classes import Reference, ModelTest
-from GEMEditor.cobraClasses import Gene, Reaction, Metabolite, generate_copy_id, find_duplicate_metabolite
+from GEMEditor.cobraClasses import Gene, Reaction, Metabolite, find_duplicate_metabolite
 from GEMEditor.ui.model_stats_tab import Ui_model_stats_tab
 from GEMEditor.ui.StandardTab import Ui_StandardTab
 from PyQt5 import QtCore, QtGui

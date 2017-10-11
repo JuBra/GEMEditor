@@ -1,163 +1,23 @@
-import os
-import sqlite3
 import logging
 import re
 from collections import defaultdict
-from GEMEditor.database import database_path
-from PyQt5.QtWidgets import QMessageBox, QDialogButtonBox, QDialog, QVBoxLayout, QCheckBox, QApplication, QProgressDialog
+from PyQt5.QtWidgets import QMessageBox, QApplication, QProgressDialog, QDialogButtonBox
 from PyQt5 import QtSql
 from GEMEditor.database.create import create_database_de_novo, get_database_connection
-from GEMEditor.database.query import DatabaseWrapper
-from GEMEditor.database.ui import Ui_AnnotationSettingsDialog
-from GEMEditor.cobraClasses import Reaction, Metabolite
-from GEMEditor.data_classes import Annotation
+from GEMEditor.database.base import DatabaseWrapper
+from GEMEditor.database.match import ManualMatchDialog
+from GEMEditor.database.query import AnnotationSettingsDialog
+from GEMEditor.base.functions import invert_mapping, get_annotation_to_item_map, generate_copy_id
 from GEMEditor import formula_validator
 
 
-class AnnotationSettingsDialog(QDialog, Ui_AnnotationSettingsDialog):
-
-    def __init__(self, metabolite_resources, reaction_resources, parent=None):
-        """ Setup the dialog
-        
-        Parameters
-        ----------
-        reaction_resources: dict - Mapping {resource_name: resource_id}
-        metabolite_resources: dict - Mapping {resource_name: resource_id}
-        parent: 
-        """
-
-        super(AnnotationSettingsDialog, self).__init__(parent)
-        self.setupUi(self)
-        self.metabolite_resources = metabolite_resources
-        self.reaction_resources = reaction_resources
-
-        self.metabolite_checkboxes = []
-        self.reaction_checkboxes = []
-
-        self.setup_options()
-
-    def setup_options(self):
-        # Setup metabolite options
-        layout = QVBoxLayout(self)
-        for element in sorted(self.metabolite_resources.keys()):
-            checkbox = QCheckBox(element, self)
-            layout.addWidget(checkbox)
-            self.metabolite_checkboxes.append(checkbox)
-        self.groupBox_met_annotation.setLayout(layout)
-
-        # Setup reaction options
-        layout = QVBoxLayout(self)
-        for element in sorted(self.reaction_resources.keys()):
-            checkbox = QCheckBox(element, self)
-            layout.addWidget(checkbox)
-            self.reaction_checkboxes.append(checkbox)
-        self.groupBox_react_annotation.setLayout(layout)
-
-    def get_settings(self):
-        settings = dict()
-        settings["formula"] = self.checkBox_formula.isChecked()
-        settings["charge"] = self.checkBox_charge.isChecked()
-        settings["reaction_resources"] = [self.reaction_resources[x.text()] for x in self.reaction_checkboxes
-                                            if x.isChecked()]
-        settings["metabolite_resources"] = [self.metabolite_resources[x.text()] for x in self.metabolite_checkboxes
-                                              if x.isChecked()]
-        return settings
-
-
-def get_pyqt_database(parent=None):
-
-    if not QtSql.QSqlDatabase.isDriverAvailable('QSQLITE'):
-        QMessageBox.critical(None, "Database driver missing!",
-                                   "It appears that the sqlite database driver is missing.\n "
-                                   "Please install it in order to use this function!",
-                                   QMessageBox.Close)
-        return
-
-    if not os.path.isfile(database_path):
-        response = QMessageBox().question(None, "Database not found.", "No database found. Would you like to setup a new one?")
-        if not response:
-            # User does not want to setup
-            return
-        elif not create_database_de_novo(parent):
-            # Database not created successfully
-            return
-
-    # Set up database
-    db = QtSql.QSqlDatabase.addDatabase('QSQLITE')
-    db.setDatabaseName(database_path)
-    db.setConnectOptions("QSQLITE_OPEN_READONLY=1")
-    return db
-
-
-def get_annotation_entries(cursor, id, entry_type):
-    """ Get all annotations for a database item
-    
-    Parameters
-    ----------
-    conn
-    id
-    type
-
-    Returns
-    -------
-
-    """
-    if entry_type == "Metabolite":
-        cursor.execute("SELECT resource_id, identifier FROM metabolite_ids WHERE metabolite_id=?;", (id,))
-    elif entry_type == "Reaction":
-        cursor.execute("SELECT resource_id, identifier FROM reaction_ids WHERE reaction_id=?;", (id,))
-    else:
-        raise ValueError("Unknown entry_type '{}'".format(str(entry_type)))
-    return cursor.fetchall()
-
-
-def get_model_object_attributes(cursor, id, class_name):
-    """ Get attribute information from database
-    
-    Parameters
-    ----------
-    cursor
-    id
-    entry_type
-
-    Returns
-    -------
-
-    """
-    if class_name == "Metabolite":
-        cursor.execute("SELECT name, formula, charge FROM metabolites WHERE id=?", (id,))
-        entry = cursor.fetchone()
-        if entry:
-            return {"name": entry[0] or None,
-                    "formula": entry[1] or None,
-                    "charge": int(entry[2]) if entry[2] else None}
-        return {}
-    else:
-        raise ValueError("Unknown class name '{}'.".format(str(class_name)))
-
-
-def get_model_object_from_id(cursor, id, cls):
-    """ Get a model item from a database id
-    
-    Parameters
-    ----------
-    cursor
-    id
-    cls
-
-    Returns
-    -------
-
-    """
-    return cls(**get_model_object_attributes(cursor, id, cls.__name__))
-
-
-def get_metabolite_to_entry_mapping(model, parent=None):
+def get_metabolite_to_entry_mapping(model, progress, parent=None):
     """ Map all metabolites to database entries
 
     Parameters
     ----------
     model: GEMEditor.cobraClasses.Model
+    progress: QProgressDialog
 
     Returns
     -------
@@ -170,13 +30,9 @@ def get_metabolite_to_entry_mapping(model, parent=None):
     # Setup database connection
     database = DatabaseWrapper()
 
-    # Set up the progress dialog
-    progress = QProgressDialog(parent)
-    progress.setMinimumDuration(0.5)
-    progress.setWindowTitle("Updating annotations..")
-    progress.setLabelText("Updating metabolites..")
+    # Update progress dialog
+    progress.setLabelText("Mapping metabolites to database..")
     progress.setRange(0, len(model.metabolites))
-    QApplication.processEvents()
 
     # Run the annotation
     for i, metabolite in enumerate(model.metabolites):
@@ -185,6 +41,7 @@ def get_metabolite_to_entry_mapping(model, parent=None):
             mapping[metabolite] = None
             continue
 
+        # Update progress if not cancelled
         progress.setValue(i)
         QApplication.processEvents()
 
@@ -213,18 +70,34 @@ def get_metabolite_to_entry_mapping(model, parent=None):
         else:
             mapping[metabolite] = None
 
-    # Close connection
+    # Close
     database.close()
+
+    # Get unique mapping for multiple entries
+    ambiguous_matches = dict(item for item in mapping.items() if isinstance(item[1], list))
+
+    # Manual match ambiguous items
+    if not progress.wasCanceled() and ambiguous_matches:
+        dialog = ManualMatchDialog(parent, unmatched_items=ambiguous_matches)
+        dialog.exec_()
+
+        # Add manually matched entries
+        mapping.update(dialog.manual_mapped)
 
     return mapping
 
 
-def run_auto_annotation(model, parent):
+def get_reaction_to_entry_mapping(metabolite_to_db_mapping, progress, parent=None):
+    pass
+
+
+def run_auto_annotation(model, progress, parent):
     """ Run the auto annotation using the MetaNetX database
 
     Parameters
     ----------
     model : GEMEditor.cobraClasses.Model
+    progress: QProgressDialog
     parent : GEMEditor.main.MainWindow
 
     Returns
@@ -232,54 +105,47 @@ def run_auto_annotation(model, parent):
 
     """
 
-    connection = get_database_connection()
+    # Mapping metabolites to database entries
+    metabolite_database_mapping = get_metabolite_to_entry_mapping(model, progress, parent)
 
-    if connection is None:
-        # Database not found
-        response = QMessageBox().question(parent, "Database not found!",
-                                          "The database necessary for this action has not been found. "
-                                          "Would you like to download the files and setup the database now?")
-        if response == QDialogButtonBox.No:
-            return False
-        elif response == QDialogButtonBox.Yes and create_database_de_novo(parent):
-            connection = get_database_connection()
-            if connection is None:
-                return False
-        else:
-            return False
+    # Shortcut if process cancelled by user
+    if progress.wasCanceled():
+        return
 
-    # Select which parts to update
-    cursor = connection.cursor()
-    cursor.execute("SELECT name, id FROM resources WHERE type=?;", ("reaction",))
-    reaction_resources = dict(tuple(x) for x in cursor.fetchall())
-    cursor.execute("SELECT name, id FROM resources WHERE type=?;", ("metabolite",))
-    metabolite_resources = dict(tuple(x) for x in cursor.fetchall())
-    cursor.execute("SELECT id, miriam_collection FROM resources WHERE type=?;", ("metabolite",))
-    resource_miriam_map = dict(tuple(x) for x in cursor.fetchall())
-    miriam_resource_map = dict((v, k) for k, v in resource_miriam_map.items())
+    # Set mapping to model
+    model.database_mapping = metabolite_database_mapping
 
-    # Get settings
-    dialog = AnnotationSettingsDialog(metabolite_resources, reaction_resources)
+    # Get possible resources
+    database = DatabaseWrapper()
+    metabolite_resources = database.get_miriam_collections()
+    reaction_resources = database.get_miriam_collections(type="reaction")
+
+    # Generate display name to miriam collection mapping
+    metabolite_mapping = dict((row['name'], row['miriam_collection']) for row in metabolite_resources)
+    reaction_mapping = dict((row['name'], row['miriam_collection']) for row in reaction_resources)
+
+    # Let the user which annotations to add and which attributes to update from the database
+    dialog = AnnotationSettingsDialog(metabolite_mapping, reaction_mapping, parent)
     if not dialog.exec_():
         # Cancelled by user
+        database.close()
         return
-    else:
-        settings = dialog.get_settings()
+
+    # Get user choice
+    settings = dialog.get_settings()
 
     # Make sure anything has been selected for update
     if not any(settings.values()):
+        database.close()
         return
 
-    # Setup progress
-    progress = QProgressDialog(parent)
-    progress.setMinimumDuration(0.5)
-    progress.setWindowTitle("Updating annotations..")
     progress.setLabelText("Updating metabolites..")
     progress.setRange(0, len(model.metabolites))
-    QApplication.processEvents()
 
     # Keep track of updated metabolites in order to update corresponding reactions as well
     updated_metabolites = []
+    # Keep track of reactions that need to be updated
+    update_reactions = set()
 
     for row, metabolite in enumerate(model.QtMetaboliteTable.get_items()):
         if progress.wasCanceled():
@@ -287,71 +153,30 @@ def run_auto_annotation(model, parent):
         progress.setValue(row)
         QApplication.processEvents()
 
-        # Map metabolite to database via an existing annotation
-        metabolite_db_id = None
-        for annotation in metabolite.annotation:
-            cursor.execute("SELECT metabolite_id FROM metabolite_ids WHERE resource_id=? AND identifier=?;",
-                           (miriam_resource_map[annotation.collection], annotation.identifier))
-            result = cursor.fetchone()
-            if result:
-                metabolite_db_id = result[0]
-                break
-
-        # Metabolite has not been mapped by annotation
-        if metabolite_db_id is None:
-            # Try mapping database entry by attributes
-            name_hits, formula_hits = set(), set()
-            if metabolite.name:
-                cursor.execute("SELECT metabolite_id FROM metabolite_names WHERE name=? COLLATE NOCASE;",
-                               (metabolite.name,))
-                name_hits.update([x[0] for x in cursor.fetchall()])
-
-            # Unique hit based on the name
-            if len(name_hits) == 1:
-                metabolite_db_id = name_hits.pop()
-
-            # No unique name, try to narrow down based on formula
-            elif len(name_hits) > 1 and metabolite.formula:
-                cursor.execute("SELECT id FROM metabolites WHERE formula=?", (metabolite.formula,))
-                formula_hits.update([x[0] for x in cursor.fetchall()])
-                intersection = name_hits.intersection(formula_hits)
-                if len(intersection) == 1:
-                    metabolite_db_id = intersection.pop()
-                else:
-                    logging.warning("Multiple entries for metabolite!")
-
-        # Unique metabolite id found
-        if metabolite_db_id is None:
+        entry = metabolite_database_mapping[metabolite]
+        if entry is None:
+            # No entry found in database for metabolite
             continue
+        elif isinstance(entry, int):
+            # Metabolite has been mapped to a database entry
+            annotations = database.get_annotations_from_id(entry, "Metabolite")
 
-        # Get annotation entries
-        annotation_entries = get_annotation_entries(cursor, metabolite_db_id, "Metabolite")
-        if not annotation_entries:
-            continue
-
-        annotations = set()
-        selected_resources = set(settings["metabolite_resources"])
-        for entry in annotation_entries:
-            resource_id, identifier = entry
-            if resource_id in selected_resources and resource_miriam_map[resource_id]:
-                annotations.add(Annotation(collection=resource_miriam_map[resource_id],
-                                           identifier=identifier))
-        # Update annotations
-        metabolite.annotation.update(annotations)
+            # Only add the annotations for the databases that have been selected by the user
+            filtered_annotations = [x for x in annotations if x.collection in settings["metabolite_resources"]]
+            metabolite.annotation.update(filtered_annotations)
 
         # Update charge formula
         if settings["formula"] or settings["charge"]:
-            cursor.execute("SELECT formula, charge FROM metabolites WHERE id=?", (metabolite_db_id,))
-            formula, charge = cursor.fetchone()
+            entry_metabolite = database.get_metabolite_from_id(entry)
+            formula, charge = entry_metabolite.formula, entry_metabolite.charge
 
             if settings["formula"] and formula and re.match(formula_validator, formula):
                 metabolite.formula = formula
             if settings["charge"] and charge not in (None, ""):
                 metabolite.charge = charge
-            updated_metabolites.append((row, metabolite))
 
-    # Keep track of reactions that need to be updated
-    update_reactions = set()
+            updated_metabolites.append((row, metabolite))
+            update_reactions.update(metabolite.reactions)
 
     # Update metabolite table entries
     progress.setLabelText("Updating metabolite table..")
@@ -362,7 +187,6 @@ def run_auto_annotation(model, parent):
         progress.setValue(i)
         QApplication.processEvents()
         row, metabolite = row_met_tuple
-        update_reactions.update(metabolite.reactions)
         model.QtMetaboliteTable.update_row_from_item(metabolite, row)
     model.QtMetaboliteTable.blockSignals(False)
     model.QtMetaboliteTable.all_data_changed()
@@ -384,7 +208,7 @@ def run_auto_annotation(model, parent):
     model.QtReactionTable.blockSignals(False)
     model.QtReactionTable.all_data_changed()
 
-    progress.close()
+    database.close()
 
 
 def run_check_consistency(model, parent):
@@ -471,49 +295,3 @@ def run_check_consistency(model, parent):
     progress.close()
 
     return errors
-
-
-def find_metabolite_name(resource_map, name_query, annotation_query, metabolite):
-    """ Find the metabolite id in the database and load annotations
-
-    Parameters
-    ----------
-    resource_map : dict - Mapping resource ids to miriam collectioins
-    database : QtSql.QSqlDatabase
-    metabolite_id : GEMEditor.cobraClasses.Metabolite
-
-    Returns
-    -------
-    annotation: set
-    """
-
-    name_query.bindValue(":name", metabolite.name)
-    name_query.exec_()
-
-    metabolite_ids = set()
-    while name_query.next():
-        metabolite_ids.add(name_query.value(0))
-
-    annotations = set()
-    if not metabolite_ids:
-        print("No id found for {}".format(metabolite.id))
-        return annotations
-
-    for metabolite_id in metabolite_ids:
-        annotation_query.bindValue(":id", metabolite_id)
-        annotation_query.exec_()
-
-        while annotation_query.next():
-            collection = resource_map[annotation_query.value(0)]
-            identifier = annotation_query.value(1)
-            annotations.add(Annotation(collection, identifier))
-
-    return annotations
-
-
-if __name__ == '__main__':
-    app = QApplication([])
-    con = sqlite3.connect(database_path)
-    cursor = con.cursor()
-    result = get_model_object_from_id(cursor, 5, Metabolite)
-    print(result.name, result.id, result.charge)

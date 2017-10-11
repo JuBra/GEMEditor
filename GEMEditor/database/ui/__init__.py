@@ -1,2 +1,6 @@
 from .AnnotationSettingsDialog import Ui_AnnotationSettingsDialog
 from .DatabaseSelectionDialog import Ui_DatabaseSelectionDialog
+from .DatabaseSearchWidget import Ui_DatabaseSearchWidget
+from .ModelItemSettings import Ui_ItemSettingWidget
+from .MetaboliteEntryDisplayWidget import Ui_MetaboliteEntryDisplayWidget
+from .ReactionEntryDisplayWidget import Ui_ReactionEntryDisplayWidget

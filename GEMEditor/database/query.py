@@ -1,356 +1,349 @@
-import sqlite3
 import logging
-from PyQt5 import QtSql, QtCore
-from PyQt5.QtWidgets import QTableWidgetItem, QProgressDialog, QApplication, QInputDialog, QWidget, QMessageBox, QDialogButtonBox, QDialog, QPushButton
-from GEMEditor.database.ui import Ui_DatabaseSelectionDialog
-from GEMEditor.cobraClasses import Metabolite, generate_copy_id, find_duplicate_metabolite
-from GEMEditor.data_classes import Annotation
-from GEMEditor.base.dialogs import CustomStandardDialog
-from GEMEditor.database.ui.MetaboliteEntryDisplayWidget import Ui_MetaboliteEntryDisplayWidget
-from GEMEditor.database.ui.ManualMetaboliteMatchDialog import Ui_ManualMatchDialog
-from GEMEditor.database import database_path
-from GEMEditor import setup_database
+from PyQt5 import QtCore
+from PyQt5.QtWidgets import QApplication, QInputDialog, QWidget, QMessageBox, QDialogButtonBox, QDialog, QHBoxLayout, QCheckBox, QVBoxLayout, QTabWidget, QPushButton, QGroupBox, QProgressDialog
+from PyQt5.QtCore import QSettings
+from PyQt5.QtSql import QSqlQuery, QSqlQueryModel, QSql
+from GEMEditor.base.functions import generate_copy_id, invert_mapping, get_annotation_to_item_map, convert_to_bool
+from GEMEditor.base.dialogs import DialogMapCompartment, CustomStandardDialog
+from GEMEditor.database.base import DatabaseWrapper, pyqt_database_connection, factory_entry_widget
+from GEMEditor.database.ui import Ui_AnnotationSettingsDialog, Ui_DatabaseSearchWidget, Ui_ItemSettingWidget
+from GEMEditor import DB_GET_MET_NAME, DB_NEW_MET_PREFIX, DB_GET_FL_AND_CH, DB_NEW_REACT_PREFIX, DB_GET_REACT_NAME
+
 
 LOGGER = logging.getLogger(__name__)
 
 
-query_identifier_from_metabolite_id = """SELECT resource_id, name, identifier 
-FROM (SELECT * FROM metabolite_ids WHERE metabolite_id = ?) AS temp 
-LEFT JOIN resources ON temp.resource_id = resources.id;"""
+class DialogDatabaseSelection(CustomStandardDialog):
 
-query_identifier_from_reaction_id = """SELECT resource_id, name, identifier 
-FROM (SELECT * FROM reaction_ids WHERE reaction_id = ?) AS temp 
-LEFT JOIN resources ON temp.resource_id = resources.id;"""
-
-query_metabolite_synonyms_from_id = """SELECT DISTINCT(name) 
-FROM metabolite_names 
-WHERE metabolite_id = ?;"""
-
-query_reaction_synonyms_from_id = """SELECT DISTINCT(name) 
-FROM reaction_names 
-WHERE reaction_id = ?;"""
-
-query_resource_id_and_type_from_collection = """SELECT id, type 
-FROM resources 
-WHERE miriam_collection = ?;"""
-
-query_metabolite_id_from_annotation = """SELECT DISTINCT(metabolite_id) 
-FROM metabolite_ids 
-WHERE identifier = ? AND resource_id = ?;"""
-
-query_reaction_id_from_annotation = """SELECT DISTINCT(reaction_id) 
-FROM reaction_ids 
-WHERE identifier = ? AND resource_id = ?;"""
-
-query_metabolite_info_from_id = """SELECT name, formula, charge 
-FROM metabolites 
-WHERE id = ?;"""
-
-query_annotation_from_metabolite_id = """SELECT miriam_collection, identifier 
-FROM (SELECT * FROM metabolite_ids WHERE metabolite_id = ?) AS temp 
-LEFT JOIN resources ON temp.resource_id = resources.id;"""
-
-query_metabolite_id_from_name = """"SELECT metabolite_id 
-FROM metabolite_names 
-WHERE name=? 
-COLLATE NOCASE;"""
-
-query_reaction_id_from_name = """"SELECT reaction_id 
-FROM reaction_names 
-WHERE name=? 
-COLLATE NOCASE;"""
-
-query_metabolite_id_from_formula = """SELECT id 
-FROM metabolites 
-WHERE formula = ?;"""
-
-
-class DatabaseWrapper:
-
-    def __init__(self):
-        self.connection = None
-        self.cursor = None
-        self.setup_connection()
-
-    def setup_connection(self):
-        self.connection = sqlite3.connect(database_path)
-        self.cursor = self.connection.cursor()
-
-    def get_synonyms_from_id(self, identifier, entry_type):
-        """ Get all synonyms for entry in database with given identifier
+    def __init__(self, model, data_type, parent=None):
+        """ Setup dialog
 
         Parameters
         ----------
-        identifier: str
-        entry_type: str
-
-        Returns
-        -------
-        list
+        model: GEMEditor.cobraClasses.Model
+        data_type: str
+        parent: QWidget
         """
 
-        if entry_type == "Metabolite":
-            self.cursor.execute(query_metabolite_synonyms_from_id, (str(identifier),))
-        elif entry_type == "Reaction":
-            self.cursor.execute(query_reaction_synonyms_from_id, (str(identifier),))
+        super(DialogDatabaseSelection, self).__init__(parent)
+
+        # Store type
+        self.model = model
+        self.data_type = data_type
+
+        # Add widgets
+        self.search_widget = factory_search_widget(data_type, parent)
+        self.settings_widget = factory_setting_widget(data_type, parent)
+        self.entry_widget = factory_entry_widget(data_type, parent)
+
+        # Setup ui
+        self.central_layout = QVBoxLayout(self)
+        self.tabwidget = QTabWidget(self)
+
+        # Add the search tab
+        self.search_tab = QWidget()
+        search_layout = QHBoxLayout(self)
+        search_layout.addWidget(self.search_widget)
+        search_layout.addWidget(self.entry_widget)
+        self.search_tab.setLayout(search_layout)
+
+        # Ad pages to layout
+        self.tabwidget.addTab(self.search_tab, "Search")
+        self.tabwidget.addTab(self.settings_widget, "Settings")
+
+        # Setup layout
+        self.central_layout.addWidget(self.tabwidget)
+
+        # Add buttonbox
+        self.buttonbox = QDialogButtonBox()
+        self.central_layout.addWidget(self.buttonbox)
+
+        # Add add button
+        add_button = QPushButton("Add {0!s}".format(self.data_type))
+        add_button.clicked.connect(self.search_widget.slot_emit_add_item)
+        self.buttonbox.addButton(add_button, QDialogButtonBox.ActionRole)
+
+        # Add close button
+        close_button = QPushButton("Close")
+        close_button.clicked.connect(self.reject)
+        self.buttonbox.addButton(close_button, QDialogButtonBox.RejectRole)
+
+        # Set layout
+        self.setLayout(self.central_layout)
+        self.entry_widget.hide()
+
+        # Connect signals
+        self.search_widget.signal_current_selection.connect(self.entry_widget.update_from_database_id)
+        self.search_widget.signal_add_item.connect(self.add_item_from_database)
+        self.finished.connect(self.save_dialog_geometry)
+
+        # Set window title
+        self.setWindowTitle("Select {0!s}".format(data_type))
+        self.restore_dialog_geometry()
+
+    @QtCore.pyqtSlot(int)
+    def add_item_from_database(self, identifier):
+        LOGGER.debug("Adding {0!s} from database id '{1!s}'".format(self.data_type, identifier))
+        if self.data_type.lower() == "metabolite":
+            add_metabolite_from_database(self.model, identifier)
+        elif self.data_type.lower() == "reaction":
+            add_reaction_from_database(self.model, identifier)
         else:
-            raise ValueError("Unexpected entry_type: '{0!s}'".format(entry_type))
+            QMessageBox().critical(None, "Error",
+                                   "Unexpected type {0!s} to add to database".format(self.data_type))
 
-        # Return unpacked synonyms
-        return [x[0] for x in self.cursor.fetchall()]
 
-    def get_annotations_from_id(self, identifier, entry_type):
-        """ Get all annotations from a database identifier
+class AnnotationSettingsDialog(QDialog, Ui_AnnotationSettingsDialog):
+    def __init__(self, metabolite_resources, reaction_resources, parent=None):
+        """ Setup the dialog
 
         Parameters
         ----------
-        identifier: str or int
-        entry_type: str, "Metabolite" or "Reaction"
-
-        Returns
-        -------
-        list of Annotation objects
+        reaction_resources: dict - Mapping {resource_name: resource_id}
+        metabolite_resources: dict - Mapping {resource_name: resource_id}
+        parent:
         """
 
-        # Run query depending on the specified type
-        if entry_type == "Metabolite":
-            self.cursor.execute(query_annotation_from_metabolite_id, (str(identifier),))
-        elif entry_type == "Reaction":
-            self.cursor.execute(query_identifier_from_reaction_id, (str(identifier),))
-        else:
-            raise ValueError("Unexpected entry_type: '{0!s}'".format(entry_type))
+        super(AnnotationSettingsDialog, self).__init__(parent)
+        self.setupUi(self)
+        self.metabolite_widget = MetaboliteSettingWidget(metabolite_resources)
+        self.reaction_widget = ReactionSettingWidget(reaction_resources)
 
-        # Return annotations
-        annotations = []
-        for collection, identifier in self.cursor.fetchall():
-            annotations.append(Annotation(collection, identifier))
-        return annotations
+        self.setup_layout()
 
-    def get_ids_from_annotation(self, identifier, collection):
-        # Get resource type from collection
-        self.cursor.execute(query_resource_id_and_type_from_collection, collection)
-        resource_id, resource_type = self.cursor.fetchone()
+    def setup_layout(self):
+        # Add the widgets to the layouts
+        self.verticalLayout_metabolites.addWidget(self.metabolite_widget)
+        self.verticalLayout_reactions.addWidget(self.reaction_widget)
 
-        # Return the identifier from the annotation
-        if resource_type == "metabolite":
-            self.cursor.execute(query_metabolite_id_from_annotation, (identifier, resource_id))
-            return self.cursor.fetchall()
-        elif resource_type == "reaction":
-            self.cursor.execute(query_reaction_id_from_annotation, (identifier, resource_id))
-            return self.cursor.fetchall()
-        else:
-            raise NotImplementedError
+        # Hide reaction annotations
+        self.reaction_widget.groupBox_attributes.hide()
+        self.metabolite_widget.checkBox_use_name.hide()
+        self.metabolite_widget.lineEdit_prefix.hide()
+        self.metabolite_widget.label.hide()
 
-    def get_ids_from_name(self, name, entry_type):
-        """ Find matching database entries by name
+    def get_settings(self):
+        settings = dict()
+        settings["formula_charge"] = self.metabolite_widget.checkBox_use_formula.isChecked()
+        settings["reaction_resources"] = self.reaction_widget.get_selected_annotations()
+        settings["metabolite_resources"] = self.metabolite_widget.get_selected_annotations()
+        return settings
+
+
+class DatabaseSettingWidget(QWidget, Ui_ItemSettingWidget):
+
+    def __init__(self, resource_type, parent=None):
+        super(DatabaseSettingWidget, self).__init__(parent)
+        self.setupUi(self)
+        self.widget_resource_mapping = {}
+
+        self.populate_annotations(resource_type)
+
+    def populate_annotations(self, resource_type="metabolite"):
+        """ Populate annotation groupBox with checkboxes for users to choose
 
         Parameters
         ----------
-        name: str
-        entry_type: str
+        resources: dict, keys are used as text in the checkboxes
 
         Returns
         -------
-
+        set
         """
-        if entry_type == "Metabolite":
-            self.cursor.execute(query_metabolite_id_from_name, (str(name),))
-        elif entry_type == "Reaction":
-            self.cursor.execute(query_reaction_id_from_name, (str(name),))
-        else:
-            raise ValueError("Unexpected entry_type: '{0!s}'".format(entry_type))
 
-        return [x[0] for x in self.cursor.fetchall()]
+        layout = QVBoxLayout()
 
-    def get_ids_from_formula(self, formula):
-        self.cursor.execute(query_metabolite_id_from_formula, (str(formula),))
-        return [x[0] for x in self.cursor.fetchall()]
+        # Get resources from database
+        with DatabaseWrapper() as database:
+            resources = database.get_miriam_collections(resource_type)
 
-    def get_metabolites_from_ids(self, ids):
+        # Populate widget with one checkbox per resource
+        for entry in sorted(resources, key=lambda x: x["name"]):
+            new_checkbox = QCheckBox(entry["name"], self)
+            new_checkbox.setChecked(bool(entry["use_resource"]))
+
+            # Connect checkbox in order to update state in database
+            new_checkbox.stateChanged.connect(self.update_resource_state)
+            layout.addWidget(new_checkbox)
+
+            # Update mapping of checkbox to id
+            self.widget_resource_mapping[new_checkbox] = entry["id"]
+
+        layout.addStretch(1)
+        self.groupBox_annotation.setLayout(layout)
+
+    def populate_widget(self):
         raise NotImplementedError
 
-    def get_metabolite_from_id(self, identifier):
-        """ Retrieve metabolite from database
+    def store_settings(self):
+        raise NotImplementedError
 
-        Parameters
-        ----------
-        identifier: str
-
-        Returns
-        -------
-
-        """
-
-        self.cursor.execute(query_metabolite_info_from_id, (str(identifier),))
-        metabolite_info = self.cursor.fetchone()
-
-        if metabolite_info:
-            metabolite = Metabolite(name=metabolite_info[0],
-                                    formula=metabolite_info[1],
-                                    charge=metabolite_info[2])
-            annotations = self.get_annotations_from_id(identifier, "Metabolite")
-            metabolite.annotation.update(annotations)
-            return metabolite
+    def get_selected_annotations(self):
+        return set(value for checkbox, value in
+                   self.widget_resource_mapping.items() if checkbox.isChecked())
 
     @QtCore.pyqtSlot()
-    def close(self):
-        self.cursor.close()
-        self.connection.close()
+    def update_resource_state(self):
+        checkbox = self.sender()
+        resource_id = self.widget_resource_mapping[checkbox]
+        with DatabaseWrapper() as database:
+            database.update_use_resource(resource_id, checkbox.isChecked())
 
 
-class MetaboliteEntryDisplayWidget(QWidget, Ui_MetaboliteEntryDisplayWidget):
+class MetaboliteSettingWidget(DatabaseSettingWidget):
 
-    def __init__(self):
-        super(MetaboliteEntryDisplayWidget, self).__init__()
+    def __init__(self, resources, parent=None):
+        super(MetaboliteSettingWidget, self).__init__(resources, parent)
+
+        # Populate widgets from settings
+        self.populate_widget()
+
+        # Connect update of widgets to update of settings
+        self.lineEdit_prefix.textChanged.connect(self.store_settings)
+        self.checkBox_use_name.stateChanged.connect(self.store_settings)
+        self.checkBox_use_formula.stateChanged.connect(self.store_settings)
+
+    def populate_widget(self):
+        settings = QSettings()
+
+        # Update prefix
+        prefix = settings.value("DB_NEW_MET_PREFIX", DB_NEW_MET_PREFIX)
+        self.lineEdit_prefix.setText(prefix)
+
+        # Update checkbox
+        name_setting = settings.value("DB_GET_MET_NAME", DB_GET_MET_NAME)
+        self.checkBox_use_name.setChecked(convert_to_bool(name_setting))
+
+        formula_charge_setting = settings.value("DB_GET_FL_AND_CH", DB_GET_FL_AND_CH)
+        self.checkBox_use_formula.setChecked(convert_to_bool(formula_charge_setting))
+
+    @QtCore.pyqtSlot()
+    def store_settings(self):
+        settings = QSettings()
+
+        settings.setValue("DB_NEW_MET_PREFIX", self.lineEdit_prefix.text())
+        settings.setValue("DB_GET_MET_NAME", self.checkBox_use_name.isChecked())
+        settings.setValue("DB_GET_FL_AND_CH", self.checkBox_use_formula.isChecked())
+
+        settings.sync()
+
+
+class ReactionSettingWidget(DatabaseSettingWidget):
+
+    def __init__(self, resources, parent=None):
+        super(ReactionSettingWidget, self).__init__(resources, parent)
+
+        # Populate widgets from settings
+        self.populate_widget()
+
+        # Connect update of widgets to update of settings
+        self.lineEdit_prefix.textChanged.connect(self.store_settings)
+        self.checkBox_use_name.stateChanged.connect(self.store_settings)
+
+        # Hide non used widgets
+        self.checkBox_use_formula.hide()
+
+    def populate_widget(self):
+        settings = QSettings()
+
+        # Update prefix
+        prefix = settings.value("DB_NEW_REACT_PREFIX", DB_NEW_REACT_PREFIX)
+        self.lineEdit_prefix.setText(prefix)
+
+        # Update checkbox
+        name_setting = settings.value("DB_GET_REACT_NAME", DB_GET_REACT_NAME)
+        self.checkBox_use_name.setChecked(convert_to_bool(name_setting))
+
+    @QtCore.pyqtSlot()
+    def store_settings(self):
+        settings = QSettings()
+
+        settings.setValue("DB_NEW_REACT_PREFIX", self.lineEdit_prefix.text())
+        settings.setValue("DB_GET_REACT_NAME", self.checkBox_use_name.isChecked())
+
+        settings.sync()
+
+
+class CombinedSettingsWidget(QWidget):
+
+    def __init__(self, parent=None):
+        super(CombinedSettingsWidget, self).__init__(parent)
+
+        layout = QHBoxLayout()
+        self.metabolite_widget = factory_setting_widget("metabolite", parent)
+        self.reaction_widget = factory_setting_widget("reaction", parent)
+        layout.addWidget(self.reaction_widget)
+        layout.addWidget(self.metabolite_widget)
+        self.setLayout(layout)
+
+    def get_selected_annotations(self):
+        metabolite_selection = self.metabolite_widget.get_selected_annotations()
+        return metabolite_selection.extend(self.reaction_widget.get_selected_annotations())
+
+
+class DatabaseSearchWidget(QWidget, Ui_DatabaseSearchWidget):
+
+    # Signal to be emitted when user wants item to be added
+    signal_add_item = QtCore.pyqtSignal(int)
+
+    # Signal to be emitted when user selection changes
+    signal_current_selection = QtCore.pyqtSignal(int)
+
+    def __init__(self, queries, headers, parent=None):
+        super(DatabaseSearchWidget, self).__init__(parent)
         self.setupUi(self)
 
-    def set_information(self, metabolite, synonyms=()):
-        """ Update the information from the metabolite
-        and the synonyms passed
+        # Setup database connection
+        self.database = pyqt_database_connection()
+        self.database.open()
 
-        Parameters
-        ----------
-        metabolite: GEMEditor.cobraClasses.Metabolite
-        synonyms: list
+        self.databaseModel = QSqlQueryModel(self)
+        self.dataView_search_results.setModel(self.databaseModel)
+
+        # Store bound queries for usage
+        self.queries = queries
+        self.combo_search_options.addItems(sorted(queries.keys()))
+
+        # Connect signals
+        self.dataView_search_results.selectionModel().selectionChanged.connect(self.slot_emit_selection_changed)
+        self.dataView_search_results.doubleClicked.connect(self.slot_emit_add_item)
+        self.pushButton_search.clicked.connect(self.update_query)
+        self.combo_search_options.currentIndexChanged.connect(self.update_query)
+
+        # Setup header
+        for element in headers:
+            self.databaseModel.setHeaderData(0, QtCore.Qt.Horizontal, element)
+
+        self.installEventFilter(self)
+
+    @QtCore.pyqtSlot()
+    def update_query(self):
+        """ Update the query with the search term
 
         Returns
         -------
         None
         """
+        LOGGER.debug("Updating search query..")
+        query = self.queries[self.combo_search_options.currentText()]
+        # Todo: Slow query setting freezes ui
+        self.databaseModel.setQuery(query.format(input=self.lineEdit_search_input.text().strip()))
+        LOGGER.debug(str(self.databaseModel.query().executedQuery()))
+        LOGGER.debug("Search complete.")
 
-        # Update labels
-        self.label_name.setText(str(metabolite.name))
-        self.label_charge.setText(str(metabolite.charge))
-        self.label_formula.setText(str(metabolite.formula))
+    def selected_id(self):
+        """ Return the id of the currently selected item
 
-        # Update synonyms
-        self.list_synonyms.clear()
-        for entry in synonyms:
-            self.list_synonyms.addItem(entry)
+        Returns
+        -------
+        int
+        """
 
-        # Update identifiers
-        self.table_identifiers.setRowCount(len(metabolite.annotation))
-        self.table_identifiers.setColumnCount(2)
-
-        # Add identifiers
-        n = 0
-        for annotation in metabolite.annotation:
-            self.table_identifiers.setItem(n, 0, QTableWidgetItem(annotation.collection))
-            self.table_identifiers.setItem(n, 1, QTableWidgetItem(annotation.identifier))
-            n += 1
-
-        # Reset header items
-        self.table_identifiers.setHorizontalHeaderLabels(["Resource", "ID"])
-
-
-class DatabaseSelectionDialog(CustomStandardDialog, Ui_DatabaseSelectionDialog):
-    queries = {"Metabolite name": "SELECT metabolites.id, metabolites.name, metabolites.formula, metabolites.charge "
-                                  "FROM metabolite_names JOIN metabolites "
-                                  "ON metabolite_names.metabolite_id = metabolites.id "
-                                  "WHERE metabolite_names.name LIKE '%{}%' "
-                                  "GROUP BY metabolite_names.metabolite_id;",
-               "Metabolite identifier": "SELECT metabolites.id, metabolites.name, metabolites.formula, metabolites.charge "
-                                        "FROM metabolite_ids JOIN metabolites "
-                                        "ON metabolite_ids.metabolite_id = metabolites.id "
-                                        "WHERE metabolite_ids.identifier LIKE '%{}%' "
-                                        "GROUP BY metabolites.id;"}
-
-    ids_query = "SELECT id, identifier, miriam_collection " \
-                "FROM resources " \
-                "JOIN (SELECT resource_id, identifier FROM metabolite_ids WHERE metabolite_id = ?) as me " \
-                "ON me.resource_id = resources.id;"
-
-    synonyms_query = "SELECT name " \
-                     "FROM metabolite_names " \
-                     "WHERE metabolite_id = ?;"
-
-    def __init__(self, parent, model):
-        super(DatabaseSelectionDialog, self).__init__(parent)
-        self.database = setup_database()
-        self.databaseModel = QtSql.QSqlQueryModel(self)
-        self.model = model
-
-        self.setupUi(self)
-        self.dataView.setModel(self.databaseModel)
-        self.comboBox.addItems(sorted(self.queries.keys()))
-
-        if self.database is None or not self.database.open():
-            raise ConnectionError
-
-        self.query_ids = QtSql.QSqlQuery(self.ids_query, self.database)
-        self.query_synonyms = QtSql.QSqlQuery(self.synonyms_query, self.database)
-
-        self.dataView.selectionModel().selectionChanged.connect(self.populate_information_box)
-
-        self.installEventFilter(self)
-
-        self.restore_dialog_geometry()
-        self.groupBox_2.hide()
-        self.setWindowTitle("Add metabolite")
-        self.setup_signals()
-
-    def setup_signals(self):
-        self.dataView.doubleClicked.connect(self.add_model_item)
-
-    def setup_table(self):
-        self.databaseModel.setHeaderData(0, QtCore.Qt.Horizontal, "ID")
-        self.databaseModel.setHeaderData(1, QtCore.Qt.Horizontal, "Name")
-        self.databaseModel.setHeaderData(2, QtCore.Qt.Horizontal, "Formula")
-        self.databaseModel.setHeaderData(3, QtCore.Qt.Horizontal, "Charge")
-
-    @QtCore.pyqtSlot()
-    def update_query(self):
-        query = self.queries[self.comboBox.currentText()].format(self.lineEdit.text().strip())
-        self.databaseModel.setQuery(query)
-        self.setup_table()
-        self.populate_information_box()
-
-    @QtCore.pyqtSlot()
-    def populate_information_box(self):
-        selection = self.dataView.get_selected_rows()
+        selection = self.dataView_search_results.get_selected_rows()
         if len(selection) != 1:
-            self.groupBox_2.setVisible(False)
-            return
-        row = selection[0]
-        metabolite_id = self.databaseModel.data(self.databaseModel.index(row, 0))
-        name = self.databaseModel.data(self.databaseModel.index(row, 1))
-
-        self.label_charge.setText(str(self.databaseModel.data(self.databaseModel.index(row, 3))))
-        self.label_formula.setText(str(self.databaseModel.data(self.databaseModel.index(row, 2))))
-        self.label_name.setText("-\n".join((name[0 + i:45 + i] for i in range(0, len(name), 45))))
-
-        self.populate_synonym_list(metabolite_id)
-        self.populate_identifier_list(metabolite_id)
-        self.groupBox_2.setVisible(True)
-
-    def populate_synonym_list(self, metabolite_id):
-        self.list_synonyms.clear()
-        self.query_synonyms.addBindValue(metabolite_id)
-        self.query_synonyms.exec_()
-
-        n = 0
-        while self.query_synonyms.next():
-            synonym = self.query_synonyms.value(0)
-            self.list_synonyms.addItem(synonym)
-            n += 1
-
-    def populate_identifier_list(self, metabolite_id):
-        self.tableWidget.setRowCount(0)
-        self.tableWidget.setColumnCount(2)
-        self.query_ids.addBindValue(metabolite_id)
-        self.query_ids.exec_()
-
-        n = 0
-        while self.query_ids.next():
-            self.tableWidget.insertRow(n)
-            resource = self.query_ids.value(0)
-            identifier = self.query_ids.value(1)
-
-            self.tableWidget.setItem(n, 0, QTableWidgetItem(resource))
-            self.tableWidget.setItem(n, 1, QTableWidgetItem(identifier))
-            n += 1
-
-        self.tableWidget.setHorizontalHeaderLabels(["Resource", "ID"])
+            return -1
+        else:
+            return int(self.databaseModel.data(self.databaseModel.index(selection[0], 0)))
 
     def eventFilter(self, source, event):
         if event.type() == QtCore.QEvent.KeyPress and event.key() in (QtCore.Qt.Key_Return, QtCore.Qt.Key_Enter):
@@ -359,277 +352,227 @@ class DatabaseSelectionDialog(CustomStandardDialog, Ui_DatabaseSelectionDialog):
         return False
 
     @QtCore.pyqtSlot()
-    def add_model_item(self, *args):
-        # Get selection
-        rows = self.dataView.get_selected_rows()
-        if rows and self.model:
-            # Get the compartment to which the metabolites should be added
-            compartment_id, status = QInputDialog().getItem(self, "Select compartment", "Select compartment:",
-                                                            sorted(self.model.compartments.keys()), 0, False)
-            if not status:
-                return
-
-            for i, row in enumerate(rows):
-
-                # Get info from database
-                metabolite_id = self.databaseModel.data(self.databaseModel.index(row, 0))
-                name = self.databaseModel.data(self.databaseModel.index(row, 1))
-                charge = int(self.databaseModel.data(self.databaseModel.index(row, 3)))
-                formula = self.databaseModel.data(self.databaseModel.index(row, 2))
-
-                # Generate new metabolite from database entry
-                new_metabolite = Metabolite(id=generate_copy_id("New", self.model.metabolites, suffix=""),
-                                            formula=formula, charge=charge, name=name, compartment=compartment_id)
-
-                # Add annotations
-                self.query_ids.addBindValue(metabolite_id)
-                self.query_ids.exec_()
-                while self.query_ids.next():
-                    identifier = self.query_ids.value(1)
-                    collection = self.query_ids.value(2)
-
-                    # Exclude identifier from resources not in MIRIAM registry
-                    if identifier and collection:
-                        annotation = Annotation(collection=self.query_ids.value(2),
-                                                identifier=self.query_ids.value(1))
-                        new_metabolite.annotation.add(annotation)
-
-                # Check for possible duplicates
-                potential_duplicates = find_duplicate_metabolite(metabolite=new_metabolite,
-                                                                 collection=self.model.metabolites,
-                                                                 same_compartment=True,
-                                                                 ignore_charge=True)
-                if potential_duplicates:
-                    print(potential_duplicates)
-                    metabolite, score = potential_duplicates[0]
-                    response = QMessageBox().question(None, "Potential duplicate",
-                                                      "A potential duplicate has been found:\n"
-                                                      "ID: {metabolite_id}\n"
-                                                      "Name: {metabolite_name}\n\n"
-                                                      "Do you want to add the metabolite anyway?".format(
-                                                          metabolite_id=metabolite.id,
-                                                          metabolite_name=metabolite.name))
-                    # User does not want to add the metabolite
-                    if response == QDialogButtonBox.No:
-                        continue
-
-                self.model.add_metabolites([new_metabolite])
-                self.model.QtMetaboliteTable.update_row_from_item(new_metabolite)
-
-    def closeEvent(self, QCloseEvent):
-        """ Close database connection before closing """
-
-        if self.database.isOpen():
-            self.database.close()
-        QCloseEvent.accept()
-
-
-class ReactionSelectionDialog(DatabaseSelectionDialog):
-    queries = {"EC number": "SELECT reactions.id, reactions.string FROM reaction_ids JOIN reactions "
-                            "ON reaction_ids.reaction_id = reactions.id "
-                            "WHERE reaction_ids.identifier LIKE '%?%' "
-                            "GROUP BY reactions.id;",
-               "Name": ""}
-
-    def __init__(self, parent, model):
-        super(ReactionSelectionDialog, self).__init__(parent, model)
-
-    def add_item_to_model(self, *args):
-        selection = self.dataView.get_selected_rows()
-        if len(selection) != 1:
-            self.groupBox_2.setVisible(False)
-            return
-        row = selection[0]
-        metabolite_id = self.databaseModel.data(self.databaseModel.index(row, 0))
-
-
-class ManualMatchDialog(QDialog, Ui_ManualMatchDialog):
-
-    def __init__(self, parent=None, unmatched_items=None):
-        super(ManualMatchDialog, self).__init__(parent)
-        self.setupUi(self)
-        self.unmatched_items = unmatched_items
-        self.current_metabolite = None
-        self.current_entries = None
-        self.manual_mapped = dict()
-        self.database = DatabaseWrapper()
-
-        self.button_save = QPushButton("Save match")
-        self.button_skip = QPushButton("Skip")
-        self.buttonBox.addButton(self.button_save, QDialogButtonBox.ActionRole)
-        self.buttonBox.addButton(self.button_skip, QDialogButtonBox.ActionRole)
-
-        self.connect_signals()
-        self.next_metabolite()
-
-    def connect_signals(self):
-
-        # Connect entry buttons
-        self.button_next_entry.clicked.connect(self.next_entry)
-        self.button_previous_entry.clicked.connect(self.previous_entry)
-
-        # Connect display update when changing index of entries
-        self.stackedWidget_database.currentChanged.connect(self.update_entry_label)
-        self.stackedWidget_database.currentChanged.connect(self.update_database_buttons)
-
-        # Connect buttonbox buttons
-        self.button_save.clicked.connect(self.save_mapping)
-        self.button_skip.clicked.connect(self.next_metabolite)
-
-    def populate_model_metabolite(self, metabolite):
-        self.display_model_metabolite.set_metabolite(metabolite)
-
-    def populate_database_entries(self, entries):
-        """ Populate the stacked widget for database entries
-
-        Parameters
-        ----------
-        entries: list
+    def slot_emit_selection_changed(self):
+        """ Emit database id of the currently selected item
 
         Returns
         -------
         None
         """
-
-        # Clear existing widgets
-        for idx in reversed(range(self.stackedWidget_database.count())):
-            self.stackedWidget_database.removeWidget(self.stackedWidget_database.widget(idx))
-
-        # Add new widgets
-        for entry in entries:
-            widget = MetaboliteEntryDisplayWidget()
-
-            # Setup widget
-            metabolite = self.database.get_metabolite_from_id(entry)
-            synonyms = self.database.get_synonyms_from_id(entry, entry_type="Metabolite")
-            annotations = self.database.get_annotations_from_id(entry, entry_type="Metabolite")
-            metabolite.annotation.update(annotations)
-            widget.set_information(metabolite, synonyms)
-
-            # Add widget to the dialog
-            self.stackedWidget_database.addWidget(widget)
-
-        # Update view
-        self.update_database_buttons(0)
-        self.update_entry_label(0)
+        self.signal_current_selection.emit(self.selected_id())
 
     @QtCore.pyqtSlot()
-    def next_metabolite(self):
-        # Return if no unmatched items are set
-        if self.unmatched_items is None:
-            return
-
-        try:
-            metabolite, entries = self.unmatched_items.popitem()
-        except KeyError:
-            # Close dialog if there is no more metabolite to match
-            self.close()
-        else:
-            # Update current items
-            self.current_metabolite = metabolite
-            self.current_entries = entries
-
-            # Update display
-            self.populate_model_metabolite(metabolite)
-            self.populate_database_entries(entries)
-
-    @QtCore.pyqtSlot()
-    def next_entry(self):
-        """ Move entry display widget to next entry """
-        current_index = self.stackedWidget_database.currentIndex()
-        if current_index + 1 < self.stackedWidget_database.count():
-            self.stackedWidget_database.setCurrentIndex(current_index+1)
-
-    @QtCore.pyqtSlot()
-    def previous_entry(self):
-        """ Move entry display widget to previous entry """
-        current_index = self.stackedWidget_database.currentIndex()
-        if current_index > 0:
-            self.stackedWidget_database.setCurrentIndex(current_index-1)
-
-    @QtCore.pyqtSlot(int)
-    def update_database_buttons(self, idx):
-        """ Disable or enable buttons to switch database item
-
-        Parameters
-        ----------
-        idx: int
+    def slot_emit_add_item(self):
+        """ Emit database id of the currently selected item
 
         Returns
         -------
-
+        None
         """
-        count = self.stackedWidget_database.count()
-        self.button_next_entry.setEnabled(idx+1 < count)
-        self.button_previous_entry.setEnabled(idx != 0)
-
-    @QtCore.pyqtSlot(int)
-    def update_entry_label(self, idx):
-        """ Update label according to the index
-
-        Parameters
-        ----------
-        idx
-
-        Returns
-        -------
-
-        """
-        self.label.setText("{0!s} / {1!s}".format(idx+1,
-                                                  self.stackedWidget_database.count()))
-
-    @QtCore.pyqtSlot()
-    def save_mapping(self):
-
-        entries_idx = self.stackedWidget_database.currentIndex()
-        if self.current_metabolite is not None:
-            self.manual_mapped[self.current_metabolite] = self.current_entries[entries_idx]
-
-        # Move to next metabolite
-        self.next_metabolite()
-
-    def closeEvent(self, QCloseEvent):
-        LOGGER.debug("Closing dialog.")
-        self.database.close()
-        super(ManualMatchDialog, self).closeEvent(QCloseEvent)
+        self.signal_add_item.emit(self.selected_id())
 
 
-def add_items_from_database(model, selection_type):
-    """ Add items from the database to the model
-    
+def factory_setting_widget(data_type, parent=None):
+    """ Factory for database selectiondialogs
+
+    Parameters
+    ----------
+    data_type: str
+
+    Returns
+    -------
+
+    """
+    if data_type.lower() == "metabolite":
+        return MetaboliteSettingWidget("metabolite", parent)
+    elif data_type.lower() == "reaction":
+        return ReactionSettingWidget("reaction", parent)
+    elif data_type.lower() == "combined":
+        return CombinedSettingsWidget(parent)
+    elif data_type.lower() == "pathway":
+        raise NotImplementedError
+    else:
+        raise ValueError("Unknown item_type '{0!s}'".format(data_type))
+
+
+def factory_search_widget(data_type, parent=None):
+    """ Factory function for creating DatabaseSearchWidgets
+
+    Parameters
+    ----------
+    data_type
+    parent
+
+    Returns
+    -------
+    DatabaseSearchWidget
+    """
+
+    if data_type.lower() == "metabolite":
+        queries = {
+            "by name": "SELECT metabolites.id, metabolites.name, metabolites.formula, metabolites.charge "
+                       "FROM metabolite_names JOIN metabolites "
+                       "ON metabolite_names.metabolite_id = metabolites.id "
+                       "WHERE metabolite_names.name LIKE '%{input}%' "
+                       "GROUP BY metabolite_names.metabolite_id;",
+            "by identifier": "SELECT metabolites.id, metabolites.name, metabolites.formula, metabolites.charge "
+                             "FROM metabolite_ids JOIN metabolites "
+                             "ON metabolite_ids.metabolite_id = metabolites.id "
+                             "WHERE metabolite_ids.identifier = '{input}'"
+                             "GROUP BY metabolites.id;"
+        }
+
+        return DatabaseSearchWidget(queries=queries, headers=["ID", "Name", "Formula", "Charge"], parent=parent)
+    elif data_type.lower() == "reaction":
+        queries = {
+            "by name": "SELECT reactions.id, reactions.string "
+                       "FROM reaction_names JOIN reactions "
+                       "ON reaction_names.reaction_id = reactions.id "
+                       "WHERE reaction_names.name LIKE '%{input}%' "
+                       "GROUP BY reaction_names.reaction_id;",
+            "by identifier": "SELECT reactions.id, reactions.string "
+                             "FROM reaction_ids JOIN reactions "
+                             "ON reaction_ids.reaction_id = reactions.id "
+                             "WHERE reaction_ids.identifier = '{input}' "
+                             "GROUP BY reactions.id;"
+        }
+
+        return DatabaseSearchWidget(queries=queries, headers=["ID", "Formula"], parent=parent)
+    else:
+        raise ValueError("Unknown input_type {0!s}".format(data_type))
+
+
+def add_metabolite_from_database(model, database_id, compartment=None):
+    """ Add metabolite from the datase
+
     Parameters
     ----------
     model: GEMEditor.cobraClasses.Model
-    type: str
+    database_id: int or str
+    compartment: str
 
     Returns
     -------
 
     """
 
-    # Check that the database is working properly
-    database = setup_database()
-    if database is None or not database.open():
-        return
+    database = DatabaseWrapper()
 
-    # Run actions
-    if selection_type == "metabolite":
-        raise NotImplementedError
-    elif selection_type == "reaction":
-        raise NotImplementedError
-    elif selection_type == "pathway":
-        raise NotImplementedError
+    # Get compartment if not provided
+    if not compartment:
+        compartment, status = QInputDialog().getItem(None, "Select compartment", "Select compartment:",
+                                                     sorted(model.compartments.keys()), 0, False)
+        if not status:
+            LOGGER.debug("User aborted addition on compartment choice")
+            return
+
+    # Generate <database_id> : [<Metabolit1>, <Metabolite2>] mapping
+    inverted_mapping = invert_mapping(model.database_mapping)
+
+    if database_id in inverted_mapping:
+        # Only keep metabolites that are in the target compartment
+        possible_duplicates = set([x for x in inverted_mapping[database_id] if x.compartment == compartment])
     else:
-        raise ValueError("Unexpected option '[}' for selection_type".format(str(selection_type)))
+        # Generate annotation to metabolite map
+        annotation_to_metabolite = get_annotation_to_item_map([x for x in model.metabolites
+                                                               if x.compartment == compartment])
+
+        # All annotations of the database metabolite
+        metabolite_annotations = database.get_annotations_from_id(database_id, "Metabolite", get_all=True)
+
+        # Collect possible duplicates by overlapping annotations
+        possible_duplicates = set()
+        for annotation in metabolite_annotations:
+            for metabolite in annotation_to_metabolite[annotation]:
+                possible_duplicates.add(metabolite)
+
+    # Generate new metabolite
+    new_metabolite = database.get_metabolite_from_id(database_id)
+    new_metabolite.id = generate_copy_id("New", model.metabolites, suffix="")
+    new_metabolite.compartment = compartment
+
+    for metabolite in possible_duplicates:
+        # Ask user if metabolite is already present
+        response = QMessageBox().question(None, "Potential duplicate",
+                                          "A potential duplicate has been found:\n"
+                                          "ID: {metabolite_id}\n"
+                                          "Name: {metabolite_name}\n\n"
+                                          "Do you want to add the metabolite anyway?".format(
+                                              metabolite_id=metabolite.id,
+                                              metabolite_name=metabolite.name))
+        # User does not want to add the metabolite
+        if response == QDialogButtonBox.No:
+            return metabolite
+
+    # Add metabolite to model
+    model.add_metabolites([new_metabolite])
+    model.QtMetaboliteTable.update_row_from_item(new_metabolite)
+    return new_metabolite
+
+
+def add_reaction_from_database(model, database_id):
+    """ Add a reaction from the database
+
+    Parameters
+    ----------
+    model: GEMEditor.cobraClasses.Model
+    database_id: int
+
+    Returns
+    -------
+
+    """
+    database = DatabaseWrapper()
+
+    # Setup new reaction
+    new_reaction = database.get_reaction_from_id(identifier=database_id)
+    new_reaction.id = generate_copy_id("New", model.reactions, suffix="")
+
+    # Get reaction participants
+    participants = database.get_reaction_participants_from_id(identifier=database_id)
+
+    # Get mapping of database compartments to model compartments
+    dialog = DialogMapCompartment(input_compartments=[x["compartment_id"] for x in participants],
+                                  model=model)
+
+    # Aborted by user
+    if not dialog.exec_():
+        return None
+
+    # Metabolite compartment map
+    metabolite_compartment_map = dialog.get_mapping()
+
+    # Add metabolites from model
+    stoichiometry = {}
+    for participant in participants:
+        compartment_id = participant["compartment_id"]
+        model_compartment = metabolite_compartment_map[compartment_id]
+        metabolite_id = participant["metabolite_id"]
+        coefficient = participant["stoichiometry"]
+
+        # Get metabolite
+        metabolite = add_metabolite_from_database(model=model,
+                                                  database_id=metabolite_id,
+                                                  compartment=model_compartment)
+        stoichiometry[metabolite] = coefficient
+
+    # Add reaction stoichiometry
+    new_reaction.add_metabolites(stoichiometry)
+
+    # Add reaction to model
+    model.add_reactions([new_reaction])
+    model.QtReactionTable.update_row_from_item(new_reaction)
+
+    return new_reaction
 
 
 if __name__ == '__main__':
-    metabolite = Metabolite(id="H2O", formula="H2O", name="Water", charge=0, compartment="c")
-    metabolite2 = Metabolite(id="H", formula="H", name="Proton", charge=1, compartment="c")
     app = QApplication([])
-    LOGGER.setLevel(logging.DEBUG)
-    handler = logging.StreamHandler()
-    LOGGER.addHandler(handler)
-    dialog = ManualMatchDialog(unmatched_items={metabolite: ["1", "50", "250"],
-                                                metabolite2: ["5", "10", "15", "20", "25"]})
+    widget = DatabaseSettingWidget(resource_type="metabolite")
+    dialog = QDialog()
+    layout = QHBoxLayout()
+    dialog.setLayout(layout)
+    layout.addWidget(widget)
     dialog.exec_()
+    print(widget.get_selected_annotations())
+

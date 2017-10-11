@@ -319,6 +319,7 @@ class BatchEvidenceDialog(CustomStandardDialog, Ui_BatchEvidenceDialog):
         if genes_added:
             QMessageBox(self).information(self, "Genes added", "{} new genes added!".format(str(genes_added)))
 
+
 def iterate_tree(standard_item, data_item):
     for n, element in enumerate(sorted(data_item.children, key=lambda x: x.name)):
             gene_item = LinkedItem(element.name, element)

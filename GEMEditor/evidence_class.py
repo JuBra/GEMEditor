@@ -275,3 +275,26 @@ class Evidence(BaseReferenceElement):
     def __hash__(self):
         return id(self)
 
+    def substitute_item(self, old_item, new_item):
+        """ Substitute an item linked in this evidence
+
+        Parameters
+        ----------
+        old_item
+        new_item
+
+        Returns
+        -------
+
+        """
+
+        if old_item is self.entity:
+            self.set_entity(new_item)
+        elif old_item is self.target:
+            self.set_target(new_item)
+        elif old_item is self.link:
+            self.set_linked_item(new_item)
+        else:
+            raise KeyError("{0!s} not a part of evidence {1!s}".format(old_item, self))
+
+

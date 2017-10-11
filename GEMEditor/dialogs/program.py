@@ -1,10 +1,11 @@
 import logging
 from PyQt5 import QtCore, QtGui
-from PyQt5.QtWidgets import QDialogButtonBox, QApplication, QDialog
+from PyQt5.QtWidgets import QDialogButtonBox, QApplication, QDialog, QFileDialog
 from GEMEditor.ui.EditSettingsDialog import Ui_EditSettingsDialog
 from GEMEditor.ui.AboutDialog import Ui_AboutDialog
 from GEMEditor.ui.ListDisplayDialog import Ui_ListDisplayDialog
 from GEMEditor.ui.UpdateAvailableDialog import Ui_UpdateAvailableDialog
+from GEMEditor.database import database_path as DB_PATH
 from GEMEditor import __projectpage__, __version__
 
 
@@ -17,6 +18,10 @@ class EditSettingsDialog(QDialog, Ui_EditSettingsDialog):
         self.settings = QtCore.QSettings()
         self.eMailLineEdit.setText(self.settings.value("Email"))
         self.eMailLineEdit.setValidator(QtGui.QRegExpValidator(QtCore.QRegExp(r"[^@\s]+@[^@\s]+\.[^@\s.]+$")))
+
+        # Setup database path
+        self.label_database_path.setText(self.settings.value("DATABASE_PATH", DB_PATH))
+        self.pushButton_change_path.clicked.connect(self.change_database_path)
 
         # Setup debug checkbox with current state
         logger = logging.getLogger("GEMEditor")
@@ -31,9 +36,18 @@ class EditSettingsDialog(QDialog, Ui_EditSettingsDialog):
                                                                     not self.eMailLineEdit.text())
 
     @QtCore.pyqtSlot()
+    def change_database_path(self):
+        current_path = self.settings.value("DATABASE_PATH", DB_PATH)
+        filename, filter = QFileDialog.getSaveFileName(self, self.tr("Change location"), current_path,
+                                                       self.tr("Database (*.db)"))
+        if filename:
+            self.label_database_path.setText(filename)
+
+    @QtCore.pyqtSlot()
     def save_settings(self):
         """ Save the currently entered E-mail """
         self.settings.setValue("Email", self.eMailLineEdit.text())
+        self.settings.setValue("DATABASE_PATH", self.label_database_path.text())
         self.settings.sync()
 
         logger = logging.getLogger("GEMEditor")

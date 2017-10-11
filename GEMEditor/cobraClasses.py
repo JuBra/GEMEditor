@@ -6,6 +6,7 @@ from cobra.core import Model as cobraModel
 from weakref import WeakValueDictionary
 from PyQt5 import QtGui, QtCore
 from collections import defaultdict
+from GEMEditor.base.functions import generate_copy_id
 from GEMEditor.widgets.tables import ReactionTable, MetaboliteTable, GeneTable, ReferenceTable, ModelTestTable, LinkedItem
 from GEMEditor.data_classes import ReactionSetting, CleaningDict, Compartment
 from GEMEditor.base_classes import BaseEvidenceElement
@@ -323,6 +324,11 @@ class Model(QtCore.QObject, BaseEvidenceElement, cobraModel):
         self.all_evidences = WeakValueDictionary()
         self.tests = []
         self.dialogs = WindowManager()
+
+        # Store the mapping between metabolites and database entries
+        self.database_mapping = dict()
+
+        # Setup model
         self.setup_tables()
         self.setup_connections()
 
@@ -407,7 +413,7 @@ class Model(QtCore.QObject, BaseEvidenceElement, cobraModel):
     def update_dialogs(self, solution):
         for dialog in self.dialogs.windows:
             try:
-                dialog.set_reaction_data(solution.x_dict)
+                dialog.set_reaction_data(solution)
             except AttributeError:
                 pass
 
@@ -505,6 +511,9 @@ class Metabolite(cobraMetabolite, BaseEvidenceElement):
         self._bound = 0.
         self._model = None
         self._reaction = set()
+
+    def get_annotation_by_collection(self, *args):
+        return set([x.identifier for x in self.annotation if x.collection in args])
 
 
 class WindowManager(QtCore.QObject):
@@ -628,22 +637,11 @@ def reaction_balance(metabolites):
     return charge_str, element_str, balanced
 
 
-def generate_copy_id(source_id, collection, suffix="_copy"):
-    base_id = str(source_id) + suffix
-    new_id = base_id
-    n = 0
-    # Make sure there is no metabolite with the same id
-    while new_id in collection:
-        n += 1
-        new_id = base_id + str(n)
-    return new_id
-
-
-def find_duplicate_metabolite(metabolite, collection, same_compartment=True, cutoff=0.):
+def find_duplicate_metabolite(metabolite, collection, same_compartment=True, cutoff=0., ignore_charge=False):
     duplicates = []
     for entry in collection:
         similarity = 0
-        if entry.charge != metabolite.charge:
+        if not ignore_charge and entry.charge != metabolite.charge:
             continue
         elif same_compartment and entry.compartment != metabolite.compartment:
             continue

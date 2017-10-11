@@ -1,12 +1,11 @@
 import logging
 from PyQt5.QtWidgets import QFileDialog, QDialogButtonBox, QMainWindow
-from PyQt5.QtCore import QStandardPaths
+from PyQt5.QtCore import QStandardPaths, Qt
 from GEMEditor.tabs import *
 from GEMEditor.dialogs.program import EditSettingsDialog, AboutDialog, ListDisplayDialog
 from GEMEditor.dialogs.model import EditModelDialog
 from GEMEditor.dialogs.reference import PubmedBrowser
-from GEMEditor.dialogs.standard import MetaboliteSelectionDialog
-from GEMEditor.dialogs.qualitychecks import DuplicateDialog, LocalizationCheck, FailingEvidencesDialog
+from GEMEditor.dialogs.qualitychecks import DuplicateDialog, FailingEvidencesDialog
 from GEMEditor.map.escher import MapListDialog
 from GEMEditor.dialogs import UpdateAvailableDialog, BatchEvidenceDialog
 from GEMEditor import __projectpage__
@@ -16,15 +15,33 @@ from GEMEditor.cobraClasses import Model, prune_gene_tree
 from GEMEditor.analysis import group_duplicate_reactions
 from GEMEditor.analysis.statistics import run_all_statistics, DisplayStatisticsDialog
 from GEMEditor.connect.checkversion import UpdateCheck
-from GEMEditor.database.create import create_database_de_novo
-from GEMEditor.database.model import run_auto_annotation, run_check_consistency
-from GEMEditor.database.query import DatabaseSelectionDialog
+from GEMEditor.database.create import create_database_de_novo, database_exists
+from GEMEditor.database.model import run_auto_annotation, run_check_consistency, get_metabolite_to_entry_mapping
+from GEMEditor.database.query import DialogDatabaseSelection
+from GEMEditor.database.base import DatabaseWrapper
 import os
 import GEMEditor.icons_rc
 
 
 LOGGER = logging.getLogger(__name__)
 
+
+class ProgressDialog(QProgressDialog):
+
+    def __init__(self, parent, title=None, label="", min=0, max=100, min_duration=500):
+        super(ProgressDialog, self).__init__(parent)
+        self.setWindowTitle(title)
+        self.setLabelText(label)
+        self.setMinimum(min)
+        self.setMaximum(max)
+        self.setMinimumDuration(500)
+
+    def __enter__(self):
+        return self
+    
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.close()
+        
 
 class MainWindow(QMainWindow, Ui_MainWindow):
 
@@ -76,6 +93,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # MetaNetX menu
         self.actionAdd_Metabolite.triggered.connect(self.add_metabolite_from_database)
+        self.actionAdd_Reactions.triggered.connect(self.add_reaction_from_database)
         self.actionAuto_annotate.triggered.connect(self.auto_annotate)
         self.actionCheck_consistency.triggered.connect(self.check_consistency)
 
@@ -282,16 +300,56 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         dialog.exec_()
 
     @QtCore.pyqtSlot()
-    def auto_annotate(self):
-        if not self.model:
+    def metanetx_update_mapping(self):
+        """ Update the mapping of the metabolites to the database
+
+        Returns
+        -------
+
+        """
+        # Check that model and database exist
+        if not self.model and database_exists(self):
             return
-        updated_items = run_auto_annotation(self.model, self)
+
+        # Run update
+        with ProgressDialog(self, title="Update mapping..") as progress:
+            mapping = get_metabolite_to_entry_mapping(self.model, progress)
+            self.model.database_mapping.update(mapping)
+
+        # Success
+        QMessageBox().information(None, "Success", "Metabolites have been mapped to the database.")
+
+    @QtCore.pyqtSlot()
+    def auto_annotate(self):
+        """ Automatically annotate model items from database
+
+        Returns
+        -------
+
+        """
+
+        # Check that model and database exists
+        if not self.model and database_exists(self):
+            return
+
+        # Update annotations
+        with ProgressDialog(self, title="Updating annotations") as progress:
+            updated_items = run_auto_annotation(self.model, progress, self)
+
+        # Update
         if updated_items:
             QMessageBox().information(None, "Items changed",
                                       "{} items have been updated!".format(len(updated_items)))
+        else:
+            QMessageBox().information(None, "No change", "No items have been changed.")
 
     @QtCore.pyqtSlot()
     def check_consistency(self):
+
+        # Check that model and database exists
+        if not self.model and database_exists(self):
+            return
+
         errors = run_check_consistency(self.model, self)
         if errors:
             dialog = ListDisplayDialog(errors, parent=self)
@@ -305,12 +363,21 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     @QtCore.pyqtSlot()
     def add_metabolite_from_database(self):
-        try:
-            dialog = DatabaseSelectionDialog(self, self.model)
-        except ConnectionError:
+        # Check that model and database exists
+        if not self.model and database_exists(self):
             return
-        else:
-            dialog.show()
+
+        dialog = DialogDatabaseSelection(model=self.model, data_type="metabolite", parent=self)
+        dialog.show()
+
+    @QtCore.pyqtSlot()
+    def add_reaction_from_database(self):
+        # Check that model and database exists
+        if not self.model and database_exists(self):
+            return
+
+        dialog = DialogDatabaseSelection(model=self.model, data_type="reaction", parent=self)
+        dialog.show()
 
     def set_model(self, model, path):
         self.model = model
@@ -366,9 +433,19 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     @QtCore.pyqtSlot()
     def update_metanetx_database(self):
-        result = create_database_de_novo(self)
+        """ Update the local MetaNetX database
+
+        Returns
+        -------
+        None
+        """
+
+        result = create_database_de_novo(parent=self,
+                                         database_path=DatabaseWrapper.get_database_path())
         if result:
             QMessageBox().information(None, "Success!", "The database has successfully been setup.")
+        else:
+            QMessageBox().information(None, "Aborted", "Database has not been created.")
 
     def check_model_closing(self):
         close_msg = "Are you sure you want to close the model and discard changes?"
@@ -379,9 +456,36 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         else:
             return False
 
+    def trigger_experimental_feature(self):
+
+        LOGGER.debug("Importing feature")
+        from GEMEditor.map.custom import reaction_literature_coverage
+
+        if not self.model:
+            LOGGER.debug("Model not set!")
+            return
+
+        coverage = reaction_literature_coverage(self.model)
+        LOGGER.debug("Coverage computed")
+        self.model.update_dialogs(coverage)
+        LOGGER.debug("Dialog supdated")
+
+    def keyPressEvent(self, event):
+
+        LOGGER.debug(str(event.modifiers()))
+
+        if event.key() == Qt.Key_E and event.modifiers() == Qt.ControlModifier:
+            LOGGER.debug("Triggering experimental feature.")
+            self.trigger_experimental_feature()
+        else:
+            LOGGER.debug("Calling super")
+            # Calling super version
+            super(MainWindow, self).keyPressEvent(event)
+
     def closeEvent(self, event):
         # Save the column width of the individual tabs
         if self.closeModel():
             event.accept()
         else:
             event.ignore()
+

@@ -6,7 +6,8 @@ from collections import defaultdict, Counter
 from PyQt5.QtWidgets import QMessageBox, QApplication, QProgressDialog
 from GEMEditor.database import metanetx_url, metanetx_files, missing_prefix
 from GEMEditor.connect.urldownloader import DownloadProgressDialog, StopDownload
-from GEMEditor.database.tables import setup_empty_database, database_path
+from GEMEditor.database.tables import setup_empty_database
+from GEMEditor.database.base import DatabaseWrapper
 from urllib.request import urlretrieve, ContentTooShortError, HTTPError, URLError
 
 
@@ -949,12 +950,13 @@ def create_indices(conn, progress):
     conn.commit()
 
 
-def create_database_de_novo(parent):
+def create_database_de_novo(parent, database_path):
     """ Setup a new database from the MetaNetX files
     
     Parameters
     ----------
     parent: GEMEditor.main.MainWindow
+    database_path: str
 
     Returns
     -------
@@ -962,7 +964,7 @@ def create_database_de_novo(parent):
     """
 
     # Generate an empty database
-    if not setup_empty_database(parent):
+    if not setup_empty_database(parent, database_path):
         return
 
     # Download files
@@ -1011,8 +1013,20 @@ def get_database_connection():
     -------
     sqlite3.Connection or None
     """
+    # Get database path
+    database_path = DatabaseWrapper.get_database_path()
 
     if os.path.isfile(database_path):
         return sqlite3.connect(database_path)
     else:
         return None
+
+
+def database_exists(parent=None, create_otherwise=True):
+    """ Check that the database exists"""
+    database_path = DatabaseWrapper.get_database_path()
+    if os.path.isfile(database_path):
+        return True
+    elif create_otherwise:
+        return create_database_de_novo(parent=parent, database_path=database_path)
+    return False

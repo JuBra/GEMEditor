@@ -16,6 +16,13 @@ database_path = abspath(join(dirname(abspath(__file__)), "database", "modelling.
 regex_formula = r"^([A-Z][a-z]?\d*)*$"
 formula_validator = re.compile(regex_formula)
 
+# Global default settings which are stored in settings
+DB_NEW_MET_PREFIX = "New"    # Prefix used for generating metabolite IDs
+DB_NEW_REACT_PREFIX = "New"  # Prefix used for generating reaction IDs
+DB_GET_MET_NAME = True       # Get the name for the new metabolite from database
+DB_GET_REACT_NAME = True     # Get the name for the new reaction from database
+DB_GET_FL_AND_CH = True      # Get the formula and name from the database
+
 
 def use_progress(func):
     """ Decorator function to use on methods to display a progress window
@@ -38,65 +45,3 @@ def use_progress(func):
         progress.close()
         return return_value
     return wrapper
-
-
-def use_database(func):
-    """ Decorator for functions using the sqlite database
-
-    Parameters
-    ----------
-    func :
-
-    Returns
-    -------
-
-    """
-    def wrapper(*args, **kwargs):
-        db = setup_database()
-
-        if db is None:
-            return
-        elif not db.open():
-            QMessageBox.critical(None, "Could not open database",
-                                       "There has been an error connecting to the database.\n"
-                                       "{}".format(db.lastError().text()),
-                                       QMessageBox.Close)
-            return
-
-        # Add progress to the positional arguments
-        args = args+(db,)
-        return_value = func(*args, **kwargs)
-        db.close()
-        return return_value
-    return wrapper
-
-
-def setup_database():
-    """ Open the SQLITE database containing the MetaNetX mappings
-
-    Returns
-    -------
-    db : QtSql.QSqlDatabase or None
-    """
-
-    # Check that SQLITE driver is installed
-    if not QtSql.QSqlDatabase.isDriverAvailable('QSQLITE'):
-        QMessageBox.critical(None, "Database driver missing!",
-                                   "It appears that the sqlite database driver is missing.\n "
-                                   "Please install it in order to use this function!",
-                                   QMessageBox.Close)
-        return
-
-    # Check that the database is found
-    if not isfile(database_path):
-        QMessageBox.critical(None, "Database not found!",
-                                   "The database has not been found at the expected location:"
-                                   "\n{}".format(database_path),
-                                   QMessageBox.Close)
-        return
-
-    # Set up database
-    db = QtSql.QSqlDatabase.addDatabase('QSQLITE')
-    db.setDatabaseName(database_path)
-    db.setConnectOptions("QSQLITE_OPEN_READONLY=1")
-    return db
