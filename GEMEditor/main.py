@@ -308,7 +308,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         """
         # Check that model and database exist
-        if not self.model and database_exists(self):
+        if not self.model or not database_exists(self):
             return
 
         # Run update
@@ -329,7 +329,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         """
 
         # Check that model and database exists
-        if not self.model and database_exists(self):
+        if not self.model or not database_exists(self):
             return
 
         # Update annotations
@@ -347,7 +347,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def check_consistency(self):
 
         # Check that model and database exists
-        if not self.model and database_exists(self):
+        if not self.model or not database_exists(self):
             return
 
         errors = run_check_consistency(self.model, self)
@@ -364,7 +364,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     @QtCore.pyqtSlot()
     def add_metabolite_from_database(self):
         # Check that model and database exists
-        if not self.model and database_exists(self):
+        if not self.model or not database_exists(self):
             return
 
         dialog = DialogDatabaseSelection(model=self.model, data_type="metabolite", parent=self)
@@ -373,7 +373,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     @QtCore.pyqtSlot()
     def add_reaction_from_database(self):
         # Check that model and database exists
-        if not self.model and database_exists(self):
+        if not self.model or not database_exists(self):
             return
 
         dialog = DialogDatabaseSelection(model=self.model, data_type="reaction", parent=self)
