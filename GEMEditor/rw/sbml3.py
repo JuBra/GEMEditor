@@ -107,7 +107,7 @@ def read_sbml3_model(path, progress):
 
     # Add compartments from metabolites if not saved
     for x in model.metabolites:
-        if x.compartment not in model.compartments:
-            model.compartments[x.compartment] = Compartment(x.compartment, None)
+        if x.compartment not in model.gem_compartments:
+            model.gem_compartments[x.compartment] = Compartment(x.compartment, None)
 
     return model

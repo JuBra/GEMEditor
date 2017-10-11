@@ -461,7 +461,7 @@ def add_metabolite_from_database(model, database_id, compartment=None):
     # Get compartment if not provided
     if not compartment:
         compartment, status = QInputDialog().getItem(None, "Select compartment", "Select compartment:",
-                                                     sorted(model.compartments.keys()), 0, False)
+                                                     sorted(model.gem_compartments.keys()), 0, False)
         if not status:
             LOGGER.debug("User aborted addition on compartment choice")
             return

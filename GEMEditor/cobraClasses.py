@@ -328,6 +328,10 @@ class Model(QtCore.QObject, BaseEvidenceElement, cobraModel):
         # Store the mapping between metabolites and database entries
         self.database_mapping = dict()
 
+        # Keep track of compartment objects
+        # to be able to link them in evidences
+        self.gem_compartments = dict()
+
         # Setup model
         self.setup_tables()
         self.setup_connections()
@@ -422,8 +426,8 @@ class Model(QtCore.QObject, BaseEvidenceElement, cobraModel):
             metabolite_list = [metabolite_list]
 
         for metabolite in metabolite_list:
-            if metabolite.compartment not in self.compartments:
-                self.compartments[metabolite.compartment] = Compartment(metabolite.compartment)
+            if metabolite.compartment not in self.gem_compartments:
+                self.gem_compartments[metabolite.compartment] = Compartment(metabolite.compartment)
 
         super(Model, self).add_metabolites(metabolite_list)
 

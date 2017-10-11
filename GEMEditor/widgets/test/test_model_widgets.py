@@ -47,7 +47,7 @@ class TestModelDisplayWidget:
 
         self.comp1_abbrev = "c"
         self.comp1_name = "Cytoplasm"
-        self.model.compartments[self.comp1_abbrev] = self.comp1_name
+        self.model.gem_compartments[self.comp1_abbrev] = self.comp1_name
 
     def test_setup(self):
 
@@ -56,7 +56,7 @@ class TestModelDisplayWidget:
         assert len(self.model.genes) == 1
         assert self.model.id == self.test_id
         assert self.model.name == self.test_name
-        assert self.model.compartments[self.comp1_abbrev] == self.comp1_name
+        assert self.model.gem_compartments[self.comp1_abbrev] == self.comp1_name
 
     def test_model_addition(self):
         path = "Test_path"

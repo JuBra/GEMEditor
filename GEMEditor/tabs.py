@@ -329,7 +329,7 @@ class ReactionTab(StandardTab):
         # Get compartment mapping from user
         compartment_mapping = dict()
         for compartment in compartments:
-            value, status = QInputDialog().getItem(self, "Choose target compartment", 'Choose target for compartment "{}":'.format(compartment), list(self.model.compartments.keys()), 0, False)
+            value, status = QInputDialog().getItem(self, "Choose target compartment", 'Choose target for compartment "{}":'.format(compartment), list(self.model.gem_compartments.keys()), 0, False)
             if not status:
                 return
             else:

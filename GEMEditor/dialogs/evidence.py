@@ -82,9 +82,9 @@ class EditEvidenceDialog(CustomStandardDialog, Ui_new):
 
     def select_compartment(self):
         compartment_id, status = QInputDialog().getItem(self, "Select compartment", "Select compartment:",
-                                                              sorted(self.model.compartments.keys()), 0, False)
+                                                              sorted(self.model.gem_compartments.keys()), 0, False)
         if status:
-            self.set_target_item(self.model.compartments[compartment_id])
+            self.set_target_item(self.model.gem_compartments[compartment_id])
 
     def set_evidence(self, evidence):
         if evidence is None:

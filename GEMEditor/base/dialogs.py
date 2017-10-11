@@ -48,7 +48,7 @@ class DialogMapCompartment(QDialog, Ui_EmptyDialogHorzButtons):
             # Add wigets with offset 1
             layout.addWidget(QLabel(str(entry)), i+1, 0)
             combobox = QComboBox()
-            combobox.addItems(sorted(model.compartments.keys()))
+            combobox.addItems(sorted(model.gem_compartments.keys()))
             layout.addWidget(combobox, i+1, 1)
 
             # Store mapping

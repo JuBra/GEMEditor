@@ -26,9 +26,9 @@ class TestAddCompartmentDialog:
         self.comp1_name = "Cytoplasm"
         self.comp2_abbreviation = "e"
         self.comp2_name = "Extracellular"
-        self.model.compartments[self.comp1_abbreviation] = self.comp1_name
+        self.model.gem_compartments[self.comp1_abbreviation] = self.comp1_name
         self.compartment_table = CompartmentTable()
-        self.compartment_table.populate_table(self.model.compartments.items())
+        self.compartment_table.populate_table(self.model.gem_compartments.items())
 
         self.wrong_format_abbreviation = "ca"
 
@@ -96,7 +96,7 @@ class TestEditModelSettings:
         self.comp1_id = "c"
         self.new_comp_id = "n"
         self.new_comp_name = "Nucleus"
-        self.model.compartments[self.comp1_id] = self.comp1_name
+        self.model.gem_compartments[self.comp1_id] = self.comp1_name
         self.metabolite = Metabolite("test", compartment=self.comp1_id)
         self.model.add_metabolites([self.metabolite])
 
@@ -111,8 +111,8 @@ class TestEditModelSettings:
     def test_setup(self):
         assert self.model.name == self.test_name
         assert self.model.id == self.test_id
-        assert self.comp1_id in self.model.compartments
-        assert self.model.compartments[self.comp1_id] == self.comp1_name
+        assert self.comp1_id in self.model.gem_compartments
+        assert self.model.gem_compartments[self.comp1_id] == self.comp1_name
 
         assert self.dialog.buttonBox.button(QDialogButtonBox.Ok).isEnabled() is False
         assert self.dialog.modelNameInput.text() == self.test_name
@@ -163,8 +163,8 @@ class TestEditModelSettings:
         self.dialog.compartmentTable.update_row_from_item((self.new_comp_id, self.new_comp_name))
         assert self.dialog.compartmentTable.rowCount() == 2
         self.dialog.save_changes()
-        assert self.model.compartments == {self.comp1_id: self.comp1_name,
-                                           self.new_comp_id: self.new_comp_name}
+        assert self.model.gem_compartments == {self.comp1_id: self.comp1_name,
+                                               self.new_comp_id: self.new_comp_name}
         assert self.metabolite in self.model.metabolites
 
     @pytest.mark.usefixtures("patch_progress")
@@ -176,12 +176,12 @@ class TestEditModelSettings:
         self.dialog.save_changes()
         assert QProgressDialog.called is True
         assert QApplication.processEvents.called is True
-        assert self.model.compartments == {}
+        assert self.model.gem_compartments == {}
         assert self.metabolite not in self.model.metabolites
 
     def test_save_changed_compartment_name(self):
         self.dialog.compartmentTable.item(0, 1).setText(self.new_comp_name)
         assert self.dialog.buttonBox.button(QDialogButtonBox.Ok).isEnabled() is True
         self.dialog.save_changes()
-        assert self.model.compartments == {self.comp1_id: self.new_comp_name}
+        assert self.model.gem_compartments == {self.comp1_id: self.new_comp_name}
 

@@ -72,7 +72,7 @@ class ModelDisplayWidget(QWidget, Ui_modelDisaplayWidget):
             self.label_number_genes.setText(str(len(self.model.genes)))
 
             self.compartment_table.setRowCount(0)
-            for key, compartment in self.model.compartments.items():
+            for key, compartment in self.model.gem_compartments.items():
                 self.compartment_table.appendRow([QtGui.QStandardItem(key), QtGui.QStandardItem(compartment.name)])
 
 
@@ -673,7 +673,7 @@ class MetaboliteAttributesDisplayWidget(QWidget, Ui_MetAttribs):
         if self.metabolite is not None:
 
             # Populate the compartment combobox
-            self.compartmentComboBox.addItems(sorted(self.model.compartments.keys()))
+            self.compartmentComboBox.addItems(sorted(self.model.gem_compartments.keys()))
 
             self.iDLineEdit.setText(self.metabolite.id)
             self.iDLineEdit.setCursorPosition(0)

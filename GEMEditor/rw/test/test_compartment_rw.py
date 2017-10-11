@@ -14,14 +14,14 @@ def test_parse_compartments():
     model = Model()
     parse_compartments(parent_node, model)
 
-    assert model.compartments["p"] == Compartment("p", "Periplasm")
-    assert model.compartments["c"] == Compartment("c", "Cytoplasm")
-    assert model.compartments["e"] == Compartment("e", "Extracellular")
+    assert model.gem_compartments["p"] == Compartment("p", "Periplasm")
+    assert model.gem_compartments["c"] == Compartment("c", "Cytoplasm")
+    assert model.gem_compartments["e"] == Compartment("e", "Extracellular")
 
 
 def test_add_compartments():
     model = Model()
-    model.compartments["c"] = Compartment("c", "Cytoplasm")
+    model.gem_compartments["c"] = Compartment("c", "Cytoplasm")
 
     root = Element("Root")
     add_compartments(root, model)
@@ -64,7 +64,7 @@ def test_add_compartment_empty_model():
 
 def test_consistency_write_read():
     model1 = Model()
-    model1.compartments["c"] = Compartment("c", "Cytoplasm")
+    model1.gem_compartments["c"] = Compartment("c", "Cytoplasm")
 
     root = Element("Root")
     add_compartments(root, model1)
@@ -72,4 +72,4 @@ def test_consistency_write_read():
     model2 = Model()
     parse_compartments(root, model2)
 
-    assert model2.compartments == model1.compartments
+    assert model2.gem_compartments == model1.gem_compartments

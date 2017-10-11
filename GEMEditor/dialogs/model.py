@@ -81,14 +81,14 @@ class EditModelDialog(QDialog, Ui_EditModelDialog):
         """ Check that the input is different than in the beginning """
         if (self.model.id != self.modelIdInput.text() or
             self.model.name != self.modelNameInput.text() or
-                self.model.compartments != dict(self.compartmentTable.get_items())):
+                self.model.gem_compartments != dict(self.compartmentTable.get_items())):
             return True
         else:
             return False
 
     def populate_table(self):
         """ Populate the compartment table """
-        self.compartmentTable.populate_table(iteritems(self.model.compartments))
+        self.compartmentTable.populate_table(iteritems(self.model.gem_compartments))
         self.compartmentTableView.setModel(self.compartmentTable)
 
     @QtCore.pyqtSlot()
@@ -110,7 +110,7 @@ class EditModelDialog(QDialog, Ui_EditModelDialog):
         changed_compartments = dict(self.compartmentTable.get_items())
 
         # Deleted compartments
-        for x, name in self.model.compartments.items():
+        for x, name in self.model.gem_compartments.items():
             if x not in changed_compartments:
                 # Get all metabolites in compartment x
                 metabolites = [y for y in self.model.metabolites if y.compartment == x]
@@ -129,5 +129,5 @@ class EditModelDialog(QDialog, Ui_EditModelDialog):
                         QApplication.processEvents()
                         metabolite.remove_from_model('subtractive')
                     progress.close()
-        self.model.compartments = changed_compartments
+        self.model.gem_compartments = changed_compartments
         self.model.setup_tables()

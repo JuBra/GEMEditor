@@ -147,6 +147,6 @@ def get_item_from_model(item_type, item_id, model):
     elif item_type == "Model":
         return model
     elif item_type == "Compartment":
-        return model.compartments[item_id]
+        return model.gem_compartments[item_id]
     else:
         raise ValueError("Unexpected item type '{0}' with id {1}".format(item_type, item_id))

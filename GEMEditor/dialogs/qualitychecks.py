@@ -102,7 +102,7 @@ class LocalizationCheck(CustomStandardDialog, Ui_Dialog):
         self.dataTable = QtGui.QStandardItemModel(self)
         self.tableView.setModel(self.dataTable)
         self.tableView.setItemDelegateForColumn(1, ComboBoxDelegate(parent=self.tableView,
-                                                                    choices=list(self.model.compartments.values())))
+                                                                    choices=list(self.model.gem_compartments.values())))
         self.pushButton.clicked.connect(self.select_file)
 
     @QtCore.pyqtSlot()
