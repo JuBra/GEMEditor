@@ -75,7 +75,7 @@ class TestTestCases:
 
         reference_node = test_references_list_node.find(ge_referenceLink)
         assert reference_node is not None
-        assert reference_node.get("referenceId") == "test_refid"
+        assert reference_node.get("id") == "test_refid"
 
     def test_writing_empty_model(self):
 

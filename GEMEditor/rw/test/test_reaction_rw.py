@@ -21,8 +21,7 @@ class TestAddReactions:
                                  name=self.test_name,
                                  subsystem=self.test_subsystem,
                                  lower_bound=self.test_lower_bound,
-                                 upper_bound=self.test_upper_bound,
-                                 objective_coefficient=self.test_objective_coefficient)
+                                 upper_bound=self.test_upper_bound)
         self.reaction.comment = self.test_comment
 
         self.metabolite1 = Metabolite(id="test_met1")
@@ -61,6 +60,7 @@ class TestAddReactions:
 
         self.model = Model(id_or_model="Test")
         self.model.add_reactions([self.reaction])
+        self.reaction.objective_coefficient = 1.
 
     def test_setup_items(self):
 
