@@ -16,7 +16,7 @@ from GEMEditor.analysis import group_duplicate_reactions
 from GEMEditor.analysis.statistics import run_all_statistics, DisplayStatisticsDialog
 from GEMEditor.connect.checkversion import UpdateCheck
 from GEMEditor.database.create import create_database_de_novo, database_exists
-from GEMEditor.database.model import run_auto_annotation, run_check_consistency, get_metabolite_to_entry_mapping
+from GEMEditor.database.model import run_auto_annotation, run_check_consistency, update_metabolite_database_mapping
 from GEMEditor.database.query import DialogDatabaseSelection
 from GEMEditor.database.base import DatabaseWrapper
 import os
@@ -313,8 +313,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # Run update
         with ProgressDialog(self, title="Update mapping..") as progress:
-            mapping = get_metabolite_to_entry_mapping(self.model, progress)
-            self.model.database_mapping.update(mapping)
+            update_metabolite_database_mapping(self.model, progress)
 
         # Success
         QMessageBox().information(None, "Success", "Metabolites have been mapped to the database.")

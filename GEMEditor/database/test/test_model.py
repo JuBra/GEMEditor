@@ -1,5 +1,6 @@
 import pytest
-from GEMEditor.database.model import AnnotationSettingsDialog
+from GEMEditor.database.model import *
+from GEMEditor.cobraClasses import Model, Metabolite, Reaction
 from PyQt5.QtWidgets import QApplication
 
 app = QApplication([])
@@ -41,3 +42,50 @@ class TestAnnotationSettingsDialog:
         else:
             assert not settings["reaction_resources"]
             assert not settings["metabolite_resources"]
+
+
+class Test_update_metabolites:
+
+    def test_updating(self):
+        model = Model()
+        met1 = Metabolite(id="met1", formula="H2O", name="Water", charge=0., compartment="c")
+        react1 = Reaction(id="react1", name="test2", subsystem="test2", lower_bound=0., upper_bound=1000.)
+        react1.add_metabolites({met1: -1})
+
+        model.add_metabolites([met1])
+        model.add_reactions([react1])
+        model.setup_tables()
+
+        assert model.QtReactionTable.rowCount() == 1
+        assert model.QtMetaboliteTable.rowCount() == 1
+
+        # Check that content is right
+        for i, element in enumerate(model.QtMetaboliteTable.header):
+            assert str(getattr(met1, element.lower())) == model.QtMetaboliteTable.item(0, i).text()
+
+        # Check that metabolite id is in table
+        assert met1.id in model.QtReactionTable.item(0, 2).text()
+
+        # Change metabolite
+        met1.id = "new_id"
+        met1.name = "new_name"
+        met1.formula = "H2O2"
+        met1.name = "None"
+        met1.charge = 1.
+        met1.compartment = "e"
+
+        # Tables are out of sync
+        for i, element in enumerate(model.QtMetaboliteTable.header):
+            assert str(getattr(met1, element.lower())) != model.QtMetaboliteTable.item(0, i).text()
+
+        # Check reaction table out of sync
+        assert react1.id not in model.QtReactionTable.item(0, 2).text()
+
+        update_metabolites(model, [met1])
+
+        # Metabolite table updated
+        for i, element in enumerate(model.QtMetaboliteTable.header):
+            assert str(getattr(met1, element.lower())) == model.QtMetaboliteTable.item(0, i).text()
+
+        # Reaction table updated
+        assert met1.id in model.QtReactionTable.item(0, 2).text()

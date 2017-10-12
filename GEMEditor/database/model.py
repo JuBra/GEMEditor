@@ -1,17 +1,16 @@
 import logging
 import re
 from collections import defaultdict
-from PyQt5.QtWidgets import QMessageBox, QApplication, QProgressDialog, QDialogButtonBox
+from PyQt5.QtWidgets import QMessageBox, QApplication, QProgressDialog
 from PyQt5 import QtSql
-from GEMEditor.database.create import create_database_de_novo, get_database_connection
+from GEMEditor.database.create import get_database_connection
 from GEMEditor.database.base import DatabaseWrapper
 from GEMEditor.database.match import ManualMatchDialog
 from GEMEditor.database.query import AnnotationSettingsDialog
-from GEMEditor.base.functions import invert_mapping, get_annotation_to_item_map, generate_copy_id
 from GEMEditor import formula_validator
 
 
-def get_metabolite_to_entry_mapping(model, progress, parent=None):
+def update_metabolite_database_mapping(model, progress, parent=None):
     """ Map all metabolites to database entries
 
     Parameters
@@ -24,9 +23,6 @@ def get_metabolite_to_entry_mapping(model, progress, parent=None):
     dict
     """
 
-    # Resulting metabolite to database mapping
-    mapping = dict()
-
     # Setup database connection
     database = DatabaseWrapper()
 
@@ -36,9 +32,7 @@ def get_metabolite_to_entry_mapping(model, progress, parent=None):
 
     # Run the annotation
     for i, metabolite in enumerate(model.metabolites):
-        if progress.wasCanceled():
-            # Map all remaining items to None
-            mapping[metabolite] = None
+        if progress.wasCanceled() or metabolite in model.database_mapping:
             continue
 
         # Update progress if not cancelled
@@ -64,17 +58,18 @@ def get_metabolite_to_entry_mapping(model, progress, parent=None):
 
         # Add found entries to mapping
         if len(entries) == 1:
-            mapping[metabolite] = entries.pop()
+            model.database_mapping[metabolite] = entries.pop()
         elif len(entries) > 1:
-            mapping[metabolite] = list(entries)
+            model.database_mapping[metabolite] = list(entries)
         else:
-            mapping[metabolite] = None
+            model.database_mapping[metabolite] = None
 
     # Close
     database.close()
 
     # Get unique mapping for multiple entries
-    ambiguous_matches = dict(item for item in mapping.items() if isinstance(item[1], list))
+    ambiguous_matches = dict(item for item in model.database_mapping.items()
+                             if isinstance(item[1], list))
 
     # Manual match ambiguous items
     if not progress.wasCanceled() and ambiguous_matches:
@@ -82,9 +77,7 @@ def get_metabolite_to_entry_mapping(model, progress, parent=None):
         dialog.exec_()
 
         # Add manually matched entries
-        mapping.update(dialog.manual_mapped)
-
-    return mapping
+        model.database_mapping.update(dialog.manual_mapped)
 
 
 def get_reaction_to_entry_mapping(metabolite_to_db_mapping, progress, parent=None):
@@ -102,33 +95,26 @@ def run_auto_annotation(model, progress, parent):
 
     Returns
     -------
-
+    list
     """
 
-    # Mapping metabolites to database entries
-    metabolite_database_mapping = get_metabolite_to_entry_mapping(model, progress, parent)
-
-    # Shortcut if process cancelled by user
-    if progress.wasCanceled():
+    # Check prerequisites
+    if not model or progress.wasCanceled():
         return
 
-    # Set mapping to model
-    model.database_mapping = metabolite_database_mapping
+    # Check that all metabolites have been mapped
+    if any([m not in model.database_mapping for m in model.metabolites]):
+        update_metabolite_database_mapping(model, progress, parent)
 
-    # Get possible resources
-    database = DatabaseWrapper()
-    metabolite_resources = database.get_miriam_collections()
-    reaction_resources = database.get_miriam_collections(type="reaction")
+        # Return if user cancelled during mapping metabolites
+        if progress.wasCanceled():
+            return
 
-    # Generate display name to miriam collection mapping
-    metabolite_mapping = dict((row['name'], row['miriam_collection']) for row in metabolite_resources)
-    reaction_mapping = dict((row['name'], row['miriam_collection']) for row in reaction_resources)
-
-    # Let the user which annotations to add and which attributes to update from the database
-    dialog = AnnotationSettingsDialog(metabolite_mapping, reaction_mapping, parent)
+    # Let the user which annotations to add and
+    # which attributes to update from the database
+    dialog = AnnotationSettingsDialog(parent)
     if not dialog.exec_():
-        # Cancelled by user
-        database.close()
+        # Dialog cancelled by user
         return
 
     # Get user choice
@@ -136,79 +122,63 @@ def run_auto_annotation(model, progress, parent):
 
     # Make sure anything has been selected for update
     if not any(settings.values()):
-        database.close()
         return
 
+    # Keep track of updated metabolites in order to update corresponding reactions as well
+    updated_metabolites = {"annotations": set(),
+                           "others": set()}
+
+    # Update progress dialog
     progress.setLabelText("Updating metabolites..")
     progress.setRange(0, len(model.metabolites))
 
-    # Keep track of updated metabolites in order to update corresponding reactions as well
-    updated_metabolites = []
-    # Keep track of reactions that need to be updated
-    update_reactions = set()
+    # Run annotation
+    database = DatabaseWrapper()
 
-    for row, metabolite in enumerate(model.QtMetaboliteTable.get_items()):
+    for i, metabolite in enumerate(model.metabolites):
         if progress.wasCanceled():
             break
-        progress.setValue(row)
+        else:
+            progress.setValue(i)
         QApplication.processEvents()
 
-        entry = metabolite_database_mapping[metabolite]
-        if entry is None:
+        # Get database id from mapping
+        entry_id = model.database_mapping[metabolite]
+        if not isinstance(entry_id, int):
             # No entry found in database for metabolite
             continue
-        elif isinstance(entry, int):
-            # Metabolite has been mapped to a database entry
-            annotations = database.get_annotations_from_id(entry, "Metabolite")
 
-            # Only add the annotations for the databases that have been selected by the user
-            filtered_annotations = [x for x in annotations if x.collection in settings["metabolite_resources"]]
-            metabolite.annotation.update(filtered_annotations)
+        # Update annotations from database
+        annotations = set(database.get_annotations_from_id(entry_id,
+                                                           "Metabolite"))
+        if annotations - metabolite.annotation:
+            # There are new annotations
+            metabolite.annotation.update(annotations)
+            updated_metabolites["annotations"].add(metabolite)
+
+        entry_metabolite = database.get_metabolite_from_id(entry_id)
 
         # Update charge formula
-        if settings["formula"] or settings["charge"]:
-            entry_metabolite = database.get_metabolite_from_id(entry)
+        if settings["formula_charge"]:
             formula, charge = entry_metabolite.formula, entry_metabolite.charge
 
-            if settings["formula"] and formula and re.match(formula_validator, formula):
-                metabolite.formula = formula
-            if settings["charge"] and charge not in (None, ""):
-                metabolite.charge = charge
+            if re.match(formula_validator, formula) and charge not in (None, ""):
+                if formula != metabolite.formula or charge != metabolite.charge:
+                    metabolite.formula = formula
+                    metabolite.charge = charge
+                    updated_metabolites["others"].add(metabolite)
 
-            updated_metabolites.append((row, metabolite))
-            update_reactions.update(metabolite.reactions)
-
-    # Update metabolite table entries
-    progress.setLabelText("Updating metabolite table..")
-    progress.setRange(0, len(updated_metabolites))
-    model.QtMetaboliteTable.blockSignals(True)
-
-    for i, row_met_tuple in enumerate(updated_metabolites):
-        progress.setValue(i)
-        QApplication.processEvents()
-        row, metabolite = row_met_tuple
-        model.QtMetaboliteTable.update_row_from_item(metabolite, row)
-    model.QtMetaboliteTable.blockSignals(False)
-    model.QtMetaboliteTable.all_data_changed()
-
-    # Map reactions to row
-    reaction_row_map = dict((reaction, i) for i, reaction in enumerate(model.QtReactionTable.get_items()))
-
-    # Set progress dialog
-    progress.setLabelText("Updating reaction table..")
-    progress.setRange(0, len(update_reactions))
-
-    # Update reactions
-    model.QtReactionTable.blockSignals(True)
-    for i, reaction in enumerate(update_reactions):
-        progress.setValue(i)
-        QApplication.processEvents()
-        reaction.update_balancing_status()
-        model.QtReactionTable.update_row_from_item(reaction, reaction_row_map[reaction])
-    model.QtReactionTable.blockSignals(False)
-    model.QtReactionTable.all_data_changed()
+        # Update name
+        if settings["update_metabolite_name"] and entry_metabolite.name != metabolite.name:
+            metabolite.name = entry_metabolite.name
+            updated_metabolites["others"].add(metabolite)
 
     database.close()
+
+    # Update tables
+    update_metabolites(model, updated_metabolites["others"], progress)
+
+    return updated_metabolites["annotations"].union(updated_metabolites["others"])
 
 
 def run_check_consistency(model, parent):
@@ -295,3 +265,69 @@ def run_check_consistency(model, parent):
     progress.close()
 
     return errors
+
+
+def update_metabolites(model, metabolites, progress=None):
+    """ Update the metabolite entries in the QTable
+
+    Parameters
+    ----------
+    model: GEMEditor.cobraClasses.Model
+    metabolites: iterable
+    progress: QProgressDialog
+
+    Returns
+    -------
+
+    """
+    if not model or not metabolites:
+        return
+
+    if progress is not None:
+        progress.setLabelText("Updating metabolite tables..")
+        progress.setRange(0, len(model.metabolites))
+
+    # Block updates for speed
+    model.QtMetaboliteTable.blockSignals(True)
+    model.QtReactionTable.blockSignals(True)
+
+    # Get mapping of tables
+    met_mapping = model.QtMetaboliteTable.get_item_to_row_mapping()
+    react_mapping = model.QtReactionTable.get_item_to_row_mapping()
+
+    reactions_to_update = set()
+
+    for i, metabolite in enumerate(metabolites):
+
+        # Update progress dialog
+        if progress:
+            progress.setValue(i)
+            QApplication.processEvents()
+
+        # Update metabolite
+        model.QtMetaboliteTable.update_row_from_item(metabolite, met_mapping[metabolite])
+        reactions_to_update.update(model.reactions)
+
+    if progress:
+        progress.setLabelText("Updating reaction tables..")
+        progress.setRange(0, len(reactions_to_update))
+
+    for i, reaction in enumerate(reactions_to_update):
+
+        # Update progress dialog
+        if progress:
+            progress.setValue(i)
+            QApplication.processEvents()
+
+        # Update reaction
+        reaction.update_balancing_status()
+        model.QtReactionTable.update_row_from_item(reaction, react_mapping[reaction])
+
+    # Unblock updates
+    model.QtMetaboliteTable.blockSignals(False)
+    model.QtReactionTable.blockSignals(False)
+
+    # Update table
+    model.QtMetaboliteTable.all_data_changed()
+    model.QtReactionTable.all_data_changed()
+

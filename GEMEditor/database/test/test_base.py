@@ -1,5 +1,5 @@
 import pytest
-from GEMEditor.database.base import DatabaseWrapper, valid_database
+from GEMEditor.database.base import DatabaseWrapper
 from GEMEditor.database.tables import setup_empty_database
 from GEMEditor.database import miriam_databases
 

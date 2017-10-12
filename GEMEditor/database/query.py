@@ -94,20 +94,19 @@ class DialogDatabaseSelection(CustomStandardDialog):
 
 
 class AnnotationSettingsDialog(QDialog, Ui_AnnotationSettingsDialog):
-    def __init__(self, metabolite_resources, reaction_resources, parent=None):
+
+    def __init__(self, parent=None):
         """ Setup the dialog
 
         Parameters
         ----------
-        reaction_resources: dict - Mapping {resource_name: resource_id}
-        metabolite_resources: dict - Mapping {resource_name: resource_id}
-        parent:
+        parent: QWidget
         """
 
         super(AnnotationSettingsDialog, self).__init__(parent)
         self.setupUi(self)
-        self.metabolite_widget = MetaboliteSettingWidget(metabolite_resources)
-        self.reaction_widget = ReactionSettingWidget(reaction_resources)
+        self.metabolite_widget = factory_setting_widget("metabolite", self)
+        self.reaction_widget = factory_setting_widget("reaction", self)
 
         self.setup_layout()
 
@@ -118,13 +117,13 @@ class AnnotationSettingsDialog(QDialog, Ui_AnnotationSettingsDialog):
 
         # Hide reaction annotations
         self.reaction_widget.groupBox_attributes.hide()
-        self.metabolite_widget.checkBox_use_name.hide()
         self.metabolite_widget.lineEdit_prefix.hide()
         self.metabolite_widget.label.hide()
 
     def get_settings(self):
         settings = dict()
         settings["formula_charge"] = self.metabolite_widget.checkBox_use_formula.isChecked()
+        settings["update_metabolite_name"] = self.metabolite_widget.checkBox_use_name.isChecked()
         settings["reaction_resources"] = self.reaction_widget.get_selected_annotations()
         settings["metabolite_resources"] = self.metabolite_widget.get_selected_annotations()
         return settings
