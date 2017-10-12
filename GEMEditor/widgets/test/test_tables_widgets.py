@@ -5,7 +5,8 @@ from GEMEditor.data_classes import *
 from GEMEditor.evidence_class import Evidence
 from collections import OrderedDict
 from unittest.mock import Mock
-from PyQt5 import QtGui, QtCore
+from PyQt5 import QtGui
+from PyQt5.QtWidgets import QApplication
 import sys
 
 app = QApplication(sys.argv)
@@ -25,14 +26,13 @@ class TestCompartmentTable:
         assert self.table.rowCount() == 0
 
     def test_row_from_item(self):
-        input_tuple = ("c", "cytoplasm")
+        input_tuple = ("c", Compartment("c", "cytoplasm"))
         return_value = self.table.row_from_item(input_tuple)
-        for i, x in enumerate(input_tuple):
-            assert isinstance(return_value[i], QtGui.QStandardItem)
-            assert return_value[i].text() == x
+        assert return_value[0].text() == "c"
+        assert return_value[1].text() == "cytoplasm"
 
     def test_item_from_row(self):
-        input_tuple = ("c", "cytoplasm")
+        input_tuple = ("c", Compartment("c", "cytoplasm"))
         self.table.appendRow(self.table.row_from_item(input_tuple))
         assert self.table.rowCount() == 1
         assert self.table.item_from_row(0) == input_tuple
@@ -49,13 +49,12 @@ class TestReactionTable:
         self.test_subsystem = "test_subsystemm"
         self.test_ub = 1500.5
         self.test_lb = 500.5
-        self.test_obj_coeff = 3.5
+        self.test_obj_coeff = 0.
         self.test_item = Reaction(id=self.test_id,
                                   name=self.test_name,
                                   subsystem=self.test_subsystem,
                                   upper_bound=self.test_ub,
-                                  lower_bound=self.test_lb,
-                                  objective_coefficient=self.test_obj_coeff)
+                                  lower_bound=self.test_lb)
 
     def test_setup(self):
         # Test header settings
@@ -74,7 +73,7 @@ class TestReactionTable:
         assert return_values[3].text() == self.test_subsystem
         assert return_values[4].text() == str(self.test_lb)
         assert return_values[5].text() == str(self.test_ub)
-        assert return_values[6].text() == str(self.test_obj_coeff)
+        assert float(return_values[6].text()) == self.test_obj_coeff
 
     def test_update_row_(self):
         assert self.table.rowCount() == 0
@@ -86,7 +85,7 @@ class TestReactionTable:
         assert self.table.item(0, 3).text() == self.test_subsystem
         assert self.table.item(0, 4).text() == str(self.test_lb)
         assert self.table.item(0, 5).text() == str(self.test_ub)
-        assert self.table.item(0, 6).text() == str(self.test_obj_coeff)
+        assert float(self.table.item(0, 6).text()) == self.test_obj_coeff
 
     def test_item_from_row(self):
         self.table.update_row_from_item(self.test_item)
@@ -396,7 +395,7 @@ class TestModelTestsTable:
 
     def test_setup(self):
         assert isinstance(self.model_test, ModelTest)
-        assert self.setting in self.model_test.settings
+        assert self.setting in self.model_test.reaction_settings
         assert self.outcome in self.model_test.outcomes
 
     def test_row_from_item(self):
@@ -891,6 +890,16 @@ class TestElementTable:
         assert self.table.item(2, 0).text() == "2"
         assert self.table.item(2, 0).link == 2
 
+    def test_get_item_to_row_mapping(self):
+        self.table.appendRow(self.expected_items)
+        additional_item = Metabolite("test")
+        self.table.appendRow([LinkedItem("test", additional_item),
+                              LinkedItem("None", None)])
+
+        assert self.table.rowCount() == 2
+        assert self.table.get_item_to_row_mapping() == {additional_item: 1,
+                                                        self.item1_obj: 0}
+
 
 class TestLinkedItem:
 
@@ -960,43 +969,7 @@ class TestEvidenceItemsTable:
         assert self.table.item_from_row(0) is reaction
 
 
-class TestEvidenceReferenceTable:
-
-    @pytest.fixture(autouse=True)
-    def setup_items(self):
-        self.table = EvidenceReferenceTable()
-
-    @pytest.fixture()
-    def setup_reference(self):
-        self.reference = Reference()
-        self.reference.authors.append(Author("Lastname", "Firstname", "F"))
-        self.reference.year = "1975"
-
-    def test_empty_table(self):
-        assert issubclass(EvidenceReferenceTable, ElementTable)
-        assert self.table.rowCount() == 0
-
-        for i, text in enumerate(self.table.header):
-            assert self.table.horizontalHeaderItem(i).text() == text
-
-    @pytest.mark.usefixtures("setup_reference")
-    def test_row_from_item(self):
-        return_values = self.table.row_from_item(self.reference)
-
-        assert len(return_values) == len(self.table.header) == 1
-        assert isinstance(return_values[0], LinkedItem)
-        assert return_values[0].link is self.reference
-        assert return_values[0].text() == self.reference.reference_string()
-
-    @pytest.mark.usefixtures("setup_reference")
-    def test_item_from_row(self):
-        assert self.table.rowCount() == 0
-        self.table.update_row_from_item(self.reference)
-        assert self.table.rowCount() == 1
-        assert self.table.item_from_row(0) is self.reference
-
-
-class TestReactionReferenceTable:
+class TestEvidenceTable:
 
     @pytest.fixture(autouse=True)
     def setup_items(self):
@@ -1011,25 +984,22 @@ class TestReactionReferenceTable:
 
     def test_row_from_item(self):
         gene1 = Gene("test id1")
-        gene2 = Gene("test id2")
-        evidence = Evidence()
-        evidence.type = "Test evidence"
-        evidence.links.append(gene1)
+        reaction1 = Reaction("react1")
+        evidence = Evidence(entity=gene1,
+                            target=reaction1,
+                            assertion="Catalyze reaction",
+                            eco="ECO:001")
 
         return_values = self.table.row_from_item(evidence)
-        assert len(return_values) == 2
+        assert len(return_values) == len(self.table.header)
         assert isinstance(return_values[0], LinkedItem)
         assert return_values[0].link is evidence
-        assert return_values[0].text() == evidence.type
-
-        assert isinstance(return_values[1], LinkedItem)
-        assert return_values[1].link is evidence
-        assert return_values[1].text() == gene1.id
-
-        evidence.links.append(gene2)
-        return_values = self.table.row_from_item(evidence)
-
-        assert return_values[1].text() == gene1.id+";"+gene2.id
+        assert return_values[0].text() == gene1.id
+        assert return_values[1].text() == evidence.assertion
+        assert return_values[2].text() == evidence.eco
+        assert return_values[3].text() == str(evidence.link)
+        assert return_values[4].text() == evidence.comment
+        assert return_values[5].text() == ""
 
     def get_items(self):
         evidence1 = Evidence()

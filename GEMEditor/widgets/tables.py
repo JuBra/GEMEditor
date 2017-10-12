@@ -85,6 +85,9 @@ class ElementTable(QStandardItemModel):
     def get_items(self):
         return [self.item_from_row(r) for r in range(self.rowCount())]
 
+    def get_item_to_row_mapping(self):
+        return dict((self.item_from_row(r), r) for r in range(self.rowCount()))
+
     def all_data_changed(self):
         self.dataChanged.emit(self.index(0, 0),
                               self.index(self.rowCount()+1,
