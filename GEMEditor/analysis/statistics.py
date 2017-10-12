@@ -1,5 +1,5 @@
 import logging
-from PyQt5.QtWidgets import QDialog, QGridLayout, QGroupBox, QLabel, QApplication, QFileDialog, QDialogButtonBox
+from PyQt5.QtWidgets import QDialog, QGridLayout, QGroupBox, QLabel, QApplication, QFileDialog, QDialogButtonBox, QPushButton
 from PyQt5 import QtCore
 from math import floor
 from collections import OrderedDict
@@ -19,7 +19,9 @@ class DisplayStatisticsDialog(QDialog, Ui_Dialog):
         self.setupUi(self)
         self.statistics = statistics
         self.setWindowTitle("Statistics")
-        self.buttonBox.accepted.connect(self.save_statistics)
+        self.save_button = QPushButton("Save")
+        self.buttonBox.addButton(self.save_button, QDialogButtonBox.ActionRole)
+        self.save_button.clicked.connect(self.save_statistics)
         self.update_statistics()
 
     def update_statistics(self):
