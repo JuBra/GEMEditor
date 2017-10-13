@@ -10,7 +10,8 @@ from GEMEditor.ui.ModelAnnotationDisplayWidget import Ui_AnnotationDisplayWidget
 from GEMEditor.widgets.tables import AnnotationTable, LinkedItem, StoichiometryTable, EvidenceTable, ReactionSettingsTable, GeneSettingsTable, OutcomesTable, LinkedReferenceTable
 from GEMEditor.dialogs.standard import MetaboliteSelectionDialog, GeneSelectionDialog, ReactionSelectionDialog, ReferenceSelectionDialog
 from GEMEditor.widgets.delegates import FloatInputDelegate, ComboBoxDelegate
-from GEMEditor.cobraClasses import reaction_balance, Gene, GeneGroup, iterate_tree, Reaction
+from GEMEditor.cobraClasses import Gene, GeneGroup, iterate_tree, Reaction
+from GEMEditor.base.functions import reaction_balance
 from GEMEditor.evidence_class import Evidence
 from GEMEditor.data_classes import Outcome, ReactionSetting, GeneSetting
 from GEMEditor.ui.TableDisplayWidgetAddDel import Ui_TableDisplayWidgetAddDel

@@ -1,6 +1,7 @@
 from os.path import join, abspath, dirname, isfile
 from PyQt5 import QtCore, QtSql
 from PyQt5.QtWidgets import QProgressDialog, QMessageBox
+from collections import namedtuple
 import re
 import configparser
 
@@ -15,6 +16,9 @@ __projectpage__ = config.get("DEFAULT", "project_url")
 database_path = abspath(join(dirname(abspath(__file__)), "database", "modelling.db"))
 regex_formula = r"^([A-Z][a-z]?\d*)*$"
 formula_validator = re.compile(regex_formula)
+
+
+GlobalSetting = namedtuple("GlobalSetting", ["string", "default_value"])
 
 # Global default settings which are stored in settings
 DB_NEW_MET_PREFIX = "New"    # Prefix used for generating metabolite IDs

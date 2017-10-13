@@ -1,6 +1,6 @@
 import logging
 from lxml.etree import SubElement
-from GEMEditor.cobraClasses import Gene, GeneGroup, Reaction, reaction_balance
+from GEMEditor.cobraClasses import Gene, GeneGroup, Reaction
 from GEMEditor.rw.annotation import annotate_xml_from_model, annotate_element_from_xml
 from GEMEditor.rw import *
 from cobra.io.sbml3 import strnum, SBML_DOT, clip

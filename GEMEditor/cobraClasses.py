@@ -4,13 +4,14 @@ from cobra.core import Gene as cobraGene
 from cobra.core import Metabolite as cobraMetabolite
 from cobra.core import Model as cobraModel
 from weakref import WeakValueDictionary
-from PyQt5 import QtGui, QtCore
-from collections import defaultdict
+from PyQt5 import QtCore
+from PyQt5.QtWidgets import QApplication
 from GEMEditor.base.functions import generate_copy_id
 from GEMEditor.widgets.tables import ReactionTable, MetaboliteTable, GeneTable, ReferenceTable, ModelTestTable, LinkedItem
 from GEMEditor.data_classes import ReactionSetting, CleaningDict, Compartment
 from GEMEditor.base_classes import BaseEvidenceElement
-from six import string_types, iteritems
+from GEMEditor.base.functions import reaction_balance
+from six import string_types
 from difflib import SequenceMatcher
 import uuid
 
@@ -493,6 +494,85 @@ class Model(QtCore.QObject, BaseEvidenceElement, cobraModel):
             reference.prepare_deletion()
             del self.references[reference.id]
 
+    def gem_update_metabolites(self, metabolites, progress=None):
+        """ Update the metabolite entries in the QTable
+
+        Parameters
+        ----------
+        metabolites: iterable
+        progress: QProgressDialog
+
+        Returns
+        -------
+
+        """
+        if not metabolites:
+            return
+
+        if progress is not None:
+            progress.setLabelText("Updating metabolite tables..")
+            progress.setRange(0, len(self.metabolites))
+
+        # Block updates for speed
+        self.QtMetaboliteTable.blockSignals(True)
+
+        # Get mapping of tables
+        met_mapping = self.QtMetaboliteTable.get_item_to_row_mapping()
+
+        reactions_to_update = set()
+
+        for i, metabolite in enumerate(metabolites):
+
+            # Update progress dialog
+            if progress:
+                progress.setValue(i)
+                QApplication.processEvents()
+
+            # Update metabolite
+            self.QtMetaboliteTable.update_row_from_item(metabolite, met_mapping[metabolite])
+            reactions_to_update.update(self.reactions)
+
+        # Update table
+        self.QtMetaboliteTable.blockSignals(False)
+        self.QtMetaboliteTable.all_data_changed()
+
+        # Run update reactions
+        self.gem_update_reactions(reactions_to_update, progress)
+
+    def gem_update_reactions(self, reactions, progress=None):
+        """ Update the reaction entries in the QTable
+
+        Parameters
+        ----------
+        reactions: iterable
+        progress: QProgressDialog
+
+        Returns
+        -------
+
+        """
+
+        self.QtReactionTable.blockSignals(True)
+        react_mapping = self.QtReactionTable.get_item_to_row_mapping()
+
+        if progress:
+            progress.setLabelText("Updating reaction tables..")
+            progress.setRange(0, len(reactions))
+
+        for i, reaction in enumerate(reactions):
+
+            # Update progress dialog
+            if progress:
+                progress.setValue(i)
+                QApplication.processEvents()
+
+            # Update reaction
+            reaction.update_balancing_status()
+            self.QtReactionTable.update_row_from_item(reaction, react_mapping[reaction])
+
+        self.QtReactionTable.blockSignals(False)
+        self.QtReactionTable.all_data_changed()
+
     def close(self):
         self.dialogs.remove_all()
 
@@ -557,88 +637,6 @@ def iterate_tree(standard_item, data_item):
             new_item.setEditable(False)
             iterate_tree(new_item, element)
             standard_item.setChild(n, new_item)
-
-
-def check_charge_balance(metabolites):
-    """ Check charge balance of the reaction """
-    # Check that charge is set for all metabolites
-    if not all(x.charge is not None for x in metabolites.keys()):
-        return None
-    else:
-        return sum([metabolite.charge * coefficient for metabolite, coefficient in iteritems(metabolites)])
-
-
-def check_element_balance(metabolites):
-    """ Check that the reaction is elementally balanced """
-    # Check that a formula is set for all metabolites
-    if not all(x.formula for x in metabolites.keys()):
-        return None
-    else:
-        metabolite_elements = defaultdict(int)
-        for metabolite, coefficient in iteritems(metabolites):
-            for element, amount in iteritems(metabolite.elements):
-                metabolite_elements[element] += coefficient * amount
-        return {k: v for k, v in iteritems(metabolite_elements) if v != 0}
-
-
-def reaction_string(stoichiometry, use_metabolite_names=True):
-    """Generate the reaction string """
-
-    attrib = "id"
-    if use_metabolite_names:
-        attrib = "name"
-
-    educts = [(str(abs(value)), getattr(key, attrib)) for key, value in iteritems(stoichiometry) if value < 0.]
-    products = [(str(abs(value)), getattr(key, attrib)) for key, value in iteritems(stoichiometry) if value > 0.]
-
-    return " + ".join([" ".join(x) for x in educts])+" --> "+" + ".join([" ".join(x) for x in products])
-
-
-def unbalanced_metabolites_to_string(in_dict):
-    substrings = ['{0}: {1:.1f}'.format(*x) for x in in_dict.items()]
-    return "<br>".join(substrings)
-
-
-def reaction_balance(metabolites):
-    """ Check the balancing status of the stoichiometry
-
-    Parameters
-    ----------
-    metabolites : dict - Dictionary of metabolites with stoichiometric coefficnets
-
-    Returns
-    -------
-    charge_str : str or bool
-    element_str : str or bool
-    balanced : str or bool
-    """
-    element_result = check_element_balance(metabolites)
-    charge_result = check_charge_balance(metabolites)
-
-    if charge_result is None:
-        charge_str = "Unknown"
-    elif charge_result == 0:
-        charge_str = "OK"
-    else:
-        charge_str = str(charge_result)
-
-    if element_result is None:
-        element_str = "Unknown"
-    elif element_result == {}:
-        element_str = "OK"
-    else:
-        element_str = unbalanced_metabolites_to_string(element_result)
-
-    if len(metabolites) < 2:
-        balanced = None
-    elif element_str == "OK" and charge_str == "OK":
-        balanced = True
-    elif element_str not in ("OK", "Unknown") or charge_str not in ("OK", "Unknown"):
-        balanced = False
-    else:
-        balanced = "Unknown"
-
-    return charge_str, element_str, balanced
 
 
 def find_duplicate_metabolite(metabolite, collection, same_compartment=True, cutoff=0., ignore_charge=False):

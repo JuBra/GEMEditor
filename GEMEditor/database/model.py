@@ -176,7 +176,7 @@ def run_auto_annotation(model, progress, parent):
     database.close()
 
     # Update tables
-    update_metabolites(model, updated_metabolites["others"], progress)
+    model.gem_update_metabolites(updated_metabolites["others"], progress)
 
     return updated_metabolites["annotations"].union(updated_metabolites["others"])
 
@@ -266,68 +266,4 @@ def run_check_consistency(model, parent):
 
     return errors
 
-
-def update_metabolites(model, metabolites, progress=None):
-    """ Update the metabolite entries in the QTable
-
-    Parameters
-    ----------
-    model: GEMEditor.cobraClasses.Model
-    metabolites: iterable
-    progress: QProgressDialog
-
-    Returns
-    -------
-
-    """
-    if not model or not metabolites:
-        return
-
-    if progress is not None:
-        progress.setLabelText("Updating metabolite tables..")
-        progress.setRange(0, len(model.metabolites))
-
-    # Block updates for speed
-    model.QtMetaboliteTable.blockSignals(True)
-    model.QtReactionTable.blockSignals(True)
-
-    # Get mapping of tables
-    met_mapping = model.QtMetaboliteTable.get_item_to_row_mapping()
-    react_mapping = model.QtReactionTable.get_item_to_row_mapping()
-
-    reactions_to_update = set()
-
-    for i, metabolite in enumerate(metabolites):
-
-        # Update progress dialog
-        if progress:
-            progress.setValue(i)
-            QApplication.processEvents()
-
-        # Update metabolite
-        model.QtMetaboliteTable.update_row_from_item(metabolite, met_mapping[metabolite])
-        reactions_to_update.update(model.reactions)
-
-    if progress:
-        progress.setLabelText("Updating reaction tables..")
-        progress.setRange(0, len(reactions_to_update))
-
-    for i, reaction in enumerate(reactions_to_update):
-
-        # Update progress dialog
-        if progress:
-            progress.setValue(i)
-            QApplication.processEvents()
-
-        # Update reaction
-        reaction.update_balancing_status()
-        model.QtReactionTable.update_row_from_item(reaction, react_mapping[reaction])
-
-    # Unblock updates
-    model.QtMetaboliteTable.blockSignals(False)
-    model.QtReactionTable.blockSignals(False)
-
-    # Update table
-    model.QtMetaboliteTable.all_data_changed()
-    model.QtReactionTable.all_data_changed()
 
