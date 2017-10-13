@@ -115,6 +115,7 @@
      <addaction name="actionFin_duplicated_metabolites"/>
      <addaction name="actionFind_duplicated_reactions"/>
      <addaction name="separator"/>
+     <addaction name="actionUpdate_formulas"/>
      <addaction name="actionCheck_evidences"/>
      <addaction name="actionPrune_Gene_Trees"/>
      <addaction name="separator"/>
@@ -259,7 +260,7 @@
   </action>
   <action name="actionAdd_Metabolite">
    <property name="icon">
-    <iconset resource="../../icons/icons.qrc">
+    <iconset>
      <normaloff>:/add_metabolite</normaloff>:/add_metabolite</iconset>
    </property>
    <property name="text">
@@ -364,6 +365,11 @@
   <action name="actionPFBA">
    <property name="text">
     <string>pFBA</string>
+   </property>
+  </action>
+  <action name="actionUpdate_formulas">
+   <property name="text">
+    <string>Update formulas</string>
    </property>
   </action>
  </widget>

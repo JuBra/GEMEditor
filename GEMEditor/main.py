@@ -14,6 +14,7 @@ from GEMEditor.ui.MainWindow import Ui_MainWindow
 from GEMEditor.cobraClasses import Model, prune_gene_tree
 from GEMEditor.analysis import group_duplicate_reactions
 from GEMEditor.analysis.statistics import run_all_statistics, DisplayStatisticsDialog
+from GEMEditor.analysis.formula import update_formulae_iteratively
 from GEMEditor.connect.checkversion import UpdateCheck
 from GEMEditor.database.create import create_database_de_novo, database_exists
 from GEMEditor.database.model import run_auto_annotation, run_check_consistency, update_metabolite_database_mapping
@@ -90,6 +91,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.actionAdd_batch.triggered.connect(self.add_batch_evidences)
         self.actionBrowsePubmed.triggered.connect(self.browsePubmedSlot)
         self.actionStatistics.triggered.connect(self.show_statistics)
+        self.actionUpdate_formulas.triggered.connect(self.quality_update_formulae_from_context)
 
         # MetaNetX menu
         self.actionAdd_Metabolite.triggered.connect(self.add_metabolite_from_database)
@@ -377,6 +379,27 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         dialog = DialogDatabaseSelection(model=self.model, data_type="reaction", parent=self)
         dialog.show()
+
+    @QtCore.pyqtSlot()
+    def quality_update_formulae_from_context(self):
+        if not self.model:
+            return
+
+        # Warn user about underlying assumptions
+        answer = QMessageBox().question(None, "Warning",
+                                        "This method assumes that the stoichiometries of the reactions are correct.\n"
+                                        "Erroneous formulas will be added to the metabolites if this is not the case.\n"
+                                        "Do you want to run this update anyway?")
+        if answer != QMessageBox.Yes:
+            return
+
+        updated_metabolites = update_formulae_iteratively(self.model)
+        if updated_metabolites:
+            self.model.gem_update_metabolites(updated_metabolites)
+            QMessageBox().information(None, "Metabolites updated",
+                                      "{0!s} metabolites updated.".format(len(updated_metabolites)))
+        else:
+            QMessageBox().information(None, "No change", "No metabolites updated.")
 
     def set_model(self, model, path):
         self.model = model

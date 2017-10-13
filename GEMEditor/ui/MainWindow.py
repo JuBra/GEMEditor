@@ -150,6 +150,8 @@ class Ui_MainWindow(object):
         self.actionFBA.setObjectName("actionFBA")
         self.actionPFBA = QtWidgets.QAction(MainWindow)
         self.actionPFBA.setObjectName("actionPFBA")
+        self.actionUpdate_formulas = QtWidgets.QAction(MainWindow)
+        self.actionUpdate_formulas.setObjectName("actionUpdate_formulas")
         self.menuFile.addAction(self.actionNewModel)
         self.menuFile.addAction(self.actionOpenModel)
         self.menuFile.addAction(self.actionLoadTestModel)
@@ -162,6 +164,7 @@ class Ui_MainWindow(object):
         self.menuQuality_Control.addAction(self.actionFin_duplicated_metabolites)
         self.menuQuality_Control.addAction(self.actionFind_duplicated_reactions)
         self.menuQuality_Control.addSeparator()
+        self.menuQuality_Control.addAction(self.actionUpdate_formulas)
         self.menuQuality_Control.addAction(self.actionCheck_evidences)
         self.menuQuality_Control.addAction(self.actionPrune_Gene_Trees)
         self.menuQuality_Control.addSeparator()
@@ -249,6 +252,7 @@ class Ui_MainWindow(object):
         self.actionFin_duplicated_metabolites.setText(_translate("MainWindow", "Find duplicated metabolites"))
         self.actionFBA.setText(_translate("MainWindow", "FBA"))
         self.actionPFBA.setText(_translate("MainWindow", "pFBA"))
+        self.actionUpdate_formulas.setText(_translate("MainWindow", "Update formulas"))
 
 from GEMEditor.tabs import AnalysesTab, GeneTab, MetaboliteTab, ModelInfoTab, ModelTestsTab, ReactionTab, ReferenceTab
-from GEMEditor.icons_rc import *
+import icons_rc

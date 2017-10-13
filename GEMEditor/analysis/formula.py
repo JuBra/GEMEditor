@@ -28,11 +28,17 @@ def update_formula_from_neighborhood(metabolite):
         else:
             putative_formula = ""
             elemental_imbalance = check_element_balance(reaction.metabolites)
+
+            # Only update formulas if the coefficients are integers
+            if any(v % 1 != 0. for v in elemental_imbalance.values()):
+                continue
+
+            # Generate putative formula
             for key, count in sorted(elemental_imbalance.items(), key=lambda x: x[0]):
                 if abs(count) == 1:
                     count_str = ""
                 else:
-                    count_str = str(abs(count))
+                    count_str = str(int(abs(count)))
 
                 putative_formula += "".join((key, count_str))
 
