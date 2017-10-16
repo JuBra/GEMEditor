@@ -100,7 +100,10 @@ class Annotation:
             return False
 
     def __hash__(self):
-        return hash((self.collection, self.identifier, self.type))
+        return hash((self._collection, self._identifier, self._type))
+
+    def __str__(self):
+        return "Annotation({0!s}, {1!s})".format(self._collection, self._identifier)
 
 
 class Author(namedtuple("Author", ["lastname", "firstname", "initials"])):

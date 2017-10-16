@@ -158,6 +158,7 @@
     <addaction name="separator"/>
     <addaction name="actionAuto_annotate"/>
     <addaction name="actionCheck_consistency"/>
+    <addaction name="actionUpdate_mapping"/>
     <addaction name="separator"/>
     <addaction name="actionUpdate_database"/>
    </widget>
@@ -370,6 +371,11 @@
   <action name="actionUpdate_formulas">
    <property name="text">
     <string>Update formulas</string>
+   </property>
+  </action>
+  <action name="actionUpdate_mapping">
+   <property name="text">
+    <string>Update mapping</string>
    </property>
   </action>
  </widget>

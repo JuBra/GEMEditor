@@ -98,6 +98,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.actionAdd_Reactions.triggered.connect(self.add_reaction_from_database)
         self.actionAuto_annotate.triggered.connect(self.auto_annotate)
         self.actionCheck_consistency.triggered.connect(self.check_consistency)
+        self.actionUpdate_mapping.triggered.connect(self.database_update_mapping)
 
         self.actionUpdate_database.triggered.connect(self.update_metanetx_database)
 
@@ -302,7 +303,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         dialog.exec_()
 
     @QtCore.pyqtSlot()
-    def metanetx_update_mapping(self):
+    def database_update_mapping(self):
         """ Update the mapping of the metabolites to the database
 
         Returns
@@ -340,7 +341,15 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # Update
         if updated_items:
             QMessageBox().information(None, "Items changed",
-                                      "{} items have been updated!".format(len(updated_items)))
+                                      "Annotations updated of:\n"
+                                      "{0!s} metabolites\n"
+                                      "{1!s} reactions\n\n"
+                                      "Attributes updated of:\n"
+                                      "{2!s} metabolites\n"
+                                      "{3!s} reactions".format(len(updated_items["metabolite_annotations"]),
+                                                               len(updated_items["reaction_annotations"]),
+                                                               len(updated_items["metabolite_attributes"]),
+                                                               len(updated_items["reaction_attributes"])))
         else:
             QMessageBox().information(None, "No change", "No items have been changed.")
 

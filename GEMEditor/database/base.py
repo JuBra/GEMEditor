@@ -92,6 +92,10 @@ query_reaction_participants_from_id = """SELECT * FROM
 LEFT JOIN metabolites 
 WHERE a.metabolite_id = metabolites.id;"""
 
+query_reaction_ids_from_participating_metabolite_ids = """SELECT DISTINCT(reaction_id) 
+FROM reaction_participants 
+WHERE metabolite_id = ?;"""
+
 
 class DatabaseWrapper:
 
@@ -315,6 +319,19 @@ class DatabaseWrapper:
 
         self.cursor.execute(query_update_resource, (int(value), resource))
         self.connection.commit()
+
+    def get_reaction_id_from_participant_ids(self, metabolite_ids):
+
+        sets = []
+        for metabolite_id in metabolite_ids:
+            self.cursor.execute(query_reaction_ids_from_participating_metabolite_ids,
+                                (metabolite_id,))
+            sets.append(set(row["reaction_id"] for row in self.cursor.fetchall()))
+
+        if sets:
+            return set.intersection(*sets)
+        else:
+            return set()
 
     @QtCore.pyqtSlot()
     def close(self):
@@ -571,7 +588,9 @@ def pyqt_database_connection(database_path=None):
     return db
 
 
-
+if __name__ == '__main__':
+    with DatabaseWrapper() as database:
+        print(database.get_reaction_id_from_participant_ids([5, 6]))
 
 
 

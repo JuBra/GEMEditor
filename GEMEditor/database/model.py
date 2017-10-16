@@ -8,6 +8,10 @@ from GEMEditor.database.base import DatabaseWrapper
 from GEMEditor.database.match import ManualMatchDialog
 from GEMEditor.database.query import AnnotationSettingsDialog
 from GEMEditor import formula_validator
+from cobra import Metabolite
+
+
+LOGGER = logging.getLogger(__name__)
 
 
 def update_metabolite_database_mapping(model, progress, parent=None):
@@ -17,11 +21,14 @@ def update_metabolite_database_mapping(model, progress, parent=None):
     ----------
     model: GEMEditor.cobraClasses.Model
     progress: QProgressDialog
+    parent: PyQt5.QtWidgets.QWidget
 
     Returns
     -------
     dict
     """
+
+    LOGGER.debug("Updating metabolite to database mapping..")
 
     # Setup database connection
     database = DatabaseWrapper()
@@ -33,6 +40,7 @@ def update_metabolite_database_mapping(model, progress, parent=None):
     # Run the annotation
     for i, metabolite in enumerate(model.metabolites):
         if progress.wasCanceled() or metabolite in model.database_mapping:
+            LOGGER.debug("Metabolite {0!s} skipped - Already mapped or progress cancelled.".format(metabolite))
             continue
 
         # Update progress if not cancelled
@@ -64,15 +72,21 @@ def update_metabolite_database_mapping(model, progress, parent=None):
         else:
             model.database_mapping[metabolite] = None
 
+        LOGGER.debug("Metabolite {0!s} mapped to {1!s}".format(metabolite,
+                                                               model.database_mapping[metabolite]))
+
     # Close
     database.close()
 
     # Get unique mapping for multiple entries
-    ambiguous_matches = dict(item for item in model.database_mapping.items()
-                             if isinstance(item[1], list))
+    # Note: check for cobra Metabolite to avoid circular dependency
+    ambiguous_matches = dict((k, v) for k, v in model.database_mapping.items()
+                             if isinstance(v, list) and isinstance(k, Metabolite))
 
     # Manual match ambiguous items
     if not progress.wasCanceled() and ambiguous_matches:
+        LOGGER.debug("There are ambiguously mapped metabolites")
+
         dialog = ManualMatchDialog(parent, unmatched_items=ambiguous_matches)
         dialog.exec_()
 
@@ -80,8 +94,91 @@ def update_metabolite_database_mapping(model, progress, parent=None):
         model.database_mapping.update(dialog.manual_mapped)
 
 
-def get_reaction_to_entry_mapping(metabolite_to_db_mapping, progress, parent=None):
-    pass
+def update_reaction_database_mapping(model, progress, parent=None):
+    """
+
+    Parameters
+    ----------
+    model: GEMEditor.cobraClasses.Model
+    progress: QProgressDialog
+    parent
+
+    Returns
+    -------
+
+    """
+
+    LOGGER.debug("Updating reaction to database mapping..")
+
+    with DatabaseWrapper() as database:
+
+        # Ignore protons when matching reactions
+        proton_entries = set()
+        for mnx_id in ("MNXM01", "MNXM1"):
+            ids = database.get_ids_from_annotation(identifier=mnx_id,
+                                                   collection="metanetx.chemical")
+            proton_entries.update(ids)
+
+        # Update progress
+        progress.setLabelText("Mapping reactions..")
+        progress.setRange(0, len(model.reactions))
+
+        # Match reactions
+        for i, reaction in enumerate(model.reactions):
+            if reaction.boundary or reaction in model.database_mapping or progress.wasCanceled():
+                LOGGER.debug("Reaction {0!s} skipped - Boundary, "
+                             "already mapped or progress cancelled.".format(reaction))
+                continue
+
+            # Update progress
+            progress.setValue(i)
+            QApplication.processEvents()
+
+            # Store expected metabolite ids
+            entry_signature = set()
+
+            if any(m not in model.database_mapping for m in reaction.metabolites):
+                # All elements must be mapped to the database
+                LOGGER.debug("Not all metabolites in reaction {0!s} have been mapped to database".format(reaction))
+                continue
+            elif any(not isinstance(model.database_mapping[m], int) for m in reaction.metabolites):
+                # All elements must be uniquely mapped to the database
+                LOGGER.debug("Not all metabolites in reaction {0!s} have been mapped to a unique database entry".format(reaction))
+                continue
+            else:
+                entry_signature.update(model.database_mapping[m] for m in reaction.metabolites)
+
+            # Remove proton entries
+            clean_signature = entry_signature - proton_entries
+
+            # Get reaction database entries that match the signature
+            common_reaction_ids = database.get_reaction_id_from_participant_ids(clean_signature)
+
+            if not common_reaction_ids:
+                # No reaction found that matches the current reaction
+                LOGGER.debug("No reaction found in database containing all metabolites in reaction {0!s}".format(reaction))
+                continue
+            else:
+                putative_matches = []
+
+                for reaction_id in common_reaction_ids:
+                    participants = database.get_reaction_participants_from_id(reaction_id)
+
+                    reaction_signature = set([row["metabolite_id"] for row in participants if
+                                              row["metabolite_id"] not in proton_entries])
+
+                    if reaction_signature == clean_signature:
+                        putative_matches.append(reaction_id)
+
+                if not putative_matches:
+                    LOGGER.debug("No corresponding reaction found in database for reaction {0!s}".format(reaction))
+                    continue
+                elif len(putative_matches) == 1:
+                    model.database_mapping[reaction] = putative_matches[0]
+                    LOGGER.debug("Reaction {0!s} mapped to {1!s}".format(reaction, model.database_mapping[reaction]))
+                else:
+                    model.database_mapping[reaction] = putative_matches
+                    LOGGER.debug("Reaction {0!s} mapped to {1!s}".format(reaction, model.database_mapping[reaction]))
 
 
 def run_auto_annotation(model, progress, parent):
@@ -98,16 +195,21 @@ def run_auto_annotation(model, progress, parent):
     list
     """
 
+    LOGGER.debug("Running auto annotation..")
+
     # Check prerequisites
     if not model or progress.wasCanceled():
         return
 
     # Check that all metabolites have been mapped
     if any([m not in model.database_mapping for m in model.metabolites]):
+        LOGGER.debug("There are unmapped metabolites. Running mapping..")
         update_metabolite_database_mapping(model, progress, parent)
+        update_reaction_database_mapping(model, progress)
 
         # Return if user cancelled during mapping metabolites
         if progress.wasCanceled():
+            LOGGER.debug("Mapping process cancelled by user. Auto annotation aborted.")
             return
 
     # Let the user which annotations to add and
@@ -115,6 +217,7 @@ def run_auto_annotation(model, progress, parent):
     dialog = AnnotationSettingsDialog(parent)
     if not dialog.exec_():
         # Dialog cancelled by user
+        LOGGER.debug("Auto annotation cancelled at annotation selection.")
         return
 
     # Get user choice
@@ -122,63 +225,27 @@ def run_auto_annotation(model, progress, parent):
 
     # Make sure anything has been selected for update
     if not any(settings.values()):
+        LOGGER.debug("Nothing has been selected for automatic annotation.")
         return
 
     # Keep track of updated metabolites in order to update corresponding reactions as well
-    updated_metabolites = {"annotations": set(),
-                           "others": set()}
+    updates = {}
 
-    # Update progress dialog
-    progress.setLabelText("Updating metabolites..")
-    progress.setRange(0, len(model.metabolites))
+    # Run update of metabolites
+    metabolite_updates = update_metabolites_from_database(model, progress,
+                                                          update_names=settings["update_metabolite_name"],
+                                                          update_formula=settings["formula_charge"])
+    updates.update(metabolite_updates)
 
-    # Run annotation
-    database = DatabaseWrapper()
+    # Run update reactions
+    reaction_updates = update_reactions_from_database(model, progress)
+    updates.update(reaction_updates)
 
-    for i, metabolite in enumerate(model.metabolites):
-        if progress.wasCanceled():
-            break
-        else:
-            progress.setValue(i)
-        QApplication.processEvents()
+    # Update tables - Only needed for those items with changed attributes
+    model.gem_update_metabolites(updates["metabolite_attributes"], progress)
+    model.gem_update_reactions(updates["reaction_attributes"], progress)
 
-        # Get database id from mapping
-        entry_id = model.database_mapping[metabolite]
-        if not isinstance(entry_id, int):
-            # No entry found in database for metabolite
-            continue
-
-        # Update annotations from database
-        annotations = set(database.get_annotations_from_id(entry_id,
-                                                           "Metabolite"))
-        if annotations - metabolite.annotation:
-            # There are new annotations
-            metabolite.annotation.update(annotations)
-            updated_metabolites["annotations"].add(metabolite)
-
-        entry_metabolite = database.get_metabolite_from_id(entry_id)
-
-        # Update charge formula
-        if settings["formula_charge"]:
-            formula, charge = entry_metabolite.formula, entry_metabolite.charge
-
-            if re.match(formula_validator, formula) and charge not in (None, ""):
-                if formula != metabolite.formula or charge != metabolite.charge:
-                    metabolite.formula = formula
-                    metabolite.charge = charge
-                    updated_metabolites["others"].add(metabolite)
-
-        # Update name
-        if settings["update_metabolite_name"] and entry_metabolite.name != metabolite.name:
-            metabolite.name = entry_metabolite.name
-            updated_metabolites["others"].add(metabolite)
-
-    database.close()
-
-    # Update tables
-    model.gem_update_metabolites(updated_metabolites["others"], progress)
-
-    return updated_metabolites["annotations"].union(updated_metabolites["others"])
+    return updates
 
 
 def run_check_consistency(model, parent):
@@ -267,3 +334,123 @@ def run_check_consistency(model, parent):
     return errors
 
 
+def update_reactions_from_database(model, progress):
+    """ Update the reaction annotations
+
+    Use the mapping of the reactions to the database
+    in order to retrieve missing annotations and
+    update the names of the reactions
+
+    Parameters
+    ----------
+    model: GEMEditor.cobraClasses.Model
+    progress: QProgressDialog
+    update_annotations: bool
+    update_names: bool
+
+    Returns
+    -------
+    dict
+    """
+
+    progress.setLabelText("Updating reactions..")
+    progress.setRange(0, len(model.reactions))
+
+    database = DatabaseWrapper()
+
+    updates = {"reaction_annotations": set(),
+               "reaction_attributes": set()}
+
+    for i, reaction in enumerate(model.reactions):
+        progress.setValue(i)
+        QApplication.processEvents()
+
+        # Check requirements
+        if reaction not in model.database_mapping:
+            continue  # Mapping not existent
+        elif not isinstance(model.database_mapping[reaction], int):
+            continue  # Mapping is non-unique
+        else:
+            entry_id = model.database_mapping[reaction]
+
+        database_annotations = database.get_annotations_from_id(identifier=entry_id,
+                                                                entry_type="reaction")
+
+        new_annotations = set(database_annotations) - reaction.annotation
+        if new_annotations:
+            LOGGER.debug("New annotations for reaction {0!s} added: {1!s}".format(reaction,
+                                                                                  ", ".join(str(x) for x in new_annotations)))
+            reaction.annotation.update(database_annotations)
+            updates["reaction_annotations"].add(reaction)
+
+    return updates
+
+
+def update_metabolites_from_database(model, progress, update_names=False, update_formula=False):
+    """ Update the metabolite information from the database
+
+    Parameters
+    ----------
+    model: GEMEditor.cobraClasses.Model
+    progress: QProgressDialog
+    update_names: bool
+    update_formula: bool
+
+    Returns
+    -------
+    dict
+    """
+
+    LOGGER.debug("Updating metabolites from database..")
+
+    # Update progress dialog
+    progress.setLabelText("Updating metabolites..")
+    progress.setRange(0, len(model.metabolites))
+
+    # Keep track of updates
+    updates = {"metabolite_annotations": set(),
+               "metabolite_attributes": set()}
+
+    with DatabaseWrapper() as database:
+
+        # Run annotation
+        for i, metabolite in enumerate(model.metabolites):
+            if progress.wasCanceled():
+                break
+            else:
+                progress.setValue(i)
+            QApplication.processEvents()
+
+            # Get database id from mapping
+            entry_id = model.database_mapping[metabolite]
+            if not isinstance(entry_id, int):
+                # No entry found in database for metabolite
+                LOGGER.debug("Skipping metabolite {0!s} due to invalid mapping.".format(metabolite))
+                continue
+
+            # Update annotations from database
+            annotations = set(database.get_annotations_from_id(entry_id,
+                                                               "Metabolite"))
+            if annotations - metabolite.annotation:
+                # There are new annotations
+                metabolite.annotation.update(annotations)
+                updates["metabolite_annotations"].add(metabolite)
+
+            entry_metabolite = database.get_metabolite_from_id(entry_id)
+
+            # Update charge formula
+            if update_formula:
+                formula, charge = entry_metabolite.formula, entry_metabolite.charge
+
+                if re.match(formula_validator, formula) and charge not in (None, ""):
+                    if formula != metabolite.formula or charge != metabolite.charge:
+                        metabolite.formula = formula
+                        metabolite.charge = charge
+                        updates["metabolite_attributes"].add(metabolite)
+
+            # Update name
+            if update_names and entry_metabolite.name != metabolite.name:
+                metabolite.name = entry_metabolite.name
+                updates["metabolite_attributes"].add(metabolite)
+
+    return updates

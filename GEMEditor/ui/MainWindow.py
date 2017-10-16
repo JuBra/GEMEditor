@@ -152,6 +152,8 @@ class Ui_MainWindow(object):
         self.actionPFBA.setObjectName("actionPFBA")
         self.actionUpdate_formulas = QtWidgets.QAction(MainWindow)
         self.actionUpdate_formulas.setObjectName("actionUpdate_formulas")
+        self.actionUpdate_mapping = QtWidgets.QAction(MainWindow)
+        self.actionUpdate_mapping.setObjectName("actionUpdate_mapping")
         self.menuFile.addAction(self.actionNewModel)
         self.menuFile.addAction(self.actionOpenModel)
         self.menuFile.addAction(self.actionLoadTestModel)
@@ -186,6 +188,7 @@ class Ui_MainWindow(object):
         self.menuMetaNetX.addSeparator()
         self.menuMetaNetX.addAction(self.actionAuto_annotate)
         self.menuMetaNetX.addAction(self.actionCheck_consistency)
+        self.menuMetaNetX.addAction(self.actionUpdate_mapping)
         self.menuMetaNetX.addSeparator()
         self.menuMetaNetX.addAction(self.actionUpdate_database)
         self.menubar.addAction(self.menuFile.menuAction())
@@ -253,6 +256,6 @@ class Ui_MainWindow(object):
         self.actionFBA.setText(_translate("MainWindow", "FBA"))
         self.actionPFBA.setText(_translate("MainWindow", "pFBA"))
         self.actionUpdate_formulas.setText(_translate("MainWindow", "Update formulas"))
+        self.actionUpdate_mapping.setText(_translate("MainWindow", "Update mapping"))
 
 from GEMEditor.tabs import AnalysesTab, GeneTab, MetaboliteTab, ModelInfoTab, ModelTestsTab, ReactionTab, ReferenceTab
-import icons_rc
