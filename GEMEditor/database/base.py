@@ -435,7 +435,7 @@ class MetaboliteEntryDisplayWidget(DatabaseEntryWidget, Ui_MetaboliteEntryDispla
         self.update_synonyms(self.list_synonyms, synonyms)
 
         # Update identifiers
-        self.update_annotations(self.table_identifiers, metabolite.annotation)
+        self.table_identifiers.populate_annotations(metabolite.annotation)
 
     @QtCore.pyqtSlot(int)
     def update_from_database_id(self, identifier):
@@ -461,7 +461,7 @@ class MetaboliteEntryDisplayWidget(DatabaseEntryWidget, Ui_MetaboliteEntryDispla
 
             # Update display widgets
             self.update_labels(metabolite)
-            self.update_annotations(self.table_identifiers, annotations)
+            self.table_identifiers.populate_annotations(annotations)
             self.update_synonyms(self.list_synonyms, synonyms)
 
     def update_labels(self, metabolite):
@@ -527,7 +527,7 @@ class ReactionEntryDisplayWidget(DatabaseEntryWidget, Ui_ReactionEntryDisplayWid
 
             # Update display widgets
             self.update_synonyms(self.list_synonyms, synonyms)
-            self.update_annotations(self.table_identifiers, annotations)
+            self.table_identifiers.populate_annotations(annotations)
             self.label_formula.setText(complete_string)
             self.label_name.setText("Unknown")
 

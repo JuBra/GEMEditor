@@ -79,7 +79,7 @@ class Ui_ReactionEntryDisplayWidget(object):
         self.label_5.setAlignment(QtCore.Qt.AlignLeading|QtCore.Qt.AlignLeft|QtCore.Qt.AlignTop)
         self.label_5.setObjectName("label_5")
         self.formLayout.setWidget(3, QtWidgets.QFormLayout.LabelRole, self.label_5)
-        self.table_identifiers = QtWidgets.QTableWidget(ReactionEntryDisplayWidget)
+        self.table_identifiers = AnnotationTableWidget(ReactionEntryDisplayWidget)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -106,3 +106,4 @@ class Ui_ReactionEntryDisplayWidget(object):
         self.label_3.setText(_translate("ReactionEntryDisplayWidget", "Synonyms:"))
         self.label_5.setText(_translate("ReactionEntryDisplayWidget", "Identifier:"))
 
+from GEMEditor.base.widgets import AnnotationTableWidget

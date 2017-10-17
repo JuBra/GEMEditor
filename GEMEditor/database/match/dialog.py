@@ -1,57 +1,11 @@
 import logging
 from PyQt5 import QtCore
-from PyQt5.QtWidgets import QPushButton, QDialogButtonBox, QWidget, QDialog, QTableWidgetItem
-from GEMEditor.database.ui.MetaboliteEntryDisplayWidget import Ui_MetaboliteEntryDisplayWidget
-from GEMEditor.database.ui.ManualMetaboliteMatchDialog import Ui_ManualMatchDialog
-from GEMEditor.database.base import DatabaseWrapper
+from PyQt5.QtWidgets import QPushButton, QDialogButtonBox, QDialog
+from GEMEditor.database.match.ui.ManualMetaboliteMatchDialog import Ui_ManualMatchDialog
+from GEMEditor.database.base import DatabaseWrapper, MetaboliteEntryDisplayWidget
 
 
 LOGGER = logging.getLogger(__name__)
-
-
-class MetaboliteEntryDisplayWidget(QWidget, Ui_MetaboliteEntryDisplayWidget):
-
-    def __init__(self):
-        super(MetaboliteEntryDisplayWidget, self).__init__()
-        self.setupUi(self)
-
-    def set_information(self, metabolite, synonyms=()):
-        """ Update the information from the metabolite
-        and the synonyms passed
-
-        Parameters
-        ----------
-        metabolite: GEMEditor.cobraClasses.Metabolite
-        synonyms: list
-
-        Returns
-        -------
-        None
-        """
-
-        # Update labels
-        self.label_name.setText(str(metabolite.name))
-        self.label_charge.setText(str(metabolite.charge))
-        self.label_formula.setText(str(metabolite.formula))
-
-        # Update synonyms
-        self.list_synonyms.clear()
-        for entry in synonyms:
-            self.list_synonyms.addItem(entry)
-
-        # Update identifiers
-        self.table_identifiers.setRowCount(len(metabolite.annotation))
-        self.table_identifiers.setColumnCount(2)
-
-        # Add identifiers
-        n = 0
-        for annotation in metabolite.annotation:
-            self.table_identifiers.setItem(n, 0, QTableWidgetItem(annotation.collection))
-            self.table_identifiers.setItem(n, 1, QTableWidgetItem(annotation.identifier))
-            n += 1
-
-        # Reset header items
-        self.table_identifiers.setHorizontalHeaderLabels(["Resource", "ID"])
 
 
 class ManualMatchDialog(QDialog, Ui_ManualMatchDialog):
@@ -108,16 +62,9 @@ class ManualMatchDialog(QDialog, Ui_ManualMatchDialog):
 
         # Add new widgets
         for entry in entries:
-            widget = MetaboliteEntryDisplayWidget()
-
             # Setup widget
-            metabolite = self.database.get_metabolite_from_id(entry)
-            synonyms = self.database.get_synonyms_from_id(entry, entry_type="Metabolite")
-            annotations = self.database.get_annotations_from_id(entry, entry_type="Metabolite")
-            if metabolite is None:
-                raise ValueError("No entry found for '{}'".format(entry))
-            metabolite.annotation.update(annotations)
-            widget.set_information(metabolite, synonyms)
+            widget = MetaboliteEntryDisplayWidget(self)
+            widget.update_from_database_id(entry)
 
             # Add widget to the dialog
             self.stackedWidget_database.addWidget(widget)

@@ -96,12 +96,13 @@ class Ui_MetaboliteEntryDisplayWidget(object):
         self.label_5.setAlignment(QtCore.Qt.AlignLeading|QtCore.Qt.AlignLeft|QtCore.Qt.AlignTop)
         self.label_5.setObjectName("label_5")
         self.formLayout.setWidget(4, QtWidgets.QFormLayout.LabelRole, self.label_5)
-        self.table_identifiers = QtWidgets.QTableWidget(MetaboliteEntryDisplayWidget)
+        self.table_identifiers = AnnotationTableWidget(MetaboliteEntryDisplayWidget)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.table_identifiers.sizePolicy().hasHeightForWidth())
         self.table_identifiers.setSizePolicy(sizePolicy)
+        self.table_identifiers.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.table_identifiers.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
         self.table_identifiers.setWordWrap(False)
         self.table_identifiers.setObjectName("table_identifiers")
@@ -124,3 +125,4 @@ class Ui_MetaboliteEntryDisplayWidget(object):
         self.label_3.setText(_translate("MetaboliteEntryDisplayWidget", "Synonyms:"))
         self.label_5.setText(_translate("MetaboliteEntryDisplayWidget", "Identifier:"))
 
+from GEMEditor.base.widgets import AnnotationTableWidget
