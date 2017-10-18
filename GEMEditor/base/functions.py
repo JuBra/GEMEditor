@@ -172,3 +172,71 @@ def reaction_balance(metabolites):
         balanced = "Unknown"
 
     return charge_str, element_str, balanced
+
+
+def merge_groups_by_overlap(data):
+    """ Merge sets
+
+    Parameters
+    ----------
+    data: list
+
+    Returns
+    -------
+
+    """
+
+    new_index = list(range(len(data)))
+    mapping = dict()
+    data = [set(m) for m in data]
+
+    # Iterate over groups in data and merge groups
+    # to the one with the lowest index
+    for i, group in enumerate(data):
+        for element in group:
+            if element not in mapping:
+                # Element has not been seen before
+                # point element to current index
+                mapping[element] = i
+                continue
+            else:
+                # Get the new location location of the group
+                # to which the element mapping points
+                destination = new_location(new_index, mapping[element])
+                if destination == i:
+                    # Group has already been merged
+                    continue
+                elif destination > i:
+                    # Merge to lowest index always
+                    destination, i = i, destination
+
+                # Merge current group with the one
+                # the item has been found in before
+                data[destination].update(data[i])
+                data[i] = None
+                # Store new index of group
+                new_index[i] = destination
+                i = destination
+
+    # Filter out the empty groups
+    return [g for g in data if g]
+
+
+def new_location(new_index, n):
+    """ Find new location
+
+    Iteratively follow pointers to new location.
+
+    Parameters
+    ----------
+    new_index: list, Should be initialized from range
+    n: int
+
+    Returns
+    -------
+    int
+    """
+
+    while new_index[n] != n:
+        n = new_index[n]
+    return n

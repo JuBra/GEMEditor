@@ -104,12 +104,8 @@ def merge_reactions(list_of_reactions, base_reaction):
                 temp_children.append(genes)
             # Move evidences
             for evidence in tuple(reaction.evidences):
-                if evidence.entity is reaction:
-                    evidence.set_entity(base_reaction)
-                elif evidence.link is reaction:
-                    evidence.set_linked_item(base_reaction)
-                elif evidence.target is reaction:
-                    evidence.set_target(base_reaction)
+                evidence.substitute_item(reaction, base_reaction)
+
             try:
                 reaction.remove_from_model()
             except Exception:
@@ -147,7 +143,12 @@ def merge_metabolites(list_of_metabolites, base_metabolite):
             for reaction in metabolite.reactions:
                 stoichiometry = reaction.metabolites
                 coefficient = stoichiometry.pop(metabolite)
-                stoichiometry[base_metabolite] = coefficient
+                if base_metabolite in stoichiometry:
+                    # This reaction is shared between current metbaolite
+                    # and the base metabolite
+                    stoichiometry[base_metabolite] += coefficient
+                else:
+                    stoichiometry[base_metabolite] = coefficient
 
                 # Remove old stoichiometries
                 reaction.subtract_metabolites(reaction.metabolites, combine=True, reversibly=False)
@@ -164,6 +165,9 @@ def merge_metabolites(list_of_metabolites, base_metabolite):
 
             # Store metabolite for removal
             merged.append(metabolite)
+
+    if merged and merged[0].model:
+        merged[0].model.gem_remove_metabolites(merged)
 
     return merged
 

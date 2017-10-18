@@ -80,3 +80,29 @@ class Test_get_annotation_to_item_map:
         assert mapping[annotation3] == [met2]
 
 
+class Test_merge_overlapping:
+
+    def test_merge_overlapping(self):
+        input_list = [set([1, 2]), set([2, 3]), set([3, 4]), set([5, 6])]
+
+        merged = merge_groups_by_overlap(input_list)
+
+        assert set([1, 2, 3, 4]) in merged
+        assert set([5, 6]) in merged
+        assert len(merged) == 2
+
+    def test_not_merging_nonoverlapping(self):
+        input_list = [set([1]), set([2])]
+
+        merged = merge_groups_by_overlap(input_list)
+
+        assert len(merged) == 2
+        assert input_list[0] in merged
+        assert input_list[1] in merged
+
+
+class Test_new_location:
+
+    def test_get_new_location(self):
+        new_index = [0, 0, 1, 2, 3]
+        assert new_location(new_index, 4) == 0

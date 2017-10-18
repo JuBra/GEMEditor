@@ -134,3 +134,43 @@ class Test_merge_metabolites:
         assert evidence1 not in met1.evidences
         assert evidence1 in met2.evidences
 
+    def test_add_coefficients_in_overlapping_reactions1(self):
+        """ If merged metabolites are involved in the same
+        reaction make sure the coefficients are added when
+        merging. """
+
+        met1 = Metabolite("met1")
+        met2 = Metabolite("met2")
+        met3 = Metabolite("met3")
+
+        react = Reaction("r1")
+        react.add_metabolites({met1: -1,
+                               met2: -1,
+                               met3: 1})
+
+        merged = merge_metabolites([met1, met2], met1)
+
+        assert merged == [met2]
+        assert react.metabolites[met1] == -2
+        assert react.metabolites[met3] == 1
+
+    def test_add_coefficients_in_overlapping_reactions2(self):
+        """ If merged metabolites are involved in the same
+        reaction make sure the coefficients are added when
+        merging. """
+
+        met1 = Metabolite("met1")
+        met2 = Metabolite("met2")
+        met3 = Metabolite("met3")
+        met4 = Metabolite("met4")
+
+        react = Reaction("r1")
+        react.add_metabolites({met1: -1,
+                               met2: -1,
+                               met3: 1,
+                               met4: 1})
+
+        merged = merge_metabolites([met1, met3], met1)
+
+        assert merged == [met3]
+        assert react.metabolites == {met2: -1, met4: 1}

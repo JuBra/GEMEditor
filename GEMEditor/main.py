@@ -5,7 +5,7 @@ from GEMEditor.tabs import *
 from GEMEditor.dialogs.program import EditSettingsDialog, AboutDialog, ListDisplayDialog
 from GEMEditor.dialogs.model import EditModelDialog
 from GEMEditor.dialogs.reference import PubmedBrowser
-from GEMEditor.dialogs.qualitychecks import DuplicateDialog, FailingEvidencesDialog
+from GEMEditor.dialogs.qualitychecks import factory_duplicate_dialog, FailingEvidencesDialog
 from GEMEditor.map.escher import MapListDialog
 from GEMEditor.dialogs import UpdateAvailableDialog, BatchEvidenceDialog
 from GEMEditor import __projectpage__
@@ -15,11 +15,13 @@ from GEMEditor.cobraClasses import Model, prune_gene_tree
 from GEMEditor.analysis import group_duplicate_reactions
 from GEMEditor.analysis.statistics import run_all_statistics, DisplayStatisticsDialog
 from GEMEditor.analysis.formula import update_formulae_iteratively
+from GEMEditor.analysis.duplicates import get_duplicated_metabolites
 from GEMEditor.connect.checkversion import UpdateCheck
 from GEMEditor.database.create import create_database_de_novo, database_exists
 from GEMEditor.database.model import run_auto_annotation, run_check_consistency, update_metabolite_database_mapping
 from GEMEditor.database.query import DialogDatabaseSelection
 from GEMEditor.database.base import DatabaseWrapper
+from GEMEditor.base.functions import merge_groups_by_overlap
 import os
 import GEMEditor.icons_rc
 
@@ -86,6 +88,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.actionMaps.triggered.connect(self.show_map_list)
 
         self.actionFind_duplicated_reactions.triggered.connect(self.find_duplicate_reactions)
+        self.actionFin_duplicated_metabolites.triggered.connect(self.find_duplicate_metabolites)
         self.actionCheck_evidences.triggered.connect(self.check_all_evidences)
         self.actionPrune_Gene_Trees.triggered.connect(self.prune_gene_trees)
         self.actionAdd_batch.triggered.connect(self.add_batch_evidences)
@@ -215,7 +218,16 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def find_duplicate_reactions(self):
         if self.model:
             duplicates = group_duplicate_reactions(self.model.reactions)
-            self.duplicate_dialog = DuplicateDialog(duplicates)
+            self.duplicate_dialog = factory_duplicate_dialog("reaction", duplicates)
+            self.duplicate_dialog.show()
+
+    @QtCore.pyqtSlot()
+    def find_duplicate_metabolites(self):
+        if self.model:
+            duplicates = get_duplicated_metabolites(self.model.metabolites,
+                                                    self.model.database_mapping)
+            groups = merge_groups_by_overlap(duplicates)
+            self.duplicate_dialog = factory_duplicate_dialog("metabolite", groups)
             self.duplicate_dialog.show()
 
     @QtCore.pyqtSlot()

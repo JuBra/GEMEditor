@@ -573,6 +573,14 @@ class Model(QtCore.QObject, BaseEvidenceElement, cobraModel):
         self.QtReactionTable.blockSignals(False)
         self.QtReactionTable.all_data_changed()
 
+    def gem_remove_metabolites(self, metabolites):
+        # Remove metabolites from model
+        self.remove_metabolites(metabolites)
+
+        # Remove metabolites from table
+        mapping = self.QtMetaboliteTable.get_item_to_row_mapping()
+        self.QtMetaboliteTable.delete_rows([mapping[m] for m in metabolites])
+
     def close(self):
         self.dialogs.remove_all()
 
