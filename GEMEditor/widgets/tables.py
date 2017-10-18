@@ -1,7 +1,7 @@
 import sip
 sip.setapi('QVariant', 2)
 sip.setapi('QString', 2)
-from PyQt5.QtGui import QPixmap, QIcon, QStandardItem, QStandardItemModel
+from PyQt5.QtGui import QPixmap, QIcon, QStandardItem, QStandardItemModel, QFont, QBrush
 from PyQt5.QtCore import Qt, QSize
 from GEMEditor.data_classes import ReactionSetting, Outcome, GeneSetting, Compartment
 
@@ -215,6 +215,45 @@ class ModelTestTable(ElementTable):
     def row_from_item(testcase):
         return [LinkedItem(testcase.description, testcase),
                 LinkedItem()]
+
+    def set_status(self, row, solution, passed):
+        """ Update the solution display in a given row
+
+        Parameters
+        ----------
+        row: int
+        solution: cobra.core.solution.solution
+        passed: bool
+
+        Returns
+        -------
+
+        """
+        status_item = self.item(row, 1)
+        font = QFont()
+        font.setBold(True)
+        status_item.setFont(font)
+        status_item.setData(Qt.AlignCenter | Qt.AlignHCenter, 7)
+
+        if solution is None:
+            # No solution passed
+            status_item.setText("")
+            status_item.link = None
+        elif solution.status != "optimal":
+            # Erroneous solution
+            status_item.setText(solution.status)
+            status_item.setForeground(QBrush(Qt.darkYellow, Qt.SolidPattern))
+            status_item.link = None
+        elif passed:
+            # Solution is optimal and passes test requirements
+            status_item.setText("Passed")
+            status_item.setForeground(QBrush(Qt.darkGreen, Qt.SolidPattern))
+            status_item.link = solution
+        else:
+            # Solution is optimal, but does not pass test requirements
+            status_item.setText("Failed")
+            status_item.setForeground(QBrush(Qt.red, Qt.SolidPattern))
+            status_item.link = solution
 
 
 class AnnotationTable(ElementTable):

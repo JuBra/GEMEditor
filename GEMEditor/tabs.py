@@ -764,8 +764,8 @@ class ModelTestsTab(StandardTab):
 
             dialog = QProgressDialog("Running tests..", "Cancel", 0, len(tests_to_run), self)
             dialog.show()
-            num_passed = 0
-            num_run = 0
+            i = 0
+            results = []
             for i, tuple_case in enumerate(tests_to_run):
 
                 # Unpack tuple
@@ -777,35 +777,24 @@ class ModelTestsTab(StandardTab):
                 if dialog.wasCanceled():
                     break
 
-                result, solution = run_test(test_case, self.model, solver)
-                status_item = self.dataTable.item(row, 1)
-                font = QtGui.QFont()
-                font.setBold(True)
-                status_item.setFont(font)
-                status_item.setData(QtCore.Qt.AlignCenter | QtCore.Qt.AlignHCenter, 7)
-                if solution.status != "optimal":
-                    status_item.setText(solution.status)
-                    status_item.setForeground(QtGui.QBrush(QtCore.Qt.red, QtCore.Qt.SolidPattern))
-                    status_item.link = None
-                elif result:
-                    status_item.setText("Passed")
-                    status_item.setForeground(QtGui.QBrush(QtCore.Qt.darkGreen, QtCore.Qt.SolidPattern))
-                    status_item.link = solution
-                    num_passed += 1
-                else:
-                    status_item.setText("Failed")
-                    status_item.setForeground(QtGui.QBrush(QtCore.Qt.red, QtCore.Qt.SolidPattern))
-                    status_item.link = solution
-                num_run += 1
+                passed, solution = run_test(test_case, self.model, solver)
+                results.append((row, solution, passed))
 
-            if num_run:
-                if num_passed == 0:
-                    self.statusBar.setStyleSheet("color: red; font-weight: bold;")
-                elif num_passed == num_run:
-                    self.statusBar.setStyleSheet("color: green; font-weight: bold;")
-                else:
-                    self.statusBar.setStyleSheet("color: orange; font-weight: bold;")
-                self.statusBar.showMessage("{0} out of {1} tests passed!".format(str(num_passed), str(num_run)), 4000)
+            self.dataTable.blockSignals(True)
+            for x in results:
+                self.dataTable.set_status(*x)
+            self.dataTable.blockSignals(False)
+            self.dataTable.all_data_changed()
+
+            num_passed = sum(x[1].status == "optimal" and x[2] for x in results)
+
+            if len(results) == 0:
+                self.statusBar.setStyleSheet("color: red; font-weight: bold;")
+            elif len(results) == i:
+                self.statusBar.setStyleSheet("color: green; font-weight: bold;")
+            else:
+                self.statusBar.setStyleSheet("color: orange; font-weight: bold;")
+            self.statusBar.showMessage("{0!s} out of {1!s} tests passed!".format(num_passed, i), 4000)
 
             # Restore state
             for x in original_state:
