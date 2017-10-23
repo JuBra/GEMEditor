@@ -519,6 +519,7 @@ class MetaboliteTab(StandardTab):
                 set_charge_action = QAction(self.tr("Set Charge"), menu)
                 set_charge_action.triggered.connect(self.set_charge)
                 menu.addAction(set_charge_action)
+        menu.addSeparator()
         copy_action = QAction(self.tr("Copy metabolites"), menu)
         copy_action.triggered.connect(self.copy_metabolites)
         menu.addAction(copy_action)
@@ -794,7 +795,7 @@ class ModelTestsTab(StandardTab):
                 self.statusBar.setStyleSheet("color: green; font-weight: bold;")
             else:
                 self.statusBar.setStyleSheet("color: orange; font-weight: bold;")
-            self.statusBar.showMessage("{0!s} out of {1!s} tests passed!".format(num_passed, i), 4000)
+            self.statusBar.showMessage("{0!s} out of {1!s} tests passed!".format(num_passed, i+1), 4000)
 
             # Restore state
             for x in original_state:

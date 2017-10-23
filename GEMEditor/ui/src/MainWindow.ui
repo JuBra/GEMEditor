@@ -339,6 +339,10 @@
    </property>
   </action>
   <action name="actionUpdate_database">
+   <property name="icon">
+    <iconset resource="../../icons/icons.qrc">
+     <normaloff>:/update_database</normaloff>:/update_database</iconset>
+   </property>
    <property name="text">
     <string>Update database</string>
    </property>

@@ -139,6 +139,9 @@ class Ui_MainWindow(object):
         self.actionAdd_Reactions = QtWidgets.QAction(MainWindow)
         self.actionAdd_Reactions.setObjectName("actionAdd_Reactions")
         self.actionUpdate_database = QtWidgets.QAction(MainWindow)
+        icon5 = QtGui.QIcon()
+        icon5.addPixmap(QtGui.QPixmap(":/update_database"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.actionUpdate_database.setIcon(icon5)
         self.actionUpdate_database.setObjectName("actionUpdate_database")
         self.actionAuto_annotation = QtWidgets.QAction(MainWindow)
         self.actionAuto_annotation.setObjectName("actionAuto_annotation")
@@ -259,3 +262,4 @@ class Ui_MainWindow(object):
         self.actionUpdate_mapping.setText(_translate("MainWindow", "Update mapping"))
 
 from GEMEditor.tabs import AnalysesTab, GeneTab, MetaboliteTab, ModelInfoTab, ModelTestsTab, ReactionTab, ReferenceTab
+import icons_rc

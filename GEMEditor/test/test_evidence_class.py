@@ -1,5 +1,5 @@
 import pytest
-from GEMEditor.evidence_class import Evidence
+from GEMEditor.evidence_class import *
 from GEMEditor.cobraClasses import Reaction, Gene
 from GEMEditor.data_classes import Reference
 
@@ -218,3 +218,6 @@ class TestEvidence:
 
         assert new_copy != evidence
         assert not new_copy == evidence
+
+
+

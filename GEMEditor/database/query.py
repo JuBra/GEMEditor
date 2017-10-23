@@ -3,6 +3,7 @@ from PyQt5 import QtCore
 from PyQt5.QtWidgets import QApplication, QInputDialog, QWidget, QMessageBox, QDialogButtonBox, QDialog, QHBoxLayout, QCheckBox, QVBoxLayout, QTabWidget, QPushButton, QGroupBox, QProgressDialog
 from PyQt5.QtCore import QSettings
 from PyQt5.QtSql import QSqlQuery, QSqlQueryModel, QSql
+from collections import OrderedDict
 from GEMEditor.base.functions import generate_copy_id, invert_mapping, get_annotation_to_item_map, convert_to_bool
 from GEMEditor.base.dialogs import DialogMapCompartment, CustomStandardDialog
 from GEMEditor.database.base import DatabaseWrapper, pyqt_database_connection, factory_entry_widget
@@ -408,33 +409,37 @@ def factory_search_widget(data_type, parent=None):
     """
 
     if data_type.lower() == "metabolite":
-        queries = {
-            "by name": "SELECT metabolites.id, metabolites.name, metabolites.formula, metabolites.charge "
+        queries = OrderedDict([
+            ("by name", "SELECT metabolites.id, metabolites.name, metabolites.formula, metabolites.charge "
                        "FROM metabolite_names JOIN metabolites "
                        "ON metabolite_names.metabolite_id = metabolites.id "
                        "WHERE metabolite_names.name LIKE '%{input}%' "
-                       "GROUP BY metabolite_names.metabolite_id;",
-            "by identifier": "SELECT metabolites.id, metabolites.name, metabolites.formula, metabolites.charge "
+                       "GROUP BY metabolite_names.metabolite_id;"),
+            ("by identifier", "SELECT metabolites.id, metabolites.name, metabolites.formula, metabolites.charge "
                              "FROM metabolite_ids JOIN metabolites "
                              "ON metabolite_ids.metabolite_id = metabolites.id "
                              "WHERE metabolite_ids.identifier = '{input}'"
-                             "GROUP BY metabolites.id;"
-        }
+                             "GROUP BY metabolites.id;")
+        ])
 
         return DatabaseSearchWidget(queries=queries, headers=["ID", "Name", "Formula", "Charge"], parent=parent)
     elif data_type.lower() == "reaction":
-        queries = {
-            "by name": "SELECT reactions.id, reactions.string "
+        queries = OrderedDict([
+            ("by name", "SELECT reactions.id, reactions.string "
                        "FROM reaction_names JOIN reactions "
                        "ON reaction_names.reaction_id = reactions.id "
                        "WHERE reaction_names.name LIKE '%{input}%' "
-                       "GROUP BY reaction_names.reaction_id;",
-            "by identifier": "SELECT reactions.id, reactions.string "
+                       "GROUP BY reaction_names.reaction_id;"),
+            ("by identifier", "SELECT reactions.id, reactions.string "
                              "FROM reaction_ids JOIN reactions "
                              "ON reaction_ids.reaction_id = reactions.id "
                              "WHERE reaction_ids.identifier = '{input}' "
-                             "GROUP BY reactions.id;"
-        }
+                             "GROUP BY reactions.id;")
+            # ("by metabolite identifier", "SELECT * FROM reactions WHERE id IN "
+            #                              "(SELECT DISTINCT(reaction_id) FROM reaction_participants WHERE metabolite_id IN "
+            #                              "(SELECT DISTINCT(metabolite_id) FROM metabolite_ids "
+            #                              "WHERE identifier = '{input}'));")
+        ])
 
         return DatabaseSearchWidget(queries=queries, headers=["ID", "Formula"], parent=parent)
     else:

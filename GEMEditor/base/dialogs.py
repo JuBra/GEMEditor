@@ -7,18 +7,22 @@ class CustomStandardDialog(QDialog):
     def __init__(self, *args, **kwargs):
         QDialog.__init__(self, *args, **kwargs)
 
+        # Store the dialog type in order to
+        # distinguish dialogs in settings
+        self.dialog_type = ""
+
     @QtCore.pyqtSlot()
     def save_dialog_geometry(self):
         # Store the geometry of the dialog during the closing
         settings = QtCore.QSettings()
-        settings.setValue(self.__class__.__name__+"Geometry", self.saveGeometry())
+        settings.setValue(self.__class__.__name__+"Geometry"+str(self.dialog_type), self.saveGeometry())
         settings.sync()
 
     def restore_dialog_geometry(self):
         # Restore the geometry of the dialog
         # Should be called in the __init__(self) of the subclass
         settings = QtCore.QSettings()
-        geometry = settings.value(self.__class__.__name__+"Geometry")
+        geometry = settings.value(self.__class__.__name__+"Geometry"+str(self.dialog_type))
         if geometry is not None:
             self.restoreGeometry(geometry)
 

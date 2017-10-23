@@ -115,7 +115,7 @@ class PathwayItem(Base):
 
 
 def setup_resources(session):
-    """ Setup the resource tables in the table
+    """ Setup the resource tables in the database
 
     Parameters
     ----------
@@ -123,7 +123,7 @@ def setup_resources(session):
 
     Returns
     -------
-    resources
+    None
     """
     for database in miriam_databases:
         new_resource = Resource(name=database.name,
@@ -168,8 +168,3 @@ def setup_empty_database(parent=None, database_path=None):
     setup_resources(session)
     session.close()
     return True
-
-if __name__ == '__main__':
-    from PyQt5 import QtWidgets
-    app = QtWidgets.QApplication([])
-    setup_empty_database(None)

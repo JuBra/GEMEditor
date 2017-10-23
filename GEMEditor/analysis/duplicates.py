@@ -144,7 +144,7 @@ def merge_metabolites(list_of_metabolites, base_metabolite):
                 stoichiometry = reaction.metabolites
                 coefficient = stoichiometry.pop(metabolite)
                 if base_metabolite in stoichiometry:
-                    # This reaction is shared between current metbaolite
+                    # This reaction is shared between current metabolite
                     # and the base metabolite
                     stoichiometry[base_metabolite] += coefficient
                 else:
