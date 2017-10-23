@@ -1,61 +1,13 @@
 from uuid import uuid4
 from copy import copy
 from GEMEditor.base_classes import BaseReferenceElement
-from GEMEditor.cobraClasses import GeneGroup
-
-
-def add_gene_to_reaction(evidence):
-    gene, reaction = evidence.entity, evidence.target
-    if len(reaction._children) == 1:
-        child = reaction._children[0]
-        if isinstance(child, GeneGroup) and child.type == "or":
-            child.add_child(gene)
-            return
-    reaction.add_child(gene)
-
-
-def check_localization(evidence):
-    """ Check that all reactions
-
-    Parameters
-    ----------
-    gene
-    compartment
-
-    Returns
-    -------
-
-    """
-    for reaction in evidence.entity.reactions:
-        if not any(metabolite.compartment == evidence.target.id for metabolite in reaction.metabolites):
-            return False
-    return True
-
-
-def fix_gene_not_catalyzing_reaction(evidence):
-    entity = evidence.entity
-    if not hasattr(entity, "_parents"):
-        return
-
-    for parent in entity._parents.copy():
-        if parent is evidence.target:
-            parent.remove_child(entity, all=True)
-        elif evidence.target in parent.reactions:
-            parent.remove_child(entity, all=True)
+from GEMEditor.evidence.assertions import ASSERTIONS
 
 
 class Evidence(BaseReferenceElement):
 
-    assertions = {"Localization": check_localization,
-                  "Catalyzing reaction": lambda evidence: evidence.target in evidence.entity.reactions,
-                  "Not catalyzing reaction": lambda evidence: evidence.target not in evidence.entity.reactions,
-                  "Reversible": lambda evidence: evidence.entity.reversibility,
-                  "Irreversible": lambda evidence: not evidence.entity.reversibility,
-                  "Present": lambda *args: True,
-                  "Presence": lambda *args: True}
-
-    fixes = {"Catalyzing reaction": add_gene_to_reaction,
-             "Not catalyzing reaction": fix_gene_not_catalyzing_reaction}
+    _validity = dict((x.text, x.func_validity) for x in ASSERTIONS)
+    _fixes = dict((x.text, x.func_fix) for x in ASSERTIONS)
 
     def __init__(self, internal_id=None, entity=None, link=None, term=None, eco=None, assertion=None, comment=None,
                  target=None):
@@ -219,28 +171,49 @@ class Evidence(BaseReferenceElement):
         return new_evidence
 
     def is_valid(self):
-        """ Check if the evidence is hold"""
+        """ Check that the evidence holds
+
+        This function is called in order to
+        assert if the the model complies with
+        the experimental information stored
+        in this item
+
+        Returns
+        -------
+        bool or None,   Returns True if the assertion holds
+                        Returns False if the assertion does not hold
+                        Returns None if there is an error in the evidence
+        """
+
         try:
-            return self.assertions[self.assertion](self)
-        except (AttributeError, KeyError):
+            # Call validity function passing this instance
+            return self._validity[self.assertion](self)
+        except (AttributeError, KeyError, ValueError):
             return None
 
     def fix(self):
+        """ Fix this evidence item
+
+        In case the current evidence item is
+        invalid, try to fix it. I.e. connect
+        the gene to the reaction.
+
+        Returns
+        -------
+        bool,   Returns True if the evidence could be fixed
+                Returns True if the evidence could not be fixed
+        """
+
         # Check if the evidence is still invalid
         validity = self.is_valid()
-        if validity is None:
-            return None, "At least one of the needed attributes are missing: 'entity', 'target', 'assertion'"
-        elif validity is True:
-            return True, ""
+        if validity is not False:
+            return bool(validity)
 
         try:
-            self.fixes[self.assertion](self)
-        except KeyError:
-            return False, "Unknown fix for assertion {}".format(self.assertion)
-        except AttributeError:
-            return False, "Error in evidence. Is the target set?"
-        else:
-            return True, "Successfully changed!"
+            self._fixes[self.assertion](self)
+            return True
+        except (KeyError, AttributeError):
+            return False
 
     def __str__(self):
         return "ID: {id}\nEntity: {entity}\nAssertion: {assertion}\n" \
