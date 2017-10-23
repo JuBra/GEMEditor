@@ -1,5 +1,4 @@
 from collections import defaultdict
-from cobra.core.Formula import Formula
 
 
 def get_turnover(solution, mapping):

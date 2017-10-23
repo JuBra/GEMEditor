@@ -170,11 +170,12 @@ class Ui_MainWindow(object):
         self.menuQuality_Control.addAction(self.actionFind_duplicated_reactions)
         self.menuQuality_Control.addSeparator()
         self.menuQuality_Control.addAction(self.actionUpdate_formulas)
-        self.menuQuality_Control.addAction(self.actionCheck_evidences)
         self.menuQuality_Control.addAction(self.actionPrune_Gene_Trees)
         self.menuQuality_Control.addSeparator()
         self.menuQuality_Control.addAction(self.actionRun_all_tests)
         self.menuEvidences.addAction(self.actionAdd_batch)
+        self.menuEvidences.addSeparator()
+        self.menuEvidences.addAction(self.actionCheck_evidences)
         self.menuModel.addAction(self.actionMaps)
         self.menuModel.addAction(self.menuQuality_Control.menuAction())
         self.menuModel.addAction(self.menuEvidences.menuAction())
@@ -248,7 +249,7 @@ class Ui_MainWindow(object):
         self.actionCheck_gene_location.setText(_translate("MainWindow", "Check gene location"))
         self.actionCheck_evidences.setText(_translate("MainWindow", "Check evidences"))
         self.actionRun_all_tests.setText(_translate("MainWindow", "Run all tests"))
-        self.actionPrune_Gene_Trees.setText(_translate("MainWindow", "Prune Gene Trees"))
+        self.actionPrune_Gene_Trees.setText(_translate("MainWindow", "Simplify gene trees"))
         self.actionAdd_batch.setText(_translate("MainWindow", "Add batch"))
         self.actionAdd_Metabolites.setText(_translate("MainWindow", "Add Metabolites"))
         self.actionAdd_Reactions.setText(_translate("MainWindow", "Add Reactions"))
@@ -262,4 +263,3 @@ class Ui_MainWindow(object):
         self.actionUpdate_mapping.setText(_translate("MainWindow", "Update mapping"))
 
 from GEMEditor.tabs import AnalysesTab, GeneTab, MetaboliteTab, ModelInfoTab, ModelTestsTab, ReactionTab, ReferenceTab
-import icons_rc

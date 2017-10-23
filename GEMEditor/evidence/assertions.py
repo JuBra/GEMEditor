@@ -117,13 +117,10 @@ def validity_localization(evidence):
     bool or None
     """
     if isinstance(evidence.entity, Gene) and isinstance(evidence.target, Compartment):
-        if evidence.entity.reactions:
-            for reaction in evidence.entity.reactions:
-                if not any(metabolite.compartment == evidence.target.id for metabolite in reaction.metabolites):
-                    return False
-            return True
-        else:
-            return False
+        for reaction in evidence.entity.reactions:
+            if not any(metabolite.compartment == evidence.target.id for metabolite in reaction.metabolites):
+                return False
+        return True
     else:
         return None
 

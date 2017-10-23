@@ -1,5 +1,6 @@
-from PyQt5.QtWidgets import QTableWidget, QTableWidgetItem, QMenu, QAction
+from PyQt5.QtWidgets import QTableWidget, QTableWidgetItem, QMenu, QAction, QWidget, QAbstractItemView
 from PyQt5 import QtCore, QtGui
+from GEMEditor.base.ui.TableSearchWidget import Ui_StandardTab
 
 
 class AnnotationTableWidget(QTableWidget):
@@ -54,3 +55,41 @@ class AnnotationTableWidget(QTableWidget):
         QtGui.QDesktopServices().openUrl(
             QtCore.QUrl("http://identifiers.org/{collection}/{identifier}".format(collection=self.item(row, 0).text(),
                                                                                   identifier=self.item(row, 1).text())))
+
+
+class SearchTableWidget(QWidget, Ui_StandardTab):
+
+    def __init__(self, parent, TableModel, ProxyModel, ViewClass):
+        """ Setup widget
+
+        Parameters
+        ----------
+        TableModel: class
+        ProxyModel: class
+        """
+
+        super(SearchTableWidget, self).__init__(parent)
+        self.setupUi(self)
+        self.datatable = TableModel(self)
+        self.proxymodel = ProxyModel(self)
+        self.dataView = ViewClass(self)
+        self.dataView.setModel(self.proxymodel)
+        self.proxymodel.setSourceModel(self.datatable)
+        self.proxymodel.setFilterCaseSensitivity(QtCore.Qt.CaseInsensitive)
+        self.proxymodel.setFilterKeyColumn(-1)
+        self.proxymodel.setDynamicSortFilter(True)
+        self.dataView.setEditTriggers(QAbstractItemView.NoEditTriggers)
+
+        # Set filter options or hide
+        if hasattr(self.proxymodel, "options"):
+            self.filterComboBox.addItems(self.proxymodel.options)
+        else:
+            self.label_filter.hide()
+            self.line.hide()
+            self.filterComboBox.hide()
+
+        # Add view to layout
+        self.verticalLayout.addWidget(self.dataView)
+
+        # Connect signals
+        self.searchInput.textChanged.connect(self.proxymodel.setFilterFixedString)

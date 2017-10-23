@@ -116,7 +116,6 @@
      <addaction name="actionFind_duplicated_reactions"/>
      <addaction name="separator"/>
      <addaction name="actionUpdate_formulas"/>
-     <addaction name="actionCheck_evidences"/>
      <addaction name="actionPrune_Gene_Trees"/>
      <addaction name="separator"/>
      <addaction name="actionRun_all_tests"/>
@@ -126,6 +125,8 @@
       <string>Evidences</string>
      </property>
      <addaction name="actionAdd_batch"/>
+     <addaction name="separator"/>
+     <addaction name="actionCheck_evidences"/>
     </widget>
     <addaction name="actionMaps"/>
     <addaction name="menuQuality_Control"/>
@@ -320,7 +321,7 @@
   </action>
   <action name="actionPrune_Gene_Trees">
    <property name="text">
-    <string>Prune Gene Trees</string>
+    <string>Simplify gene trees</string>
    </property>
   </action>
   <action name="actionAdd_batch">

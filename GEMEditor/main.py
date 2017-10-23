@@ -22,29 +22,14 @@ from GEMEditor.database.model import run_auto_annotation, run_check_consistency,
 from GEMEditor.database.query import DialogDatabaseSelection
 from GEMEditor.database.base import DatabaseWrapper
 from GEMEditor.base.functions import merge_groups_by_overlap
+from GEMEditor.base.classes import ProgressDialog
+from GEMEditor.evidence.analysis import DialogEvidenceStatus
 import os
 import GEMEditor.icons_rc
 
 
 LOGGER = logging.getLogger(__name__)
 
-
-class ProgressDialog(QProgressDialog):
-
-    def __init__(self, parent, title=None, label="", min=0, max=100, min_duration=500):
-        super(ProgressDialog, self).__init__(parent)
-        self.setWindowTitle(title)
-        self.setLabelText(label)
-        self.setMinimum(min)
-        self.setMaximum(max)
-        self.setMinimumDuration(500)
-
-    def __enter__(self):
-        return self
-    
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        self.close()
-        
 
 class MainWindow(QMainWindow, Ui_MainWindow):
 
@@ -447,15 +432,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if not self.model:
             return
 
-        failing_evidences = {}
-        for evidence in self.model.all_evidences.values():
-            if not evidence.is_valid():
-                failing_evidences[evidence] = ""
-
-        if failing_evidences:
-            dialog = FailingEvidencesDialog(failing_evidences, self.model)
-            self.model.dialogs.add(dialog)
-            dialog.show()
+        dialog = DialogEvidenceStatus(self.model)
+        dialog.exec_()
 
     @QtCore.pyqtSlot()
     def prune_gene_trees(self):

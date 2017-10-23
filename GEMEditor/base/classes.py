@@ -1,3 +1,4 @@
+from PyQt5.QtWidgets import QProgressDialog
 
 
 class BaseModelItem:
@@ -80,3 +81,19 @@ class BaseReferenceElement:
             super(BaseReferenceElement, self).gem_prepare_deletion()
         except AttributeError:
             pass
+
+
+class ProgressDialog(QProgressDialog):
+    def __init__(self, parent, title=None, label="", min=0, max=100, min_duration=500):
+        super(ProgressDialog, self).__init__(parent)
+        self.setWindowTitle(title)
+        self.setLabelText(label)
+        self.setMinimum(min)
+        self.setMaximum(max)
+        self.setMinimumDuration(min_duration)
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.close()

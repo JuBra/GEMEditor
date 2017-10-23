@@ -408,3 +408,6 @@ class Compartment(BaseEvidenceElement):
 
     def __repr__(self):
         return str(self.id)
+
+    def __hash__(self):
+        return id(self)
