@@ -1,7 +1,8 @@
 import logging
 import re
+import json
 from collections import defaultdict
-from PyQt5.QtWidgets import QMessageBox, QApplication, QProgressDialog
+from PyQt5.QtWidgets import QMessageBox, QApplication, QProgressDialog, QFileDialog
 from PyQt5 import QtSql
 from GEMEditor.database.create import get_database_connection
 from GEMEditor.database.base import DatabaseWrapper
@@ -454,3 +455,64 @@ def update_metabolites_from_database(model, progress, update_names=False, update
                 updates["metabolite_attributes"].add(metabolite)
 
     return updates
+
+
+def load_mapping(model, path):
+    """ Load database mapping from file
+
+    Parameters
+    ----------
+    model: GEMEditor.cobraClasses.Model
+
+    Returns
+    -------
+
+    """
+
+    # Abort if database mapping is wrong
+    if not model or not path:
+        return
+
+    try:
+        with open(path) as json_file:
+            data = json.load(json_file)
+        assert isinstance(data, dict)
+    except Exception as e:
+        QMessageBox().critical(None, "Error", "Error loading file. The file is not properly formatted!\n{}".format(str(e)))
+    else:
+        substituted = dict()
+        for key, value in data.items():
+            if key in model.metabolites:
+                item = model.metabolites.get_by_id(key)
+            elif key in model.reactions:
+                item = model.reactions.get_by_id(key)
+            else:
+                continue
+
+            substituted[item] = value
+
+        model.database_mapping.update(substituted)
+        QMessageBox().information(None, "Success", "Mapping loaded!")
+
+
+def store_mapping(model, path):
+    """ Dump the mapping to file
+
+    Parameters
+    ----------
+    model: GEMEditor.cobraClasses.Model
+    path: str
+
+    Returns
+    -------
+    None
+    """
+
+    if not all((model, model.database_mapping, path)):
+        return
+
+    # Substitute database items for their id
+    substituted = dict((key.id, value) for key, value in model.database_mapping.items())
+
+    with open(path, "w") as open_file:
+        open_file.write(json.dumps(substituted))

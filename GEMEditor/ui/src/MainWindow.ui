@@ -154,12 +154,22 @@
     <property name="title">
      <string>MetaNetX</string>
     </property>
+    <widget class="QMenu" name="menuMapping">
+     <property name="title">
+      <string>Mapping</string>
+     </property>
+     <addaction name="action_mapping_load"/>
+     <addaction name="action_mapping_save"/>
+     <addaction name="separator"/>
+     <addaction name="actionAuto_annotate"/>
+     <addaction name="actionCheck_consistency"/>
+     <addaction name="separator"/>
+     <addaction name="actionUpdate_mapping"/>
+    </widget>
     <addaction name="actionAdd_Metabolite"/>
     <addaction name="actionAdd_Reactions"/>
     <addaction name="separator"/>
-    <addaction name="actionAuto_annotate"/>
-    <addaction name="actionCheck_consistency"/>
-    <addaction name="actionUpdate_mapping"/>
+    <addaction name="menuMapping"/>
     <addaction name="separator"/>
     <addaction name="actionUpdate_database"/>
    </widget>
@@ -381,6 +391,16 @@
   <action name="actionUpdate_mapping">
    <property name="text">
     <string>Update mapping</string>
+   </property>
+  </action>
+  <action name="action_mapping_load">
+   <property name="text">
+    <string>Load from file</string>
+   </property>
+  </action>
+  <action name="action_mapping_save">
+   <property name="text">
+    <string>Save to file</string>
    </property>
   </action>
  </widget>

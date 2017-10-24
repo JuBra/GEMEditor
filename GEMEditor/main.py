@@ -18,7 +18,7 @@ from GEMEditor.analysis.formula import update_formulae_iteratively
 from GEMEditor.analysis.duplicates import get_duplicated_metabolites
 from GEMEditor.connect.checkversion import UpdateCheck
 from GEMEditor.database.create import create_database_de_novo, database_exists
-from GEMEditor.database.model import run_auto_annotation, run_check_consistency, update_metabolite_database_mapping
+from GEMEditor.database.model import run_auto_annotation, run_check_consistency, update_metabolite_database_mapping, load_mapping, store_mapping
 from GEMEditor.database.query import DialogDatabaseSelection
 from GEMEditor.database.base import DatabaseWrapper
 from GEMEditor.base.functions import merge_groups_by_overlap
@@ -84,6 +84,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # MetaNetX menu
         self.actionAdd_Metabolite.triggered.connect(self.add_metabolite_from_database)
         self.actionAdd_Reactions.triggered.connect(self.add_reaction_from_database)
+
+        ### Mapping
+        self.action_mapping_load.triggered.connect(self.db_mapping_load_mapping)
+        self.action_mapping_save.triggered.connect(self.db_mapping_save_mapping)
         self.actionAuto_annotate.triggered.connect(self.auto_annotate)
         self.actionCheck_consistency.triggered.connect(self.check_consistency)
         self.actionUpdate_mapping.triggered.connect(self.database_update_mapping)
@@ -154,6 +158,18 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 model = cobra.io.load_json_model(filename)
                 self.set_model(model, filename)
                 self.modelLoaded(True)
+
+    @QtCore.pyqtSlot()
+    def db_mapping_load_mapping(self):
+        filename, _ = QFileDialog.getOpenFileName(self, self.tr("Open mapping"), "",
+                                                  self.tr("Json files (*.json)"))
+        load_mapping(self.model, filename)
+
+    @QtCore.pyqtSlot()
+    def db_mapping_save_mapping(self):
+        filename, _ = QFileDialog.getSaveFileName(self, self.tr("Save Model"), "",
+                                                  self.tr("Json files (*.json)"))
+        store_mapping(self.model, filename)
 
     @QtCore.pyqtSlot()
     def saveModel(self):
@@ -509,4 +525,3 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             event.accept()
         else:
             event.ignore()
-
