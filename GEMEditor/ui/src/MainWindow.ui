@@ -320,6 +320,10 @@
    </property>
   </action>
   <action name="actionCheck_evidences">
+   <property name="icon">
+    <iconset resource="../../icons/icons.qrc">
+     <normaloff>:/check_evidence</normaloff>:/check_evidence</iconset>
+   </property>
    <property name="text">
     <string>Check evidences</string>
    </property>
@@ -335,6 +339,10 @@
    </property>
   </action>
   <action name="actionAdd_batch">
+   <property name="icon">
+    <iconset resource="../../icons/icons.qrc">
+     <normaloff>:/batch_evidence</normaloff>:/batch_evidence</iconset>
+   </property>
    <property name="text">
     <string>Add batch</string>
    </property>

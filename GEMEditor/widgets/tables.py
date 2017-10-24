@@ -242,7 +242,7 @@ class ModelTestTable(ElementTable):
         elif solution.status != "optimal":
             # Erroneous solution
             status_item.setText(solution.status)
-            status_item.setForeground(QBrush(Qt.darkYellow, Qt.SolidPattern))
+            status_item.setForeground(QBrush(Qt.darkMagenta, Qt.SolidPattern))
             status_item.link = None
         elif passed:
             # Solution is optimal and passes test requirements
