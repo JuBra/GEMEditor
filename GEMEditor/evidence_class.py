@@ -212,7 +212,7 @@ class Evidence(BaseReferenceElement):
         try:
             self._fixes[self.assertion](self)
             return True
-        except (KeyError, AttributeError):
+        except (KeyError, AttributeError, NotImplementedError):
             return False
 
     def __str__(self):

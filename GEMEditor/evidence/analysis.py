@@ -1,7 +1,7 @@
 from collections import defaultdict
-from PyQt5.QtWidgets import QDialog, QTreeView, QTableView, QProgressDialog
+from PyQt5.QtWidgets import QDialog, QTreeView, QTableView, QProgressDialog, QAction, QMenu, QMessageBox
 from PyQt5.QtGui import QStandardItem
-from PyQt5.QtCore import QSortFilterProxyModel, QSettings, pyqtSlot
+from PyQt5.QtCore import QSortFilterProxyModel, QSettings, pyqtSlot, QPoint, Qt
 from GEMEditor.evidence.assertions import assertion_to_group
 from GEMEditor.widgets.tables import EvidenceTable
 from GEMEditor.widgets.proxymodels import RecursiveProxyFilter
@@ -26,6 +26,8 @@ class DialogEvidenceStatus(QDialog, Ui_DialogEvidenceStatus):
         self.tabWidget.addTab(self.tab_error, "Errors")
 
         self.finished.connect(self.save_dialog_state)
+        self.tab_failing.dataView.customContextMenuRequested.connect(self.showContextMenu)
+        self.tab_failing.dataView.setContextMenuPolicy(Qt.CustomContextMenu)
 
         self.update_evidences()
         self.restore_dialog_geometry()
@@ -41,11 +43,15 @@ class DialogEvidenceStatus(QDialog, Ui_DialogEvidenceStatus):
         self.populate_tree(self.tab_conflict.datatable, conflicts, EvidenceTable.row_from_item)
         self.tab_conflict.dataView.expandAll()
 
-        # Set labels
-        self.tabWidget.setTabText(0, "Conflicts({0!s})".format(len(conflicts)))
-        self.tabWidget.setTabText(1, "Failing({0!s})".format(len(failing)))
-        self.tabWidget.setTabText(2, "Errors({0!s})".format(len(error)))
+        self.update_labels()
         progress.close()
+
+    @pyqtSlot()
+    def update_labels(self):
+        # Set labels
+        self.tabWidget.setTabText(0, "Conflicts({0!s})".format(self.tab_conflict.datatable.rowCount()))
+        self.tabWidget.setTabText(1, "Failing({0!s})".format(self.tab_failing.datatable.rowCount()))
+        self.tabWidget.setTabText(2, "Errors({0!s})".format(self.tab_error.datatable.rowCount()))
 
     @staticmethod
     def populate_tree(data_model, items, row_factory):
@@ -65,6 +71,57 @@ class DialogEvidenceStatus(QDialog, Ui_DialogEvidenceStatus):
                     root_item.setChild(i, group_item)
                 else:
                     root_item.appendRow(row_factory(item_list[0]))
+
+    @pyqtSlot(QPoint)
+    def showContextMenu(self, pos):
+        """ Show context menu
+
+        Parameters
+        ----------
+        pos: QPoint
+
+        Returns
+        -------
+        None
+        """
+        menu = QMenu()
+        index = self.tab_failing.dataView.indexAt(pos)
+        if index.isValid():
+            action_fix_evidence = QAction(self.tr("Fix evidence"), menu)
+            action_fix_evidence.triggered.connect(self.fix_failing)
+            menu.addAction(action_fix_evidence)
+            menu.exec_(self.tab_failing.dataView.viewport().mapToGlobal(pos))
+
+    @pyqtSlot()
+    def fix_failing(self):
+        """ Fix the selected evidence item"""
+        view = self.tab_failing.dataView
+        proxy = self.tab_failing.proxymodel
+        table = self.tab_failing.datatable
+
+        indices = view.selectedIndexes()
+        first_index = sorted(indices, key=lambda x: x.column())[0]
+        real_index = proxy.mapToSource(first_index)
+        item = table.itemFromIndex(real_index)
+        parent = item.parent()
+        if parent is None:
+            if item.child(0, 0):
+                evidence = item.child(0,0).link
+            else:
+                evidence = item.link
+
+            if evidence.fix():
+                table.removeRow(real_index.row())
+            else:
+                QMessageBox().warning(None, "Fix evidence", "Fixing evidence failed!")
+        else:
+            if item.link.fix():
+                parent_idx = table.indexFromItem(parent)
+                table.removeRow(parent_idx.row())
+            else:
+                QMessageBox().warning(None, "Fix evidence", "Fixing evidence failed!")
+
+        self.update_labels()
 
     @pyqtSlot()
     def save_dialog_state(self):
