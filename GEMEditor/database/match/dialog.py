@@ -13,9 +13,13 @@ class ManualMatchDialog(QDialog, Ui_ManualMatchDialog):
     def __init__(self, parent=None, unmatched_items=None):
         super(ManualMatchDialog, self).__init__(parent)
         self.setupUi(self)
-        self.unmatched_items = unmatched_items or []
+
+        # Store unmatched item for iteration
+        self.unmatched_items = unmatched_items or {}
         if isinstance(unmatched_items, dict):
             self.unmatched_items = list(unmatched_items.items())
+            # Sort unmatched according to candidates - easy choices first
+            self.unmatched_items.sort(key=lambda x: len(x[1]))
 
         # Keep track of the current metabolite
         self.current_index = -1
@@ -75,7 +79,11 @@ class ManualMatchDialog(QDialog, Ui_ManualMatchDialog):
 
         # Clear existing widgets
         for idx in reversed(range(self.stackedWidget_database.count())):
-            self.stackedWidget_database.removeWidget(self.stackedWidget_database.widget(idx))
+            widget = self.stackedWidget_database.widget(idx)
+            self.stackedWidget_database.removeWidget(widget)
+            # Delete widget in order to avoid lagging
+            # when changing widget
+            widget.deleteLater()
 
         # Add new widgets
         for entry in entries:
@@ -99,11 +107,17 @@ class ManualMatchDialog(QDialog, Ui_ManualMatchDialog):
             # Update current items
             self.current_index = new_idx
             self.current_metabolite = metabolite
-            self.current_entries = entries
+
+            # Sort selected entry to be on index 0
+            if metabolite in self.manual_mapped:
+                mapped_value = self.manual_mapped[metabolite]
+                self.current_entries = sorted(entries, key=lambda x: x != mapped_value)
+            else:
+                self.current_entries = entries
 
             # Update display
             self.populate_model_metabolite(metabolite)
-            self.populate_database_entries(entries)
+            self.populate_database_entries(self.current_entries)
             self.update_item_buttons(new_idx)
 
     def update_entry_index(self, new_idx):
@@ -151,10 +165,10 @@ class ManualMatchDialog(QDialog, Ui_ManualMatchDialog):
         """ Update selection button and background """
         if self.entry_is_active_mapped(self.current_entry_id):
             self.button_select.setText("deselect")
-            self.stackedWidget_database.setStyleSheet("QStackedWidget{background-color: #d9f2e4;}")
+            self.groupBox_database.setStyleSheet("QGroupBox{background-color: #d9f2e4;}")
         else:
             self.button_select.setText("select")
-            self.stackedWidget_database.setStyleSheet("QStackedWidget{background-color: none;}")
+            self.groupBox_database.setStyleSheet("QGroupBox{background-color: none;}")
 
     @QtCore.pyqtSlot(int)
     def update_database_buttons(self, idx):

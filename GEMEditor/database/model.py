@@ -135,6 +135,19 @@ def update_reaction_database_mapping(model, progress, parent=None):
             progress.setValue(i)
             QApplication.processEvents()
 
+            # First try to map by annotation
+            ids_from_annotation = set()
+            for annotation in reaction.annotation:
+                ids = database.get_ids_from_annotation(annotation.identifier,
+                                                       annotation.collection)
+                ids_from_annotation.update(ids)
+
+            # Store mapping and skip mapping by database signature
+            if ids_from_annotation:
+                model.database_mapping[reaction] = list(ids_from_annotation)
+                LOGGER.debug("Reaction {0!s} mapped to {1!s} by annotation".format(reaction, model.database_mapping[reaction]))
+                continue
+
             # Store expected metabolite ids
             entry_signature = set()
 

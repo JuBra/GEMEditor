@@ -29,7 +29,7 @@ class Ui_MetaboliteEntryDisplayWidget(object):
         sizePolicy.setHeightForWidth(self.label_name.sizePolicy().hasHeightForWidth())
         self.label_name.setSizePolicy(sizePolicy)
         self.label_name.setText("")
-        self.label_name.setWordWrap(False)
+        self.label_name.setWordWrap(True)
         self.label_name.setObjectName("label_name")
         self.formLayout.setWidget(0, QtWidgets.QFormLayout.FieldRole, self.label_name)
         self.label_4 = QtWidgets.QLabel(MetaboliteEntryDisplayWidget)

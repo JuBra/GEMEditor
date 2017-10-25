@@ -26,6 +26,7 @@ class Ui_Form(object):
         self.formLayout.setWidget(1, QtWidgets.QFormLayout.LabelRole, self.label_2)
         self.label_names = QtWidgets.QLabel(Form)
         self.label_names.setText("")
+        self.label_names.setWordWrap(True)
         self.label_names.setObjectName("label_names")
         self.formLayout.setWidget(1, QtWidgets.QFormLayout.FieldRole, self.label_names)
         self.label_3 = QtWidgets.QLabel(Form)

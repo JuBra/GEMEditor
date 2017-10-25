@@ -1,11 +1,16 @@
 import os
 import sqlite3
+import logging
 from PyQt5 import QtCore, QtSql
 from PyQt5.QtWidgets import QMessageBox, QWidget, QTableWidgetItem
 from GEMEditor.cobraClasses import Metabolite, Reaction
 from GEMEditor.data_classes import Annotation
 from GEMEditor.database import database_path as DB_PATH
 from GEMEditor.database.ui import Ui_MetaboliteEntryDisplayWidget, Ui_ReactionEntryDisplayWidget
+
+
+LOGGER = logging.getLogger(__name__)
+
 
 query_identifier_from_metabolite_id = """SELECT resource_id, name, identifier 
 FROM (SELECT * FROM metabolite_ids WHERE metabolite_id = ?) AS temp 
@@ -176,7 +181,11 @@ class DatabaseWrapper:
     def get_ids_from_annotation(self, identifier, collection):
         # Get resource type from collection
         self.cursor.execute(query_resource_id_and_type_from_collection, (collection,))
-        resource_id, resource_type = self.cursor.fetchone()
+        try:
+            resource_id, resource_type = self.cursor.fetchone()
+        except TypeError:
+            LOGGER.debug("Resource {0!s} not in database.".format(collection))
+            return []
 
         # Return the identifier from the annotation
         if resource_type == "metabolite":
@@ -404,8 +413,7 @@ class DatabaseEntryWidget(QWidget):
         """
 
         list_widget.clear()
-        for entry in synonyms:
-            list_widget.addItem(entry)
+        list_widget.addItems(synonyms)
 
 
 class MetaboliteEntryDisplayWidget(DatabaseEntryWidget, Ui_MetaboliteEntryDisplayWidget):
