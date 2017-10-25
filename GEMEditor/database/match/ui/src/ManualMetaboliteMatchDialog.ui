@@ -66,6 +66,13 @@
           </widget>
          </item>
          <item>
+          <widget class="QPushButton" name="button_select">
+           <property name="text">
+            <string>select</string>
+           </property>
+          </widget>
+         </item>
+         <item>
           <widget class="QPushButton" name="button_next_entry">
            <property name="text">
             <string>next</string>

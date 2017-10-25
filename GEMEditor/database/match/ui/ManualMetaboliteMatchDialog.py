@@ -44,6 +44,9 @@ class Ui_ManualMatchDialog(object):
         self.button_previous_entry = QtWidgets.QPushButton(ManualMatchDialog)
         self.button_previous_entry.setObjectName("button_previous_entry")
         self.horizontalLayout.addWidget(self.button_previous_entry)
+        self.button_select = QtWidgets.QPushButton(ManualMatchDialog)
+        self.button_select.setObjectName("button_select")
+        self.horizontalLayout.addWidget(self.button_select)
         self.button_next_entry = QtWidgets.QPushButton(ManualMatchDialog)
         self.button_next_entry.setObjectName("button_next_entry")
         self.horizontalLayout.addWidget(self.button_next_entry)
@@ -68,6 +71,7 @@ class Ui_ManualMatchDialog(object):
         self.groupBox_model.setTitle(_translate("ManualMatchDialog", "Model metabolite"))
         self.groupBox_database.setTitle(_translate("ManualMatchDialog", "Database entry"))
         self.button_previous_entry.setText(_translate("ManualMatchDialog", "previous"))
+        self.button_select.setText(_translate("ManualMatchDialog", "select"))
         self.button_next_entry.setText(_translate("ManualMatchDialog", "next"))
 
 from GEMEditor.widgets.model import MetaboliteDisplayWidget
