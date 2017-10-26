@@ -193,7 +193,7 @@ class DatabaseWrapper:
             return [x[0] for x in self.cursor.fetchall()]
         elif resource_type == "reaction":
             self.cursor.execute(query_reaction_id_from_annotation, (identifier, resource_id))
-            return self.cursor.fetchall()
+            return [x[0] for x in self.cursor.fetchall()]
         else:
             raise NotImplementedError
 
@@ -330,7 +330,7 @@ class DatabaseWrapper:
         self.connection.commit()
 
     def get_reaction_id_from_participant_ids(self, metabolite_ids):
-
+        LOGGER.debug("Getting common reactions from metabolite ids.")
         sets = []
         for metabolite_id in metabolite_ids:
             self.cursor.execute(query_reaction_ids_from_participating_metabolite_ids,

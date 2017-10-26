@@ -934,7 +934,9 @@ def create_indices(conn, progress):
                "CREATE INDEX idx_met_id ON metabolites (id);",  # Internal search
                "CREATE INDEX idx_met_names2 ON metabolite_names (metabolite_id);",  # User search
                "CREATE INDEX idx_met_xref_identifier2 ON metabolite_ids (metabolite_id);",  # User search
-               "CREATE INDEX idx_met_formula ON metabolites (formula);"
+               "CREATE INDEX idx_met_formula ON metabolites (formula);",
+               "CREATE INDEX idx_reactionid_participants ON reaction_participants (reaction_id)",  # Matching reaction to database
+               "CREATE INDEX idx_metid_participants ON reaction_participants (metabolite_id)"  # Matching metabolite to database
                ]
 
     progress.setMaximum(len(indices))

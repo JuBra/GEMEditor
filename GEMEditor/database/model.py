@@ -86,7 +86,7 @@ def update_metabolite_database_mapping(model, progress, parent=None):
 
     # Manual match ambiguous items
     if not progress.wasCanceled() and ambiguous_matches:
-        LOGGER.debug("There are ambiguously mapped metabolites")
+        LOGGER.debug("There are {0!s} ambiguously mapped metabolites".format(len(ambiguous_matches)))
 
         dialog = ManualMatchDialog(parent, unmatched_items=ambiguous_matches)
         dialog.exec_()
@@ -128,8 +128,10 @@ def update_reaction_database_mapping(model, progress, parent=None):
         for i, reaction in enumerate(model.reactions):
             if reaction.boundary or reaction in model.database_mapping or progress.wasCanceled():
                 LOGGER.debug("Reaction {0!s} skipped - Boundary, "
-                             "already mapped or progress cancelled.".format(reaction))
+                             "already mapped or progress cancelled.".format(reaction.id))
                 continue
+            else:
+                LOGGER.debug("Mapping {0!s}".format(reaction.id))
 
             # Update progress
             progress.setValue(i)
@@ -145,19 +147,16 @@ def update_reaction_database_mapping(model, progress, parent=None):
             # Store mapping and skip mapping by database signature
             if ids_from_annotation:
                 model.database_mapping[reaction] = list(ids_from_annotation)
-                LOGGER.debug("Reaction {0!s} mapped to {1!s} by annotation".format(reaction, model.database_mapping[reaction]))
+                LOGGER.debug("Reaction {0!s} mapped to {1!s} by annotation".format(reaction.id, model.database_mapping[reaction]))
                 continue
 
             # Store expected metabolite ids
             entry_signature = set()
 
-            if any(m not in model.database_mapping for m in reaction.metabolites):
+            if any(m not in model.database_mapping or not isinstance(model.database_mapping[m], int)
+                   for m in reaction.metabolites):
                 # All elements must be mapped to the database
-                LOGGER.debug("Not all metabolites in reaction {0!s} have been mapped to database".format(reaction))
-                continue
-            elif any(not isinstance(model.database_mapping[m], int) for m in reaction.metabolites):
-                # All elements must be uniquely mapped to the database
-                LOGGER.debug("Not all metabolites in reaction {0!s} have been mapped to a unique database entry".format(reaction))
+                LOGGER.debug("Not all metabolites in reaction {0!s} have been uniquely mapped to database".format(reaction.id))
                 continue
             else:
                 entry_signature.update(model.database_mapping[m] for m in reaction.metabolites)
@@ -167,10 +166,11 @@ def update_reaction_database_mapping(model, progress, parent=None):
 
             # Get reaction database entries that match the signature
             common_reaction_ids = database.get_reaction_id_from_participant_ids(clean_signature)
+            LOGGER.debug("Common reaction ids: {0!s}".format(common_reaction_ids))
 
             if not common_reaction_ids:
                 # No reaction found that matches the current reaction
-                LOGGER.debug("No reaction found in database containing all metabolites in reaction {0!s}".format(reaction))
+                LOGGER.debug("No reaction found in database containing all metabolites in reaction {0!s}".format(reaction.id))
                 continue
             else:
                 putative_matches = []
@@ -185,14 +185,14 @@ def update_reaction_database_mapping(model, progress, parent=None):
                         putative_matches.append(reaction_id)
 
                 if not putative_matches:
-                    LOGGER.debug("No corresponding reaction found in database for reaction {0!s}".format(reaction))
+                    LOGGER.debug("No corresponding reaction found in database for reaction {0!s}".format(reaction.id))
                     continue
                 elif len(putative_matches) == 1:
                     model.database_mapping[reaction] = putative_matches[0]
-                    LOGGER.debug("Reaction {0!s} mapped to {1!s}".format(reaction, model.database_mapping[reaction]))
                 else:
                     model.database_mapping[reaction] = putative_matches
-                    LOGGER.debug("Reaction {0!s} mapped to {1!s}".format(reaction, model.database_mapping[reaction]))
+
+                LOGGER.debug("Reaction {0!s} mapped to {1!s}".format(reaction.id, model.database_mapping[reaction]))
 
 
 def run_auto_annotation(model, progress, parent):
