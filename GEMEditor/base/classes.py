@@ -97,3 +97,9 @@ class ProgressDialog(QProgressDialog):
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.close()
+
+    def close(self):
+        super(ProgressDialog, self).close()
+        # Schedule dialog for deletion
+        # Fixes external destruction warning
+        self.deleteLater()
