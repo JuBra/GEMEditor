@@ -240,3 +240,23 @@ def new_location(new_index, n):
     while new_index[n] != n:
         n = new_index[n]
     return n
+
+
+def unpack(iterable, cls):
+    """ Unpack the value
+
+    Parameters
+    ----------
+    iterable
+    cls
+
+    Returns
+    -------
+
+    """
+
+    if len(iterable) == 1:
+        return iterable.pop()
+    else:
+        return cls(iterable)
+

@@ -135,9 +135,9 @@ class DatabaseWrapper:
         list
         """
 
-        if entry_type == "Metabolite":
+        if entry_type.lower() == "metabolite":
             self.cursor.execute(query_metabolite_synonyms_from_id, (str(identifier),))
-        elif entry_type == "Reaction":
+        elif entry_type.lower() == "reaction":
             self.cursor.execute(query_reaction_synonyms_from_id, (str(identifier),))
         else:
             raise ValueError("Unexpected entry_type: '{0!s}'".format(entry_type))
@@ -209,9 +209,9 @@ class DatabaseWrapper:
         -------
 
         """
-        if entry_type == "Metabolite":
+        if entry_type.lower() == "metabolite":
             self.cursor.execute(query_metabolite_id_from_name, (str(name),))
-        elif entry_type == "Reaction":
+        elif entry_type.lower() == "reaction":
             self.cursor.execute(query_reaction_id_from_name, (str(name),))
         else:
             raise ValueError("Unexpected entry_type: '{0!s}'".format(entry_type))
@@ -289,6 +289,9 @@ class DatabaseWrapper:
 
         """
         reaction = Reaction()
+        self.cursor.execute(query_reaction_info_from_id, (identifier,))
+        if not self.cursor.fetchone():
+            return
         annotations = self.get_annotations_from_id(identifier, "Reaction")
         reaction.annotation.update(annotations)
         return reaction
@@ -296,22 +299,6 @@ class DatabaseWrapper:
     def get_miriam_collections(self, type="metabolite"):
         self.cursor.execute(query_miriam_resources, (type.lower(),))
         return self.cursor.fetchall()
-
-    def set_selected_collections(self, collections):
-        """ Set the selected annotation sources
-
-        In order to only add the annotations of a subset of databases
-        used in MetaNetX the corresponding
-
-        Parameters
-        ----------
-        collections: set
-
-        Returns
-        -------
-
-        """
-        self.selected_collections = collections
 
     def update_use_resource(self, resource, value):
         """ Update the use resource flag in the resource table

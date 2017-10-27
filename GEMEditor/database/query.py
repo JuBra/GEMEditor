@@ -530,6 +530,9 @@ def add_reaction_from_database(model, database_id):
 
     # Setup new reaction
     new_reaction = database.get_reaction_from_id(identifier=database_id)
+    if new_reaction is None:
+        return None
+
     new_reaction.id = generate_copy_id("New", model.reactions, suffix="")
 
     # Get reaction participants

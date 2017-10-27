@@ -106,3 +106,19 @@ class Test_new_location:
     def test_get_new_location(self):
         new_index = [0, 0, 1, 2, 3]
         assert new_location(new_index, 4) == 0
+
+
+class Test_unpack:
+
+    def test_return_single_value(self):
+        assert unpack(set([0]), list) == 0
+        assert unpack([0], list) == 0
+
+    def test_repackage_multiple_valeus(self):
+        return_value = unpack([1, 2], list)
+        assert return_value == [1, 2]
+        assert isinstance(return_value, list)
+
+        return_value = unpack([1, 2], set)
+        assert return_value == set([1, 2])
+        assert isinstance(return_value, set)
