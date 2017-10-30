@@ -933,6 +933,20 @@ class AnalysesTab(QWidget, Ui_AnalysisTab):
         self.dualValueWindow.show()
         self.model.update_dialogs(solution)
 
+    def open_map(self, solution):
+        if solution.status != "optimal":
+            self.show_infeasible_message(solution)
+            return
+
+        # Get maps
+        try:
+            maps = self.window().maps
+        except AttributeError:
+            return
+        else:
+            # Todo: implement the selection of maps and dialog opening
+            QMessageBox().critical(None, "Not implemented", "This feature is not implemented yet.")
+
     def show_infeasible_message(self, solution):
         QMessageBox.critical(self,
                              self.tr("Error in solution"),
@@ -968,7 +982,7 @@ class AnalysesTab(QWidget, Ui_AnalysisTab):
         except AttributeError:
             return
         else:
-            self.open_result(solution)
+            self.open_map(solution)
 
     @QtCore.pyqtSlot()
     def show_solution_as_table(self):
