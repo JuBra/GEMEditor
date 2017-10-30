@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>Form</class>
- <widget class="QWidget" name="Form">
+ <class>SolutionTableWidget</class>
+ <widget class="QWidget" name="SolutionTableWidget">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>297</width>
+    <width>242</width>
     <height>52</height>
    </rect>
   </property>
@@ -16,6 +16,29 @@
   <layout class="QHBoxLayout" name="horizontalLayout">
    <item>
     <layout class="QGridLayout" name="gridLayout">
+     <item row="0" column="2" rowspan="2">
+      <widget class="QPushButton" name="button_open_solution_table">
+       <property name="statusTip">
+        <string>Open solution table</string>
+       </property>
+       <property name="whatsThis">
+        <string>Open solution table</string>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="icon">
+        <iconset resource="../../icons/icons.qrc">
+         <normaloff>:/solution_table_icon</normaloff>:/solution_table_icon</iconset>
+       </property>
+       <property name="iconSize">
+        <size>
+         <width>18</width>
+         <height>18</height>
+        </size>
+       </property>
+      </widget>
+     </item>
      <item row="0" column="0">
       <widget class="QLabel" name="label">
        <property name="text">
@@ -56,23 +79,35 @@
        </property>
       </widget>
      </item>
+     <item row="0" column="3" rowspan="2">
+      <widget class="QPushButton" name="button_open_solution_map">
+       <property name="statusTip">
+        <string>Show solution on map</string>
+       </property>
+       <property name="whatsThis">
+        <string>Show solution on map</string>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="icon">
+        <iconset resource="../../icons/icons.qrc">
+         <normaloff>:/solution_map_icon</normaloff>:/solution_map_icon</iconset>
+       </property>
+       <property name="iconSize">
+        <size>
+         <width>18</width>
+         <height>18</height>
+        </size>
+       </property>
+      </widget>
+     </item>
     </layout>
-   </item>
-   <item>
-    <widget class="QPushButton" name="button_show_solution">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="text">
-      <string>Show</string>
-     </property>
-    </widget>
    </item>
   </layout>
  </widget>
- <resources/>
+ <resources>
+  <include location="../../icons/icons.qrc"/>
+ </resources>
  <connections/>
 </ui>

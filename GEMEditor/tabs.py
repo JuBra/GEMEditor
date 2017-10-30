@@ -9,8 +9,9 @@ from GEMEditor.ui.model_stats_tab import Ui_model_stats_tab
 from GEMEditor.ui.StandardTab import Ui_StandardTab
 from PyQt5 import QtCore, QtGui
 from PyQt5.QtWidgets import QWidget, QMessageBox, QApplication, QAction, QMenu, QInputDialog, QProgressDialog, \
-    QComboBox, QStatusBar, QErrorMessage, QHBoxLayout, QPushButton, QFormLayout, QLabel
-from PyQt5.QtCore import QSortFilterProxyModel
+    QStatusBar, QErrorMessage, QListWidgetItem
+from PyQt5.QtCore import QSortFilterProxyModel, QSize
+from cobra.core.solution import LegacySolution, Solution
 
 from GEMEditor.dialogs.reaction import ReactionInputDialog
 from GEMEditor.dialogs.metabolite import MetaboliteEditDialog
@@ -22,6 +23,7 @@ from GEMEditor.dialogs.modeltest import EditModelTestDialog
 from GEMEditor.analysis.model_test import run_test
 from GEMEditor.widgets.proxymodels import ReactionProxyFilter, MetaboliteProxyFilter, GeneProxyFilter
 from GEMEditor.analysis.model_test import get_original_settings
+from GEMEditor.ui import Ui_AnalysisTab, Ui_SolutionTableWidget
 
 
 class StandardTab(QWidget, Ui_StandardTab):
@@ -826,65 +828,60 @@ class ModelTestsTab(StandardTab):
         menu.exec_(self.dataView.viewport().mapToGlobal(pos))
 
 
-class AnalysesTab(QWidget):
+class AnalysesTab(QWidget, Ui_AnalysisTab):
+
     def __init__(self):
-        QWidget.__init__(self)
+        super(AnalysesTab, self).__init__()
+        self.setupUi(self)
         self.model = None
 
         self.analyses = ("Flux Balance Analysis", "Parsimonious FBA", "Reaction Knockout", "Gene Knockout", "Flux Variability Analysis")
-        self.createComponents()
-        self.createLayout()
-        self.createConnects()
+        self.populate_analyses()
 
+        self.solvers = list(cobra.solvers.solver_dict.keys())
+        self.populate_solvers()
 
-    def createComponents(self):
-        self.solverSelection = QComboBox(self)
-        if list(cobra.solvers.solver_dict.keys()):
-            self.solverSelection.addItem(self.tr("-- Select Solver --"))
-            self.solverSelection.addItems(list(cobra.solvers.solver_dict.keys()))
+        self.button_run.setEnabled(False)
+        self.combo_solver.setEnabled(False)
+
+        # Connect signals
+        self.button_run.clicked.connect(self.run_analysis)
+        self.combo_analysis.currentIndexChanged.connect(self.toggle_button)
+        self.combo_solver.currentIndexChanged.connect(self.toggle_button)
+        self.combo_analysis.currentIndexChanged.connect(self.toggle_solver_selection)
+
+        self.list_solutions.addItem("No solution")
+        self.list_solutions.setEnabled(False)
+
+    def populate_solvers(self):
+        if self.solvers:
+            self.combo_solver.addItems(self.solvers)
         else:
-            self.solverSelection.addItem(self.tr("No solver found!"))
-        self.solverSelection.setEnabled(False)
-        self.analysisSelection = QComboBox(self)
-        self.analysisSelection.addItem(self.tr("-- Select Analysis --"))
-        self.analysisSelection.addItems(self.analyses)
-        self.executeButton = QPushButton(self.tr("Run"))
-        self.executeButton.setEnabled(False)
+            self.combo_solver.clear()
+            self.combo_solver.addItem("No solver found!")
+            self.combo_solver.setEnabled(False)
 
-
-    def createLayout(self):
-        self.tabLayout = QHBoxLayout()
-        self.selectionLayout = QFormLayout()
-        self.selectionLayout.addRow(QLabel(self.tr("Select Analysis:")), self.analysisSelection )
-        self.selectionLayout.addRow(QLabel(self.tr("Select solver:")), self.solverSelection)
-        self.selectionLayout.addWidget(self.executeButton)
-        self.tabLayout.addLayout(self.selectionLayout)
-        self.tabLayout.addStretch(1)
-        self.setLayout(self.tabLayout)
-
-    def createConnects(self):
-        self.executeButton.clicked.connect(self.run_analysis)
-        self.analysisSelection.currentIndexChanged.connect(self.activateSolverSelection)
-        self.analysisSelection.currentIndexChanged.connect(self.activateRunButton)
-        self.solverSelection.currentIndexChanged.connect(self.activateRunButton)
+    def populate_analyses(self):
+        self.combo_analysis.addItems(self.analyses)
 
     @QtCore.pyqtSlot()
-    def activateRunButton(self):
-        if self.analysisSelection.currentIndex() != 0 and self.solverSelection.currentIndex() != 0:
-            self.executeButton.setEnabled(True)
-        else:
-            self.executeButton.setEnabled(False)
+    def toggle_button(self):
+        self.button_run.setEnabled(self.combo_solver.currentIndex() != 0 and
+                                   self.combo_analysis.currentIndex() != 0)
+
+    @QtCore.pyqtSlot()
+    def toggle_solver_selection(self):
+        self.combo_solver.setEnabled(self.combo_analysis.currentIndex() != 0)
 
     @QtCore.pyqtSlot()
     def run_analysis(self):
         if not self.model.objective:
-            QMessageBox.critical(self,
-                                       self.tr("Error in objective values"),
-                                       self.tr("The objective value of all reactions is 0!\nPlease specify the reactions to optimize for."),
-                                       QMessageBox.Ok)
+            QMessageBox.critical(self, self.tr("Error in objective values"),
+                                 self.tr("The objective value of all reactions is 0!\nPlease specify the reactions to optimize for."),
+                                 QMessageBox.Ok)
 
-        selected_analysis = self.analysisSelection.currentText()
-        selected_solver = self.solverSelection.currentText()
+        selected_analysis = self.combo_analysis.currentText()
+        selected_solver = self.combo_solver.currentText()
 
         # If analysis is Flux Balance Analysis
         if selected_analysis == "Flux Balance Analysis":
@@ -899,16 +896,13 @@ class AnalysesTab(QWidget):
         elif selected_analysis == "Flux Variability Analysis":
             self.run_flux_variability(selected_solver)
 
-    @QtCore.pyqtSlot()
-    def activateSolverSelection(self):
-        if self.analysisSelection.currentIndex() != 0:
-            self.solverSelection.setEnabled(True)
-        else:
-            self.solverSelection.setEnabled(False)
-
     def run_flux_balance_analysis(self, selected_solver):
         solution = self.model.optimize(solver=selected_solver)
-        self.open_result(solution)
+        if solution.status != "optimal":
+            self.show_infeasible_message(solution)
+        else:
+            self.add_solution(solution)
+            self.open_result(solution)
 
     def run_single_deletions(self):
         raise NotImplementedError
@@ -926,12 +920,7 @@ class AnalysesTab(QWidget):
 
     def open_result(self, solution):
         if solution.status != "optimal":
-            QMessageBox.critical(self,
-                                       self.tr("Error in solution"),
-                                       self.tr(
-                                           "The solution status is {0}!\nThis might be caused by erroneous boundaries or model stoichiometry!".format(
-                                               solution.status)),
-                                       QMessageBox.Ok)
+            self.show_infeasible_message(solution)
             return
 
         self.fluxValueWindow = FluxValueDialog(self.model, solution)
@@ -944,8 +933,51 @@ class AnalysesTab(QWidget):
         self.dualValueWindow.show()
         self.model.update_dialogs(solution)
 
+    def show_infeasible_message(self, solution):
+        QMessageBox.critical(self,
+                             self.tr("Error in solution"),
+                             self.tr("The solution status is {0}!\n"
+                                     "This might be caused by erroneous boundaries or model stoichiometry!".format(
+                                     solution.status)), QMessageBox.Ok)
+        return
+
     def set_model(self, model):
         self.model = model
+
+    def add_solution(self, solution):
+        if solution.status != "optimal":
+            self.show_infeasible_message(solution)
+            return
+        elif self.list_solutions.isEnabled() is False:
+            self.list_solutions.clear()
+            self.list_solutions.setEnabled(True)
+        solution_widget = QListWidgetItem()
+        solution_widget.setSizeHint(QSize(solution_widget.sizeHint().width(), 50))
+        self.list_solutions.insertItem(0, solution_widget)
+
+        # Setup solution display widget
+        display_widget = SolutionWidget(solution)
+        display_widget.button_open_solution_table.clicked.connect(self.show_solution_as_table)
+        display_widget.button_open_solution_map.clicked.connect(self.show_solution_on_map)
+        self.list_solutions.setItemWidget(solution_widget, display_widget)
+
+    @QtCore.pyqtSlot()
+    def show_solution_on_map(self):
+        try:
+            solution = self.sender().parent().get_solution()
+        except AttributeError:
+            return
+        else:
+            self.open_result(solution)
+
+    @QtCore.pyqtSlot()
+    def show_solution_as_table(self):
+        try:
+            solution = self.sender().parent().get_solution()
+        except AttributeError:
+            return
+        else:
+            self.open_result(solution)
 
 
 class ModelInfoTab(QWidget, Ui_model_stats_tab):
@@ -959,3 +991,37 @@ class ModelInfoTab(QWidget, Ui_model_stats_tab):
 
     def set_path(self, path):
         self.modelInfoWidget.set_path(path)
+
+
+class SolutionWidget(QWidget, Ui_SolutionTableWidget):
+
+    def __init__(self, solution=None):
+        super(SolutionWidget, self).__init__()
+        self.setupUi(self)
+        self.solution = solution
+        self.update_display()
+
+    def update_display(self):
+        if isinstance(self.solution, LegacySolution):
+            status, objective = self.solution.status, self.solution.f
+        elif isinstance(self.solution, Solution):
+            status, objective = self.solution.status, self.solution.objective_value
+        else:
+            status, objective = "No solution set", "-"
+
+        # Set status
+        self.label_status.setText("{0!s}".format(status))
+        if status == "optimal":
+            self.label_status.setStyleSheet("color: ForestGreen; font-weight: bold;")
+        else:
+            self.label_status.setStyleSheet("")
+
+        # Set objective value
+        try:
+            self.label_value.setText("{0:.2f}".format(objective))
+        except TypeError:
+            self.label_value.setText("{0!s}".format(objective))
+
+    def get_solution(self):
+        return self.solution
+
