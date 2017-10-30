@@ -317,7 +317,6 @@ class DatabaseWrapper:
         self.connection.commit()
 
     def get_reaction_id_from_participant_ids(self, metabolite_ids):
-        LOGGER.debug("Getting common reactions from metabolite ids.")
         sets = []
         for metabolite_id in metabolite_ids:
             self.cursor.execute(query_reaction_ids_from_participating_metabolite_ids,
@@ -338,6 +337,7 @@ class DatabaseWrapper:
     def store_database_path(database_path):
         settings = QtCore.QSettings()
         settings.setValue("DATABASE_PATH", database_path)
+        LOGGER.debug("Database path changed to: {0!s}".format(database))
         settings.sync()
 
     @staticmethod
@@ -400,7 +400,7 @@ class DatabaseEntryWidget(QWidget):
         """
 
         list_widget.clear()
-        list_widget.addItems(synonyms)
+        list_widget.addItems(sorted(synonyms))
 
 
 class MetaboliteEntryDisplayWidget(DatabaseEntryWidget, Ui_MetaboliteEntryDisplayWidget):

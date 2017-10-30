@@ -2,27 +2,107 @@ import logging
 import re
 import json
 from collections import defaultdict
-from PyQt5.QtWidgets import QMessageBox, QApplication, QProgressDialog, QFileDialog
+from PyQt5.QtWidgets import QMessageBox, QApplication, QProgressDialog
 from PyQt5 import QtSql
 from GEMEditor.database.create import get_database_connection
 from GEMEditor.database.base import DatabaseWrapper
 from GEMEditor.database.match import ManualMatchDialog
 from GEMEditor.database.query import AnnotationSettingsDialog
 from GEMEditor import formula_validator
+from GEMEditor.base.functions import unpack
 from cobra import Metabolite
 
 
 LOGGER = logging.getLogger(__name__)
 
 
-def update_metabolite_database_mapping(model, progress, parent=None):
-    """ Map all metabolites to database entries
+def map_by_annotation(database, item):
+    """ Map model item by annotation
+
+    Parameters
+    ----------
+    database:   DatabaseWrapper
+    item:       GEMEditor.cobraClasses.Metabolite or
+                GEMEditor.cobraClasses.Reaction
+
+    Returns
+    -------
+    entries
+    """
+
+    entries = set()
+    for annotation in item.annotation:
+        ids = database.get_ids_from_annotation(annotation.identifier,
+                                               annotation.collection)
+        entries.update(ids)
+    return entries
+
+
+def get_reactions_with_same_signature(database, entries, signature, ignored_ids):
+    """ Get reactions from database that match signature
+
+    Parameters
+    ----------
+    database: DatabaseWrapper
+    entries: set, Containing the reaction ids to check for same signature
+    signature: set, Containing metabolite entry ids of the metabolites in the reaction
+    ignored_ids: set, Containing the metabolite entry ids to be ignored e.g. proton
+
+    Returns
+    -------
+    set
+    """
+    matches = set()
+
+    for reaction_id in entries:
+        participants = database.get_reaction_participants_from_id(reaction_id)
+
+        reaction_signature = set([row["metabolite_id"] for row in participants if
+                                  row["metabolite_id"] not in ignored_ids])
+
+        if reaction_signature == signature:
+            matches.add(reaction_id)
+
+    return matches
+
+
+def check_ambiguous_mappings(model, parent):
+    """ Allow user to manually map ambiguously mapped metabolites
 
     Parameters
     ----------
     model: GEMEditor.cobraClasses.Model
+    parent: QWidget or None
+
+    Returns
+    -------
+    None
+    """
+
+    # Get unique mapping for multiple entries
+    # Note: check for cobra Metabolite to avoid circular dependency
+    ambiguous_matches = dict((k, v) for k, v in model.database_mapping.items()
+                             if isinstance(v, list) and isinstance(k, Metabolite))
+
+    # Manual match ambiguous items
+    if ambiguous_matches:
+        LOGGER.debug("There are {0!s} ambiguously mapped metabolites".format(len(ambiguous_matches)))
+
+        dialog = ManualMatchDialog(parent, unmatched_items=ambiguous_matches)
+        dialog.exec_()
+
+        # Add manually matched entries
+        model.database_mapping.update(dialog.manual_mapped)
+
+
+def update_metabolite_database_mapping(database, model, progress):
+    """ Map all metabolites to database entries
+
+    Parameters
+    ----------
+    database: DatabaseWrapper
+    model: GEMEditor.cobraClasses.Model
     progress: QProgressDialog
-    parent: PyQt5.QtWidgets.QWidget
 
     Returns
     -------
@@ -30,9 +110,6 @@ def update_metabolite_database_mapping(model, progress, parent=None):
     """
 
     LOGGER.debug("Updating metabolite to database mapping..")
-
-    # Setup database connection
-    database = DatabaseWrapper()
 
     # Update progress dialog
     progress.setLabelText("Mapping metabolites to database..")
@@ -66,37 +143,21 @@ def update_metabolite_database_mapping(model, progress, parent=None):
             entries.update(database.get_ids_from_formula(formula=metabolite.formula))
 
         # Add found entries to mapping
-        if len(entries) == 1:
-            model.database_mapping[metabolite] = entries.pop()
-        elif len(entries) > 1:
-            model.database_mapping[metabolite] = list(entries)
+        if entries:
+            model.database_mapping[metabolite] = unpack(entries, list)
         else:
             model.database_mapping[metabolite] = None
 
         LOGGER.debug("Metabolite {0!s} mapped to {1!s}".format(metabolite,
                                                                model.database_mapping[metabolite]))
 
-    # Close
-    database.close()
 
-    # Get unique mapping for multiple entries
-    # Note: check for cobra Metabolite to avoid circular dependency
-    ambiguous_matches = dict((k, v) for k, v in model.database_mapping.items()
-                             if isinstance(v, list) and isinstance(k, Metabolite))
+def update_reaction_database_mapping(database, model, progress):
+    """  Map reactions to the corresponding entry in the database
 
-    # Manual match ambiguous items
-    if not progress.wasCanceled() and ambiguous_matches:
-        LOGGER.debug("There are {0!s} ambiguously mapped metabolites".format(len(ambiguous_matches)))
-
-        dialog = ManualMatchDialog(parent, unmatched_items=ambiguous_matches)
-        dialog.exec_()
-
-        # Add manually matched entries
-        model.database_mapping.update(dialog.manual_mapped)
-
-
-def update_reaction_database_mapping(model, progress, parent=None):
-    """
+    1)  Use annotations to map to database
+    2)  Refine annotation mapping or do initial mapping
+        by stoichiometry
 
     Parameters
     ----------
@@ -111,91 +172,83 @@ def update_reaction_database_mapping(model, progress, parent=None):
 
     LOGGER.debug("Updating reaction to database mapping..")
 
-    with DatabaseWrapper() as database:
+    mapping = model.database_mapping
 
-        # Ignore protons when matching reactions
-        proton_entries = set()
-        for mnx_id in ("MNXM01", "MNXM1"):
-            ids = database.get_ids_from_annotation(identifier=mnx_id,
-                                                   collection="metanetx.chemical")
-            proton_entries.update(ids)
+    # Ignore protons when matching reactions
+    proton_entries = set()
+    for mnx_id in ("MNXM01", "MNXM1"):
+        ids = database.get_ids_from_annotation(identifier=mnx_id,
+                                               collection="metanetx.chemical")
+        proton_entries.update(ids)
 
-        # Update progress
-        progress.setLabelText("Mapping reactions..")
-        progress.setRange(0, len(model.reactions))
+    # Update progress
+    progress.setLabelText("Mapping reactions..")
+    progress.setRange(0, len(model.reactions))
 
-        # Match reactions
-        for i, reaction in enumerate(model.reactions):
-            if reaction.boundary or reaction in model.database_mapping or progress.wasCanceled():
-                LOGGER.debug("Reaction {0!s} skipped - Boundary, "
-                             "already mapped or progress cancelled.".format(reaction.id))
-                continue
-            else:
-                LOGGER.debug("Mapping {0!s}".format(reaction.id))
-
-            # Update progress
+    # Match reactions
+    for i, reaction in enumerate(model.reactions):
+        if progress.wasCanceled():
+            return
+        elif reaction.boundary:
+            LOGGER.debug("Skip boundary reaction {0!s}".format(reaction.id))
+            continue
+        elif reaction in mapping:
+            LOGGER.debug("Skip already mapped reaction {0!s}".format(reaction.id))
+            continue
+        else:
+            LOGGER.debug("Mapping reaction reaction {0!s}".format(reaction.id))
             progress.setValue(i)
             QApplication.processEvents()
 
-            # First try to map by annotation
-            ids_from_annotation = set()
-            for annotation in reaction.annotation:
-                ids = database.get_ids_from_annotation(annotation.identifier,
-                                                       annotation.collection)
-                ids_from_annotation.update(ids)
+        # First try to map by annotation
+        entries_by_annotation = map_by_annotation(database, reaction)
 
-            # Store mapping and skip mapping by database signature
-            if ids_from_annotation:
-                model.database_mapping[reaction] = list(ids_from_annotation)
-                LOGGER.debug("Reaction {0!s} mapped to {1!s} by annotation".format(reaction.id, model.database_mapping[reaction]))
-                continue
+        # Directly map if unique
+        if len(entries_by_annotation) == 1:
+            mapping[reaction] = entries_by_annotation.pop()
+            LOGGER.debug("Mapped to {0!s} by annotation".format(mapping[reaction]))
+            continue
 
-            # Store expected metabolite ids
-            entry_signature = set()
+        # Check if all metabolites are mapped
+        all_mapped = all(m in mapping and isinstance(mapping[m], int) for m in reaction.metabolites)
 
-            if any(m not in model.database_mapping or not isinstance(model.database_mapping[m], int)
-                   for m in reaction.metabolites):
-                # All elements must be mapped to the database
-                LOGGER.debug("Not all metabolites in reaction {0!s} have been uniquely mapped to database".format(reaction.id))
-                continue
+        if not all_mapped:
+            if entries_by_annotation:
+                mapping[reaction] = unpack(entries_by_annotation, list)
+                LOGGER.debug("Mapped to {0!s} by annotation".format(mapping[reaction]))
             else:
-                entry_signature.update(model.database_mapping[m] for m in reaction.metabolites)
+                LOGGER.debug("No match found by annotation and stoichiometry")
+            continue
 
-            # Remove proton entries
-            clean_signature = entry_signature - proton_entries
+        # Store expected metabolite ids
+        metabolite_mapping = set(mapping[m] for m in reaction.metabolites)
 
-            # Get reaction database entries that match the signature
-            common_reaction_ids = database.get_reaction_id_from_participant_ids(clean_signature)
-            LOGGER.debug("Common reaction ids: {0!s}".format(common_reaction_ids))
+        # Remove proton entries
+        clean_signature = metabolite_mapping - proton_entries
 
-            if not common_reaction_ids:
-                # No reaction found that matches the current reaction
-                LOGGER.debug("No reaction found in database containing all metabolites in reaction {0!s}".format(reaction.id))
-                continue
-            else:
-                putative_matches = []
+        # Get reaction database entries that match the signature
+        common_ids = database.get_reaction_id_from_participant_ids(clean_signature)
+        entries_by_signature = get_reactions_with_same_signature(database, common_ids,
+                                                                 clean_signature, proton_entries)
 
-                for reaction_id in common_reaction_ids:
-                    participants = database.get_reaction_participants_from_id(reaction_id)
+        # Find entries that match metabolites and annotations
+        overlap = entries_by_signature.intersection(entries_by_annotation)
 
-                    reaction_signature = set([row["metabolite_id"] for row in participants if
-                                              row["metabolite_id"] not in proton_entries])
-
-                    if reaction_signature == clean_signature:
-                        putative_matches.append(reaction_id)
-
-                if not putative_matches:
-                    LOGGER.debug("No corresponding reaction found in database for reaction {0!s}".format(reaction.id))
-                    continue
-                elif len(putative_matches) == 1:
-                    model.database_mapping[reaction] = putative_matches[0]
-                else:
-                    model.database_mapping[reaction] = putative_matches
-
-                LOGGER.debug("Reaction {0!s} mapped to {1!s}".format(reaction.id, model.database_mapping[reaction]))
+        if overlap:
+            mapping[reaction] = unpack(overlap, list)
+            LOGGER.debug("Mapped to {0!s} by annotation and stoichiometry".format(mapping[reaction]))
+        elif entries_by_signature or entries_by_annotation:
+            combination = entries_by_annotation.union(entries_by_signature)
+            mapping[reaction] = unpack(combination, list)
+            if entries_by_signature:
+                LOGGER.debug("Mapped to {0!s} by stoichiometry".format(entries_by_signature))
+            if entries_by_annotation:
+                LOGGER.debug("Mapped to {0!s} by annotation".format(entries_by_annotation))
+        else:
+            LOGGER.debug("No match by stoichiometry or annotations.")
 
 
-def run_auto_annotation(model, progress, parent):
+def run_auto_annotation(database, model, progress, parent):
     """ Run the auto annotation using the MetaNetX database
 
     Parameters
@@ -218,8 +271,8 @@ def run_auto_annotation(model, progress, parent):
     # Check that all metabolites have been mapped
     if any([m not in model.database_mapping for m in model.metabolites]):
         LOGGER.debug("There are unmapped metabolites. Running mapping..")
-        update_metabolite_database_mapping(model, progress, parent)
-        update_reaction_database_mapping(model, progress)
+        update_metabolite_database_mapping(database, model, progress)
+        update_reaction_database_mapping(database, model, progress)
 
         # Return if user cancelled during mapping metabolites
         if progress.wasCanceled():

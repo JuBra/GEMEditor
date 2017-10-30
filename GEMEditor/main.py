@@ -328,9 +328,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             return
 
         # Run update
-        with ProgressDialog(self, title="Update mapping..") as progress:
-            update_metabolite_database_mapping(self.model, progress)
-            update_reaction_database_mapping(self.model, progress)
+        with ProgressDialog(self, title="Update mapping..") as progress, DatabaseWrapper() as database:
+            update_metabolite_database_mapping(database, self.model, progress)
+            update_reaction_database_mapping(database, self.model, progress)
 
         # Success
         QMessageBox().information(None, "Success", "Metabolites have been mapped to the database.")
@@ -349,8 +349,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             return
 
         # Update annotations
-        with ProgressDialog(self, title="Updating annotations") as progress:
-            updated_items = run_auto_annotation(self.model, progress, self)
+        with ProgressDialog(self, title="Updating annotations") as progress, DatabaseWrapper() as database:
+            updated_items = run_auto_annotation(database, self.model, progress, self)
 
         # Update
         if updated_items:

@@ -128,10 +128,16 @@
      <addaction name="separator"/>
      <addaction name="actionCheck_evidences"/>
     </widget>
+    <widget class="QMenu" name="menuReferences">
+     <property name="title">
+      <string>References</string>
+     </property>
+     <addaction name="actionBrowsePubmed"/>
+    </widget>
     <addaction name="actionMaps"/>
     <addaction name="menuQuality_Control"/>
     <addaction name="menuEvidences"/>
-    <addaction name="actionBrowsePubmed"/>
+    <addaction name="menuReferences"/>
     <addaction name="separator"/>
     <addaction name="actionStatistics"/>
    </widget>
