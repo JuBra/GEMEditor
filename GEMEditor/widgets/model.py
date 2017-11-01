@@ -26,7 +26,6 @@ from GEMEditor.dialogs.evidence import EditEvidenceDialog
 from GEMEditor.widgets.baseWidgets import TableDisplayWidget
 from GEMEditor.ui.SettingDisplayWiget import Ui_SettingsDisplayWidget
 from GEMEditor.ui.MetaboliteDisplayWidget import Ui_Form as Ui_MetDisplayWidget
-from GEMEditor.widgets.ui.SolutionTableWidget import Ui_SolutionTableWidget
 
 
 class ModelDisplayWidget(QWidget, Ui_modelDisaplayWidget):
@@ -1437,27 +1436,3 @@ class MetaboliteDisplayWidget(QWidget, Ui_MetDisplayWidget):
         self.label_formula.clear()
         self.label_charge.clear()
         self.label_compartment.clear()
-
-
-class SolutionDisplayWidget(QWidget, Ui_SolutionTableWidget):
-
-    def __init__(self, parent=None):
-        super(SolutionDisplayWidget, self).__init__(parent)
-        self.setupUi(self)
-        self.solution = None
-
-        self.button_open_map.clicked.connect(self.open_map)
-        self.button_open_solution.clicked.connect(self.open_solution)
-
-    def set_solution(self, solution):
-        self.solution = solution
-        self.label_status.setText(str(solution.status))
-        self.label_objective.setText(str(solution.objective))
-
-    @QtCore.pyqtSlot()
-    def open_solution(self):
-        pass
-
-    @QtCore.pyqtSlot()
-    def open_map(self):
-        pass
