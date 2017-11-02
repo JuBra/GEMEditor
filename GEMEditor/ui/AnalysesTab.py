@@ -47,6 +47,8 @@ class Ui_AnalysisTab(object):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.list_solutions.sizePolicy().hasHeightForWidth())
         self.list_solutions.setSizePolicy(sizePolicy)
+        self.list_solutions.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+        self.list_solutions.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
         self.list_solutions.setObjectName("list_solutions")
         self.verticalLayout.addWidget(self.list_solutions)
         self.gridLayout.addWidget(self.groupBox, 4, 0, 1, 2)

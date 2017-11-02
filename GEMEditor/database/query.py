@@ -572,14 +572,3 @@ def add_reaction_from_database(model, database_id):
 
     return new_reaction
 
-
-if __name__ == '__main__':
-    app = QApplication([])
-    widget = DatabaseSettingWidget(resource_type="metabolite")
-    dialog = QDialog()
-    layout = QHBoxLayout()
-    dialog.setLayout(layout)
-    layout.addWidget(widget)
-    dialog.exec_()
-    print(widget.get_selected_annotations())
-

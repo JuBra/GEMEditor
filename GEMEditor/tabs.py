@@ -849,9 +849,7 @@ class AnalysesTab(QWidget, Ui_AnalysisTab):
         self.combo_analysis.currentIndexChanged.connect(self.toggle_button)
         self.combo_solver.currentIndexChanged.connect(self.toggle_button)
         self.combo_analysis.currentIndexChanged.connect(self.toggle_solver_selection)
-
-        self.list_solutions.addItem("No solution")
-        self.list_solutions.setEnabled(False)
+        self.list_solutions.customContextMenuRequested.connect(self.show_context_menu)
 
     def populate_solvers(self):
         if self.solvers:
@@ -992,6 +990,19 @@ class AnalysesTab(QWidget, Ui_AnalysisTab):
             return
         else:
             self.open_result(solution)
+
+    @QtCore.pyqtSlot()
+    def remove_solution(self):
+        self.list_solutions.takeItem(self.list_solutions.currentRow())
+
+    @QtCore.pyqtSlot(QtCore.QPoint)
+    def show_context_menu(self, pos):
+        if self.list_solutions.itemAt(pos) is not None:
+            menu = QMenu()
+            remove_action = QAction("Remove")
+            remove_action.triggered.connect(self.remove_solution)
+            menu.addAction(remove_action)
+            menu.exec_(self.list_solutions.viewport().mapToGlobal(pos))
 
 
 class ModelInfoTab(QWidget, Ui_model_stats_tab):
