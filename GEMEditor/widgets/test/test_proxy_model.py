@@ -1,10 +1,10 @@
+import sys
+import pytest
+from PyQt5.QtWidgets import QApplication
 from GEMEditor.widgets.proxymodels import ReactionProxyFilter, reversibility
 from GEMEditor.widgets.tables import ReactionTable
 from GEMEditor.cobraClasses import Reaction, Metabolite, Gene
 from GEMEditor.data_classes import Annotation
-from PyQt5 import QtGui, QtCore
-import sys
-import pytest
 
 
 app = QApplication(sys.argv)

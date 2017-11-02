@@ -1,8 +1,6 @@
 from PyQt5 import QtCore, QtGui
-from PyQt5.QtWebEngineWidgets import QWebEnginePage
 from PyQt5.QtWidgets import QErrorMessage, QDialogButtonBox, QMessageBox, QDialog, QInputDialog, QLineEdit, QFileDialog
 from PyQt5.QtCore import QStandardPaths
-import os.path
 from GEMEditor.base.dialogs import CustomStandardDialog
 from GEMEditor.ui.ReferenceEditDialog import Ui_ReferenceEditDialog
 from GEMEditor.ui.AddAuthorName import Ui_AddAuthorName

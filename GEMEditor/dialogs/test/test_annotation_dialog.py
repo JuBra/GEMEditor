@@ -1,7 +1,7 @@
-from GEMEditor.dialogs.annotation import EditAnnotationDialog, AutoAnnotationOptionDialog
+from GEMEditor.dialogs.annotation import EditAnnotationDialog
 from GEMEditor.cobraClasses import Metabolite
-from PyQt5 import QtGui, QtTest
-from PyQt5.QtWidgets import QCheckBox, QDialogButtonBox, QApplication
+from PyQt5 import QtTest
+from PyQt5.QtWidgets import QApplication
 import sys
 
 
@@ -32,40 +32,3 @@ class TestEditAnnotationDialog:
         assert resulting_annotation.identifier == new_annotation
         assert resulting_annotation.collection == dialog.lookup[dialog.typeComboBox.currentText()].collection
 
-
-class TestAutoAnnotationSettingsDialog:
-
-    def test_no_option_checked(self):
-
-        dialog = AutoAnnotationOptionDialog()
-
-        # Check that ok button is enabled by default
-        assert dialog.buttonBox.button(QDialogButtonBox.Ok).isEnabled()
-
-        # Uncheck all boxes
-        for x in dialog.children():
-            if isinstance(x, QCheckBox):
-                x.setChecked(False)
-
-        # Check that ok button is disabled when no item is selected
-        assert not dialog.buttonBox.button(QDialogButtonBox.Ok).isEnabled()
-
-    def test_all_checked(self):
-
-        dialog = AutoAnnotationOptionDialog()
-
-        # Check that ok button is enabled by default
-        assert dialog.buttonBox.button(QDialogButtonBox.Ok).isEnabled()
-
-        # Uncheck all boxes
-        for x in dialog.children():
-            if isinstance(x, QCheckBox):
-                x.setChecked(True)
-
-        # Check that ok button is still enabled
-        assert dialog.buttonBox.button(QDialogButtonBox.Ok).isEnabled()
-
-        result = dialog.get_settings()
-        assert result["Annotations"] == 1
-        assert result["Charge"] == 1
-        assert result["Name"] == 1

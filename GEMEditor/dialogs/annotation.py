@@ -1,12 +1,10 @@
 import re
 from PyQt5 import QtGui, QtCore
-from PyQt5.QtWidgets import QDialog, QDialogButtonBox, QCheckBox
+from PyQt5.QtWidgets import QDialog, QDialogButtonBox
 from GEMEditor.ui.EditAnnotationsDialog import Ui_EditAnnotationDialog
-from GEMEditor.ui.AutoAnnotationSettingsDialog import Ui_AutoAnnotationDialog
 from GEMEditor.data_classes import Annotation
 from GEMEditor.facts import Metabolite_annotations, Reaction_annotations, Gene_annotations, Resource
 from GEMEditor.cobraClasses import Reaction, Metabolite, Gene
-from collections import defaultdict
 
 
 class EditAnnotationDialog(QDialog, Ui_EditAnnotationDialog):
@@ -84,39 +82,3 @@ class EditAnnotationDialog(QDialog, Ui_EditAnnotationDialog):
         text = self.typeComboBox.currentText()
         return Annotation(collection=self.lookup[text].collection,
                           identifier=self.annotationLineEdit.text())
-
-
-class AutoAnnotationOptionDialog(QDialog, Ui_AutoAnnotationDialog):
-    """ A dialog enabling the user to choose which part of the model
-    to update automatically from the MetaNetX database.
-    
-    Metabolites:
-    - Charge
-    - Name
-    - Annotations
-    
-    """
-
-    def __init__(self, parent=None):
-        super(AutoAnnotationOptionDialog, self).__init__(parent)
-        self.setupUi(self)
-
-        # All checkable options
-        self.options = [x for x in self.children() if isinstance(x, QCheckBox)]
-
-        # Connect checking to toggling of button
-        for x in self.options:
-            x.stateChanged.connect(self.toggle_ok_button)
-
-    @QtCore.pyqtSlot()
-    def toggle_ok_button(self):
-        # Disable ok button if no option is checked
-        status = any(x.isChecked() for x in self.options)
-        self.buttonBox.button(QDialogButtonBox.Ok).setEnabled(status)
-
-    def get_settings(self):
-        settings = defaultdict(int)
-        settings["Annotations"] = self.checkBox_annotations.isChecked()
-        settings["Charge"] = self.checkBox_charge.isChecked()
-        settings["Name"] = self.checkBox_name.isChecked()
-        return settings

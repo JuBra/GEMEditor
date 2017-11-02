@@ -1,5 +1,5 @@
 from PyQt5 import QtCore, QtGui
-from PyQt5.QtWidgets import QMenu, QAction, QDialogButtonBox, QApplication, QMessageBox, QErrorMessage, QInputDialog
+from PyQt5.QtWidgets import QMenu, QAction, QDialogButtonBox, QMessageBox, QErrorMessage, QInputDialog
 from GEMEditor.base.dialogs import CustomStandardDialog
 from GEMEditor.dialogs.standard import GeneSelectionDialog, ReactionSelectionDialog, MetaboliteSelectionDialog
 from GEMEditor.ui.EditEvidenceDialog import Ui_EditEvidenceDialog as Ui_new
@@ -326,10 +326,3 @@ def iterate_tree(standard_item, data_item):
             gene_item.setEditable(False)
             standard_item.setChild(n, gene_item)
             iterate_tree(gene_item, element)
-
-
-if __name__ == "__main__":
-    app = QApplication([])
-    dialog = EditEvidenceDialog()
-    dialog.exec_()
-    app.exec_()

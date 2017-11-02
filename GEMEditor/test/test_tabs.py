@@ -1,11 +1,11 @@
 import pytest
 import sys
-from cobra.core.Solution import Solution
-from GEMEditor.tabs import ModelTestsTab, StandardTab, ReactionTab, MetaboliteTab, GeneTab, ReferenceTab
+from GEMEditor.tabs import *
+from cobra.core.solution import Solution
 from GEMEditor.cobraClasses import Model, Reaction, Metabolite, Gene
 from GEMEditor.data_classes import ModelTest, ReactionSetting, Outcome, Reference
 from GEMEditor.dialogs.mock import MockModelTestDialog
-from PyQt5 import QtCore, QtGui, QtTest
+from PyQt5 import QtCore, QtTest
 from PyQt5.QtWidgets import QApplication, QErrorMessage
 from unittest.mock import Mock
 

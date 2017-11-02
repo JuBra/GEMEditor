@@ -1,5 +1,5 @@
 from PyQt5 import QtGui, QtCore
-from PyQt5.QtWidgets import QDialog, QDialogButtonBox, QAbstractItemView, QTableWidgetItem, QProgressDialog, QApplication, QInputDialog, QMessageBox
+from PyQt5.QtWidgets import QDialogButtonBox, QAbstractItemView
 from PyQt5.QtCore import QSortFilterProxyModel
 from GEMEditor.ui.SelectionDialog import Ui_SelectionDialog
 from GEMEditor.ui.GeneTreeSelectionDialog import Ui_GeneTreeSelection

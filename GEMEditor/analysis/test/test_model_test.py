@@ -1,6 +1,6 @@
 from GEMEditor.cobraClasses import Reaction, Metabolite, Model
 from GEMEditor.data_classes import ReactionSetting, Outcome, ModelTest
-from cobra.core.Solution import Solution
+from cobra.core.solution import Solution
 from GEMEditor.analysis.model_test import get_original_settings, run_test
 import GEMEditor
 from unittest.mock import Mock
