@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'ResultDialog.ui'
+# Form implementation generated from reading ui file '.\SearchTab.ui'
 #
 # Created by: PyQt5 UI code generator 5.8.2
 #
@@ -8,28 +8,28 @@
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
-class Ui_Dialog(object):
-    def setupUi(self, Dialog):
-        Dialog.setObjectName("Dialog")
-        Dialog.resize(432, 330)
-        self.verticalLayout = QtWidgets.QVBoxLayout(Dialog)
+class Ui_SearchTab(object):
+    def setupUi(self, SearchTab):
+        SearchTab.setObjectName("SearchTab")
+        SearchTab.resize(448, 366)
+        self.verticalLayout = QtWidgets.QVBoxLayout(SearchTab)
         self.verticalLayout.setObjectName("verticalLayout")
         self.horizontalLayout = QtWidgets.QHBoxLayout()
         self.horizontalLayout.setObjectName("horizontalLayout")
         spacerItem = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
         self.horizontalLayout.addItem(spacerItem)
-        self.label_filter = QtWidgets.QLabel(Dialog)
+        self.label_filter = QtWidgets.QLabel(SearchTab)
         self.label_filter.setObjectName("label_filter")
         self.horizontalLayout.addWidget(self.label_filter)
-        self.filterComboBox = QtWidgets.QComboBox(Dialog)
+        self.filterComboBox = QtWidgets.QComboBox(SearchTab)
         self.filterComboBox.setObjectName("filterComboBox")
         self.horizontalLayout.addWidget(self.filterComboBox)
-        self.line = QtWidgets.QFrame(Dialog)
+        self.line = QtWidgets.QFrame(SearchTab)
         self.line.setFrameShape(QtWidgets.QFrame.VLine)
         self.line.setFrameShadow(QtWidgets.QFrame.Sunken)
         self.line.setObjectName("line")
         self.horizontalLayout.addWidget(self.line)
-        self.label = QtWidgets.QLabel(Dialog)
+        self.label = QtWidgets.QLabel(SearchTab)
         self.label.setMinimumSize(QtCore.QSize(15, 15))
         self.label.setMaximumSize(QtCore.QSize(15, 15))
         self.label.setText("")
@@ -37,7 +37,7 @@ class Ui_Dialog(object):
         self.label.setScaledContents(True)
         self.label.setObjectName("label")
         self.horizontalLayout.addWidget(self.label)
-        self.searchInput = ButtonLineEdit(Dialog)
+        self.searchInput = ButtonLineEdit(SearchTab)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -46,7 +46,7 @@ class Ui_Dialog(object):
         self.searchInput.setObjectName("searchInput")
         self.horizontalLayout.addWidget(self.searchInput)
         self.verticalLayout.addLayout(self.horizontalLayout)
-        self.dataView = ProxyElementTableView(Dialog)
+        self.dataView = QtWidgets.QTableView(SearchTab)
         self.dataView.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.dataView.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
         self.dataView.setSortingEnabled(True)
@@ -56,16 +56,12 @@ class Ui_Dialog(object):
         self.dataView.verticalHeader().setHighlightSections(False)
         self.verticalLayout.addWidget(self.dataView)
 
-        self.retranslateUi(Dialog)
-        Dialog.finished['int'].connect(Dialog.save_dialog_geometry)
-        Dialog.finished['int'].connect(Dialog.save_header_state)
-        QtCore.QMetaObject.connectSlotsByName(Dialog)
+        self.retranslateUi(SearchTab)
+        QtCore.QMetaObject.connectSlotsByName(SearchTab)
 
-    def retranslateUi(self, Dialog):
+    def retranslateUi(self, SearchTab):
         _translate = QtCore.QCoreApplication.translate
-        Dialog.setWindowTitle(_translate("Dialog", "Dialog"))
-        self.label_filter.setText(_translate("Dialog", "Filter:"))
+        SearchTab.setWindowTitle(_translate("SearchTab", "Form"))
+        self.label_filter.setText(_translate("SearchTab", "Filter:"))
 
 from GEMEditor.widgets.gui import ButtonLineEdit
-from GEMEditor.widgets.views import ProxyElementTableView
-from GEMEditor.icons_rc import *

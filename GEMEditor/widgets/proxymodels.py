@@ -161,7 +161,7 @@ class GeneProxyFilter(CustomSortFilterProxyModel):
 
 class FluxTableProxyFilter(QSortFilterProxyModel):
 
-    options = ("All", "Nonzero flux", "Flux at bound", "Boundary reaction")
+    options = ("All", "Nonzero flux", "Flux at bound", "All boundary", "Active boundary")
 
     def __init__(self, *args, **kwargs):
         super(FluxTableProxyFilter, self).__init__(*args, **kwargs)
@@ -191,6 +191,10 @@ class FluxTableProxyFilter(QSortFilterProxyModel):
             # Boundary reaction
             reaction = self.sourceModel().item(row, 0).link
             return reaction.boundary is True
+        elif self.custom_filter == 4:
+            reaction = self.sourceModel().item(row, 0).link
+            flux = self.sourceModel().item(row, 7).data(2)
+            return reaction.boundary and flux != 0.
         else:
             raise NotImplementedError
 

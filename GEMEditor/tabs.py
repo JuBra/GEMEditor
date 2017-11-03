@@ -17,13 +17,14 @@ from GEMEditor.dialogs.reaction import ReactionInputDialog
 from GEMEditor.dialogs.metabolite import MetaboliteEditDialog
 from GEMEditor.dialogs.gene import GeneEditDialog
 from GEMEditor.dialogs.reference import ReferenceEditDialog
-from GEMEditor.dialogs.results import FluxValueDialog, DualValueDialog
 from GEMEditor.dialogs.input import SetFluxValueDialog
 from GEMEditor.dialogs.modeltest import EditModelTestDialog
 from GEMEditor.analysis.model_test import run_test
 from GEMEditor.widgets.proxymodels import ReactionProxyFilter, MetaboliteProxyFilter, GeneProxyFilter
 from GEMEditor.analysis.model_test import get_original_settings
 from GEMEditor.ui import Ui_AnalysisTab, Ui_SolutionTableWidget
+from GEMEditor.solution import SolutionDialog, status_objective_from_solution, set_objective_to_label,\
+    set_status_to_label
 
 
 class StandardTab(QWidget, Ui_StandardTab):
@@ -704,13 +705,9 @@ class ModelTestsTab(StandardTab):
             if len(selected_indices) == 1 and selected_indices[0].column() == 1:
                 solution = self.dataTable.itemFromIndex(selected_indices[0]).link
                 if solution:
-                    for dialog_class in (FluxValueDialog, DualValueDialog):
-                        dialog = dialog_class(self.model, solution)
-                        dialog.setModal(False)
-                        dialog.setWindowFlags(QtCore.Qt.Window)
-                        self.model.dialogs.add(dialog)
-                        dialog.show()
-                        self.model.update_dialogs(solution)
+                    solution_dialog = SolutionDialog(solution, self.model)
+                    self.model.dialogs.add(solution_dialog)
+                    solution_dialog.show()
                     return
 
             if dialog is None:
@@ -917,19 +914,22 @@ class AnalysesTab(QWidget, Ui_AnalysisTab):
         self.open_result(solution)
 
     def open_result(self, solution):
+        """ Display the solution in a dialog
+
+        Parameters
+        ----------
+        solution: LegacySolution or Solution
+
+        Returns
+        -------
+        None
+        """
         if solution.status != "optimal":
             self.show_infeasible_message(solution)
-            return
-
-        self.fluxValueWindow = FluxValueDialog(self.model, solution)
-        self.fluxValueWindow.setModal(False)
-        self.fluxValueWindow.setWindowFlags(QtCore.Qt.Window)
-        self.fluxValueWindow.show()
-        self.dualValueWindow = DualValueDialog(self.model, solution)
-        self.dualValueWindow.setModal(False)
-        self.dualValueWindow.setWindowFlags(QtCore.Qt.Window)
-        self.dualValueWindow.show()
-        self.model.update_dialogs(solution)
+        else:
+            solution_dialog = SolutionDialog(solution, self.model)
+            self.model.dialogs.add(solution_dialog)
+            solution_dialog.show()
 
     def open_map(self, solution):
         if solution.status != "optimal":
@@ -992,15 +992,17 @@ class AnalysesTab(QWidget, Ui_AnalysisTab):
             self.open_result(solution)
 
     @QtCore.pyqtSlot()
-    def remove_solution(self):
-        self.list_solutions.takeItem(self.list_solutions.currentRow())
+    def remove_solution(self, item):
+        row = self.list_solutions.row(item)
+        self.list_solutions.takeItem(row)
 
     @QtCore.pyqtSlot(QtCore.QPoint)
     def show_context_menu(self, pos):
-        if self.list_solutions.itemAt(pos) is not None:
+        item = self.list_solutions.itemAt(pos)
+        if item is not None:
             menu = QMenu()
             remove_action = QAction("Remove")
-            remove_action.triggered.connect(self.remove_solution)
+            remove_action.triggered.connect(lambda: self.remove_solution(item))
             menu.addAction(remove_action)
             menu.exec_(self.list_solutions.viewport().mapToGlobal(pos))
 
@@ -1027,25 +1029,9 @@ class SolutionWidget(QWidget, Ui_SolutionTableWidget):
         self.update_display()
 
     def update_display(self):
-        if isinstance(self.solution, LegacySolution):
-            status, objective = self.solution.status, self.solution.f
-        elif isinstance(self.solution, Solution):
-            status, objective = self.solution.status, self.solution.objective_value
-        else:
-            status, objective = "No solution set", "-"
-
-        # Set status
-        self.label_status.setText("{0!s}".format(status))
-        if status == "optimal":
-            self.label_status.setStyleSheet("color: ForestGreen; font-weight: bold;")
-        else:
-            self.label_status.setStyleSheet("")
-
-        # Set objective value
-        try:
-            self.label_value.setText("{0:.2f}".format(objective))
-        except TypeError:
-            self.label_value.setText("{0!s}".format(objective))
+        status, objective = status_objective_from_solution(self.solution)
+        set_status_to_label(self.label_status, status)
+        set_objective_to_label(self.label_value, objective)
 
     def get_solution(self):
         return self.solution
