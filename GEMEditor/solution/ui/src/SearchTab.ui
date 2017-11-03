@@ -72,12 +72,18 @@
       </widget>
      </item>
      <item>
-      <widget class="ButtonLineEdit" name="searchInput">
+      <widget class="QLineEdit" name="searchInput">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
          <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
+       </property>
+       <property name="placeholderText">
+        <string>Search..</string>
+       </property>
+       <property name="clearButtonEnabled">
+        <bool>true</bool>
        </property>
       </widget>
      </item>
@@ -107,13 +113,6 @@
    </item>
   </layout>
  </widget>
- <customwidgets>
-  <customwidget>
-   <class>ButtonLineEdit</class>
-   <extends>QLineEdit</extends>
-   <header>GEMEditor.widgets.gui</header>
-  </customwidget>
- </customwidgets>
  <resources>
   <include location="../../../icons/icons.qrc"/>
  </resources>

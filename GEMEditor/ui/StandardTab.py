@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'StandardTab.ui'
+# Form implementation generated from reading ui file '.\StandardTab.ui'
 #
 # Created by: PyQt5 UI code generator 5.8.2
 #
@@ -37,12 +37,13 @@ class Ui_StandardTab(object):
         self.label.setScaledContents(True)
         self.label.setObjectName("label")
         self.horizontalLayout.addWidget(self.label)
-        self.searchInput = ButtonLineEdit(StandardTab)
+        self.searchInput = QtWidgets.QLineEdit(StandardTab)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.searchInput.sizePolicy().hasHeightForWidth())
         self.searchInput.setSizePolicy(sizePolicy)
+        self.searchInput.setClearButtonEnabled(True)
         self.searchInput.setObjectName("searchInput")
         self.horizontalLayout.addWidget(self.searchInput)
         self.verticalLayout.addLayout(self.horizontalLayout)
@@ -82,10 +83,10 @@ class Ui_StandardTab(object):
         _translate = QtCore.QCoreApplication.translate
         StandardTab.setWindowTitle(_translate("StandardTab", "Form"))
         self.label_filter.setText(_translate("StandardTab", "Filter:"))
+        self.searchInput.setPlaceholderText(_translate("StandardTab", "Search.."))
         self.addItemButton.setText(_translate("StandardTab", "Add item"))
         self.editItemButton.setText(_translate("StandardTab", "Edit item"))
         self.deleteItemButton.setText(_translate("StandardTab", "Delete item"))
 
-from GEMEditor.widgets.gui import ButtonLineEdit
 from GEMEditor.widgets.views import ProxyElementTableView
-from GEMEditor.icons_rc import *
+

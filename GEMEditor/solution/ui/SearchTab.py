@@ -37,12 +37,13 @@ class Ui_SearchTab(object):
         self.label.setScaledContents(True)
         self.label.setObjectName("label")
         self.horizontalLayout.addWidget(self.label)
-        self.searchInput = ButtonLineEdit(SearchTab)
+        self.searchInput = QtWidgets.QLineEdit(SearchTab)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.searchInput.sizePolicy().hasHeightForWidth())
         self.searchInput.setSizePolicy(sizePolicy)
+        self.searchInput.setClearButtonEnabled(True)
         self.searchInput.setObjectName("searchInput")
         self.horizontalLayout.addWidget(self.searchInput)
         self.verticalLayout.addLayout(self.horizontalLayout)
@@ -63,5 +64,4 @@ class Ui_SearchTab(object):
         _translate = QtCore.QCoreApplication.translate
         SearchTab.setWindowTitle(_translate("SearchTab", "Form"))
         self.label_filter.setText(_translate("SearchTab", "Filter:"))
-
-from GEMEditor.widgets.gui import ButtonLineEdit
+        self.searchInput.setPlaceholderText(_translate("SearchTab", "Search.."))

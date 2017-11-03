@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'EcoSelectionDialog.ui'
+# Form implementation generated from reading ui file '.\EcoSelectionDialog.ui'
 #
 # Created by: PyQt5 UI code generator 5.8.2
 #
@@ -33,12 +33,13 @@ class Ui_EcoSelectionDialog(object):
         self.label_5.setScaledContents(True)
         self.label_5.setObjectName("label_5")
         self.horizontalLayout.addWidget(self.label_5)
-        self.searchInput = ButtonLineEdit(self.groupBox_2)
+        self.searchInput = QtWidgets.QLineEdit(self.groupBox_2)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.searchInput.sizePolicy().hasHeightForWidth())
         self.searchInput.setSizePolicy(sizePolicy)
+        self.searchInput.setClearButtonEnabled(True)
         self.searchInput.setObjectName("searchInput")
         self.horizontalLayout.addWidget(self.searchInput)
         self.verticalLayout.addLayout(self.horizontalLayout)
@@ -110,11 +111,10 @@ class Ui_EcoSelectionDialog(object):
         _translate = QtCore.QCoreApplication.translate
         EcoSelectionDialog.setWindowTitle(_translate("EcoSelectionDialog", "Select Evidence Code"))
         self.groupBox_2.setTitle(_translate("EcoSelectionDialog", "Selection"))
+        self.searchInput.setPlaceholderText(_translate("EcoSelectionDialog", "Search.."))
         self.groupBox.setTitle(_translate("EcoSelectionDialog", "Information"))
         self.label.setText(_translate("EcoSelectionDialog", "ID:"))
         self.label_2.setText(_translate("EcoSelectionDialog", "Name:"))
         self.label_3.setText(_translate("EcoSelectionDialog", "Definition:"))
         self.label_4.setText(_translate("EcoSelectionDialog", "Synonyms:"))
 
-from GEMEditor.widgets.gui import ButtonLineEdit
-from GEMEditor.icons_rc import *

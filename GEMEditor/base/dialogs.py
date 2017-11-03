@@ -1,6 +1,6 @@
 from PyQt5 import QtCore
 from PyQt5.QtWidgets import QDialog, QGridLayout, QLabel, QComboBox
-from GEMEditor.base.ui import Ui_EmptyDialogHorzButtons
+from GEMEditor.base.ui import Ui_EmptyDialogHorzButtons, Ui_ListDisplayDialog
 
 
 class CustomStandardDialog(QDialog):
@@ -68,3 +68,11 @@ class DialogMapCompartment(QDialog, Ui_EmptyDialogHorzButtons):
     def get_mapping(self):
         return dict((input_comp, combobox.currentText()) for
                     input_comp, combobox in self.input_widget_map.items())
+
+
+class ListDisplayDialog(QDialog, Ui_ListDisplayDialog):
+
+    def __init__(self, display_list, parent=None):
+        super(ListDisplayDialog, self).__init__(parent)
+        self.setupUi(self)
+        self.listWidget.addItems(display_list)

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'SelectionDialog.ui'
+# Form implementation generated from reading ui file '.\SelectionDialog.ui'
 #
 # Created by: PyQt5 UI code generator 5.8.2
 #
@@ -26,12 +26,13 @@ class Ui_SelectionDialog(object):
         self.label.setScaledContents(True)
         self.label.setObjectName("label")
         self.horizontalLayout.addWidget(self.label)
-        self.searchInput = ButtonLineEdit(SelectionDialog)
+        self.searchInput = QtWidgets.QLineEdit(SelectionDialog)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.searchInput.sizePolicy().hasHeightForWidth())
         self.searchInput.setSizePolicy(sizePolicy)
+        self.searchInput.setClearButtonEnabled(True)
         self.searchInput.setObjectName("searchInput")
         self.horizontalLayout.addWidget(self.searchInput)
         self.verticalLayout.addLayout(self.horizontalLayout)
@@ -60,7 +61,7 @@ class Ui_SelectionDialog(object):
     def retranslateUi(self, SelectionDialog):
         _translate = QtCore.QCoreApplication.translate
         SelectionDialog.setWindowTitle(_translate("SelectionDialog", "Dialog"))
+        self.searchInput.setPlaceholderText(_translate("SelectionDialog", "Search.."))
 
-from GEMEditor.widgets.gui import ButtonLineEdit
 from GEMEditor.widgets.views import ProxyElementTableView
-from GEMEditor.icons_rc import *
+

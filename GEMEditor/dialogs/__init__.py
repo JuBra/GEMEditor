@@ -1,2 +1,1 @@
-from GEMEditor.dialogs.program import UpdateAvailableDialog
 from GEMEditor.dialogs.evidence import BatchEvidenceDialog

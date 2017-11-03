@@ -12,7 +12,7 @@ from PyQt5.QtWidgets import QWidget, QMessageBox, QApplication, QAction, QMenu, 
     QStatusBar, QErrorMessage, QListWidgetItem
 from PyQt5.QtCore import QSortFilterProxyModel, QSize
 from cobra.core.solution import LegacySolution, Solution
-
+from cobra.flux_analysis import pfba
 from GEMEditor.dialogs.reaction import ReactionInputDialog
 from GEMEditor.dialogs.metabolite import MetaboliteEditDialog
 from GEMEditor.dialogs.gene import GeneEditDialog
@@ -910,7 +910,7 @@ class AnalysesTab(QWidget, Ui_AnalysisTab):
         self.open_result(solution)
 
     def run_parsimonous(self, selected_solver):
-        solution = cobra.flux_analysis.optimize_minimal_flux(self.model, solver=selected_solver)
+        solution = pfba(self.model, solver=selected_solver)
         self.open_result(solution)
 
     def open_result(self, solution):

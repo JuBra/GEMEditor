@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'ModelTestTab.ui'
+# Form implementation generated from reading ui file '.\ModelTestTab.ui'
 #
 # Created by: PyQt5 UI code generator 5.8.2
 #
@@ -35,12 +35,13 @@ class Ui_ModelTestTab(object):
         self.label.setScaledContents(True)
         self.label.setObjectName("label")
         self.horizontalLayout.addWidget(self.label)
-        self.searchInput = ButtonLineEdit(ModelTestTab)
+        self.searchInput = QtWidgets.QLineEdit(ModelTestTab)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.searchInput.sizePolicy().hasHeightForWidth())
         self.searchInput.setSizePolicy(sizePolicy)
+        self.searchInput.setClearButtonEnabled(True)
         self.searchInput.setObjectName("searchInput")
         self.horizontalLayout.addWidget(self.searchInput)
         self.verticalLayout.addLayout(self.horizontalLayout)
@@ -75,10 +76,10 @@ class Ui_ModelTestTab(object):
         ModelTestTab.setWindowTitle(_translate("ModelTestTab", "Form"))
         self.label_status_description.setText(_translate("ModelTestTab", "Status:"))
         self.label_status.setText(_translate("ModelTestTab", "Unknown"))
+        self.searchInput.setPlaceholderText(_translate("ModelTestTab", "Search.."))
         self.addItemButton.setText(_translate("ModelTestTab", "Add Test"))
         self.editItemButton.setText(_translate("ModelTestTab", "Edit Test"))
         self.deleteItemButton.setText(_translate("ModelTestTab", "Delete Test"))
 
-from GEMEditor.widgets.gui import ButtonLineEdit
 from GEMEditor.widgets.views import GeneTreeView
-from GEMEditor.icons_rc import *
+

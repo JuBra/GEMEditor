@@ -2,12 +2,12 @@ import logging
 from PyQt5.QtWidgets import QFileDialog, QDialogButtonBox, QMainWindow
 from PyQt5.QtCore import QStandardPaths, Qt
 from GEMEditor.tabs import *
-from GEMEditor.dialogs.program import EditSettingsDialog, AboutDialog, ListDisplayDialog
+from GEMEditor.main.dialogs import AboutDialog, EditSettingsDialog, UpdateAvailableDialog
 from GEMEditor.dialogs.model import EditModelDialog
 from GEMEditor.dialogs.reference import PubmedBrowser
 from GEMEditor.dialogs.qualitychecks import factory_duplicate_dialog, FailingEvidencesDialog
 from GEMEditor.map.escher import MapListDialog
-from GEMEditor.dialogs import UpdateAvailableDialog, BatchEvidenceDialog
+from GEMEditor.dialogs import BatchEvidenceDialog
 from GEMEditor import __projectpage__
 import GEMEditor.rw.sbml3 as sbml3
 from GEMEditor.ui.MainWindow import Ui_MainWindow
@@ -23,6 +23,7 @@ from GEMEditor.database.query import DialogDatabaseSelection
 from GEMEditor.database.base import DatabaseWrapper
 from GEMEditor.base.functions import merge_groups_by_overlap
 from GEMEditor.base.classes import ProgressDialog
+from GEMEditor.base.dialogs import ListDisplayDialog
 from GEMEditor.evidence.analysis import DialogEvidenceStatus
 import os
 import GEMEditor.icons_rc
