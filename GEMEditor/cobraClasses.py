@@ -7,6 +7,7 @@ from weakref import WeakValueDictionary
 from PyQt5 import QtCore
 from PyQt5.QtWidgets import QApplication
 from GEMEditor.base.functions import generate_copy_id
+from GEMEditor.base.classes import WindowManager
 from GEMEditor.widgets.tables import ReactionTable, MetaboliteTable, GeneTable, ReferenceTable, ModelTestTable, LinkedItem
 from GEMEditor.data_classes import ReactionSetting, CleaningDict, Compartment
 from GEMEditor.base_classes import BaseEvidenceElement
@@ -606,32 +607,6 @@ class Metabolite(cobraMetabolite, BaseEvidenceElement):
 
     def get_annotation_by_collection(self, *args):
         return set([x.identifier for x in self.annotation if x.collection in args])
-
-
-class WindowManager(QtCore.QObject):
-
-    def __init__(self):
-        super(WindowManager, self).__init__()
-        self.windows = set()
-
-    def add(self, dialog):
-        self.windows.add(dialog)
-        dialog.finished.connect(self.delete_window)
-
-    def remove(self, dialog):
-        self.windows.discard(dialog)
-
-    def remove_all(self):
-        for window in self.windows.copy():
-            # Remove c object before deleting dialog otherwise warnings
-            # are thrown due to external deletion of object
-            window.deleteLater()
-            window.close()
-
-    @QtCore.pyqtSlot()
-    def delete_window(self):
-        sender = self.sender()
-        self.windows.discard(sender)
 
 
 def iterate_tree(standard_item, data_item):

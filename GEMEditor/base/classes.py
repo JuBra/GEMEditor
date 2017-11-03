@@ -1,4 +1,5 @@
 from PyQt5.QtWidgets import QProgressDialog
+from PyQt5.QtCore import QObject, pyqtSlot
 
 
 class BaseModelItem:
@@ -103,3 +104,75 @@ class ProgressDialog(QProgressDialog):
         # Schedule dialog for deletion
         # Fixes external destruction warning
         self.deleteLater()
+
+
+class WindowManager(QObject):
+    """ Manage dialog windows
+
+    This class is intended for the management of
+    dialog instances. An active reference to the
+    instance is kept to avoid premature garbage
+    collection that is caused by displaying non-
+    modal dialogs via the .show() method which
+    returns control immediately. After closing
+    the dialog the instance will be removed from
+    the manager and is therefore free for gc. """
+
+    def __init__(self):
+        super(WindowManager, self).__init__()
+        self._windows = set()
+
+    @property
+    def windows(self):
+        return self._windows.copy()
+
+    def add(self, dialog):
+        """ Add a dialog to manager
+
+        Parameters
+        ----------
+        dialog: QDialog
+
+        Returns
+        -------
+        None
+        """
+        self._windows.add(dialog)
+        dialog.finished.connect(self.delete_dialog)
+
+    def remove(self, dialog):
+        """ Remove dialog from manager
+
+        Parameters
+        ----------
+        dialog: QDialog
+
+        Returns
+        -------
+        None
+        """
+        self._windows.discard(dialog)
+
+    def remove_all(self):
+        """ Delete all managed dialogs
+
+        Returns
+        -------
+        None
+        """
+        for dialog in self.windows:
+            # Remove c object before deleting dialog otherwise warnings
+            # are thrown due to external deletion of object
+            dialog.done(2)
+            dialog.deleteLater()
+
+    @pyqtSlot()
+    def delete_dialog(self):
+        """ Slot called by finished signal
+
+        Returns
+        -------
+        None
+        """
+        sender = self.sender()
+        self.remove(sender)
