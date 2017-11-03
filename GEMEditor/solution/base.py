@@ -55,7 +55,7 @@ def status_objective_from_solution(solution):
     elif isinstance(solution, Solution):
         status, objective = solution.status, solution.objective_value
     else:
-        status, objective = "No solution set", "-"
+        raise TypeError("Expected LegacySolution or Solution object")
     return str(status), objective
 
 
