@@ -2,7 +2,9 @@ import logging
 from PyQt5.QtWidgets import QFileDialog, QDialogButtonBox, QMainWindow
 from PyQt5.QtCore import QStandardPaths, Qt
 from GEMEditor.tabs import *
-from GEMEditor.main.dialogs import AboutDialog, EditSettingsDialog, UpdateAvailableDialog
+from GEMEditor.main.about import AboutDialog
+from GEMEditor.main.settings import EditSettingsDialog
+from GEMEditor.main.update import UpdateAvailableDialog
 from GEMEditor.dialogs.model import EditModelDialog
 from GEMEditor.dialogs.reference import PubmedBrowser
 from GEMEditor.dialogs.qualitychecks import factory_duplicate_dialog, FailingEvidencesDialog
@@ -16,7 +18,7 @@ from GEMEditor.analysis import group_duplicate_reactions
 from GEMEditor.analysis.statistics import run_all_statistics, DisplayStatisticsDialog
 from GEMEditor.analysis.formula import update_formulae_iteratively
 from GEMEditor.analysis.duplicates import get_duplicated_metabolites
-from GEMEditor.connect.checkversion import UpdateCheck
+from GEMEditor.main.update.worker import UpdateCheck
 from GEMEditor.database.create import create_database_de_novo, database_exists
 from GEMEditor.database.model import run_auto_annotation, run_check_consistency, update_metabolite_database_mapping, load_mapping, store_mapping, update_reaction_database_mapping
 from GEMEditor.database.query import DialogDatabaseSelection
@@ -260,28 +262,17 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     @QtCore.pyqtSlot()
     def show_newversion_dialog(self):
-        settings = QtCore.QSettings()
-
         # Get the current version from the CheckUpdate Thread
         try:
             current_version = self.sender().current_version
         except AttributeError:
-            current_version = None
-
-        # Do not show a dialog if the current version is set to be ignored
-        if settings.value("IgnoreVersion", None) == current_version:
+            LOGGER.warning("Error fetching current version from worker!")
             return
 
         # Show update dialog
-        dialog = UpdateAvailableDialog(self)
-        dialog.exec_()
-
-        # Go to project page if update requested
-        if dialog.status is QDialogButtonBox.Yes:
-            QtGui.QDesktopServices.openUrl(QtCore.QUrl(__projectpage__))
-        elif dialog.status is QDialogButtonBox.No and not dialog.show_again():
-            settings.setValue("IgnoreVersion", current_version)
-            settings.sync()
+        dialog = UpdateAvailableDialog(current_version, parent=self)
+        if not dialog.version_is_ignored():
+            dialog.exec_()
 
     def save_table_headers(self):
         settings = QtCore.QSettings()

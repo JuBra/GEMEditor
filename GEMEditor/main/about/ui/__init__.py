@@ -1,0 +1,1 @@
+from .AboutDialog import Ui_AboutDialog

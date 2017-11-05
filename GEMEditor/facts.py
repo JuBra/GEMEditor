@@ -9,31 +9,6 @@ def get_resource_dict(resources):
     return result
 
 
-AA_names = {"Alanine": "A",
-            "Arginine": "R",
-            "Asparagine": "N",
-            "Aspartic acid": "D",
-            "Cysteine": "C",
-            "Glutamic acid": "E",
-            "Glutamine": "Q",
-            "Glycine": "G",
-            "Histidine": "H",
-            "Isoleucine": "I",
-            "Leucine": "L",
-            "Lysine": "K",
-            "Methionine": "M",
-            "Phenylalanine": "F",
-            "Proline": "P",
-            "Serine": "S",
-            "Threonine": "T",
-            "Tryptophan": "W",
-            "Tyrosine": "Y",
-            "Valine": "V",
-            "Selenocysteine": "U",
-            "Pyrrolysine": "O"}
-
-AA_ignore_characters = ["*"]
-
 # MIRIAM collections
 
 def return_tuple():

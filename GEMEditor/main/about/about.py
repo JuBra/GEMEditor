@@ -1,6 +1,6 @@
 from PyQt5.QtWidgets import QDialog, QApplication
 from GEMEditor import __projectpage__, __version__
-from GEMEditor.main.dialogs.ui import Ui_AboutDialog
+from GEMEditor.main.about.ui import Ui_AboutDialog
 
 
 class AboutDialog(QDialog, Ui_AboutDialog):

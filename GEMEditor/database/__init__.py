@@ -61,3 +61,6 @@ metabolite_ambiguitiy_map = {"kegg": ["kegg.compound",
 
 reaction_ambiguitiy_map = {"kegg": 'kegg.reaction',
                            "bigg": 'bigg.reaction'}
+
+
+map_collection_validator = dict((x.miriam_collection, x.validator) for x in miriam_databases)

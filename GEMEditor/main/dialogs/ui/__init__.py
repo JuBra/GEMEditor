@@ -1,3 +1,0 @@
-from .AboutDialog import Ui_AboutDialog
-from .EditSettingsDialog import Ui_EditSettingsDialog
-from .UpdateAvailableDialog import Ui_UpdateAvailableDialog

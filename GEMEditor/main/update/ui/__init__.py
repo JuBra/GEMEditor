@@ -1,0 +1,1 @@
+from .UpdateAvailableDialog import Ui_UpdateAvailableDialog

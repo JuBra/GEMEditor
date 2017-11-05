@@ -9,6 +9,7 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 class Ui_UpdateAvailableDialog(object):
+
     def setupUi(self, UpdateAvailableDialog):
         UpdateAvailableDialog.setObjectName("UpdateAvailableDialog")
         UpdateAvailableDialog.resize(411, 83)

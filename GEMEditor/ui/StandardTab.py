@@ -89,4 +89,3 @@ class Ui_StandardTab(object):
         self.deleteItemButton.setText(_translate("StandardTab", "Delete item"))
 
 from GEMEditor.widgets.views import ProxyElementTableView
-

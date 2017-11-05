@@ -2,7 +2,7 @@ import logging
 from PyQt5.QtWidgets import QDialog, QDialogButtonBox, QFileDialog
 from PyQt5.QtCore import QSettings, QRegExp, pyqtSlot
 from PyQt5.QtGui import QRegExpValidator
-from GEMEditor.main.dialogs.ui import Ui_EditSettingsDialog
+from GEMEditor.main.settings.ui import Ui_EditSettingsDialog
 from GEMEditor.database import database_path as DB_PATH
 
 

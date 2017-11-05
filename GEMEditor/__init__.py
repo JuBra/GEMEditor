@@ -20,12 +20,30 @@ formula_validator = re.compile(regex_formula)
 
 GlobalSetting = namedtuple("GlobalSetting", ["string", "default_value"])
 
-# Global default settings which are stored in settings
-DB_NEW_MET_PREFIX = "New"    # Prefix used for generating metabolite IDs
-DB_NEW_REACT_PREFIX = "New"  # Prefix used for generating reaction IDs
-DB_GET_MET_NAME = True       # Get the name for the new metabolite from database
-DB_GET_REACT_NAME = True     # Get the name for the new reaction from database
-DB_GET_FL_AND_CH = True      # Get the formula and name from the database
+
+# Default program settings #
+
+# Standard prefix for metabolite ids added from the database
+DB_NEW_MET_PREFIX = "New"
+
+# Standard prefix for reaction ids added from the database
+DB_NEW_REACT_PREFIX = "New"
+
+# Use the name for the new metabolite from database
+DB_GET_MET_NAME = True
+
+# Use the name for the new reaction from database
+DB_GET_REACT_NAME = True
+
+# Use the formula and charge from the database
+DB_GET_FL_AND_CH = True
+
+
+# Values stored in settings #
+
+# Version number the user does not want to update to.
+# Do not inform the user if the latest version on pypi has this number
+VERSION_IGNORED = "IgnoreVersion"
 
 
 def use_progress(func):
