@@ -1,5 +1,5 @@
 import logging
-from PyQt5.QtWidgets import QFileDialog, QDialogButtonBox, QMainWindow
+from PyQt5.QtWidgets import QFileDialog,QMainWindow
 from PyQt5.QtCore import QStandardPaths, Qt
 from GEMEditor.tabs import *
 from GEMEditor.main.about import AboutDialog
@@ -7,10 +7,9 @@ from GEMEditor.main.settings import EditSettingsDialog
 from GEMEditor.main.update import UpdateAvailableDialog
 from GEMEditor.dialogs.model import EditModelDialog
 from GEMEditor.dialogs.reference import PubmedBrowser
-from GEMEditor.dialogs.qualitychecks import factory_duplicate_dialog, FailingEvidencesDialog
+from GEMEditor.dialogs.qualitychecks import factory_duplicate_dialog
 from GEMEditor.map.escher import MapListDialog
 from GEMEditor.dialogs import BatchEvidenceDialog
-from GEMEditor import __projectpage__
 import GEMEditor.rw.sbml3 as sbml3
 from GEMEditor.ui.MainWindow import Ui_MainWindow
 from GEMEditor.cobraClasses import Model, prune_gene_tree
@@ -432,7 +431,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     @QtCore.pyqtSlot()
     def show_map_list(self):
-        dialog = MapListDialog(self, self.maps, self.model)
+        dialog = MapListDialog(None, self.maps, self.model)
         self.model.dialogs.add(dialog)
         dialog.show()
 
@@ -487,18 +486,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             return False
 
     def trigger_experimental_feature(self):
-
-        LOGGER.debug("Importing feature")
-        from GEMEditor.map.custom import reaction_literature_coverage
-
-        if not self.model:
-            LOGGER.debug("Model not set!")
-            return
-
-        coverage = reaction_literature_coverage(self.model)
-        LOGGER.debug("Coverage computed")
-        self.model.update_dialogs(coverage)
-        LOGGER.debug("Dialog supdated")
+        LOGGER.debug("Experimental feature triggered")
 
     def keyPressEvent(self, event):
 

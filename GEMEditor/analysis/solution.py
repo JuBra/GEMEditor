@@ -1,47 +1,6 @@
 from collections import defaultdict
 
 
-def get_turnover(solution, mapping):
-    """ Get the turnover of metabolites
-
-    Calculate the turnover of all metabolites that are mapped
-    in the mapping dictionary. The turnover is considered to be the
-    net flux all reactions that are neither boundary nor transport
-    reactions.
-
-
-    Parameters
-    ----------
-    solution : cobra.core.Solution
-    mapping : dict
-
-    Returns
-    -------
-    turnover : dict
-    """
-
-    turnover = dict()
-
-    for name, metabolite_list in mapping.items():
-        production = 0
-        consumption = 0
-        for metabolite in metabolite_list:
-            for reaction in metabolite.reactions:
-                # Only add the flux of reactions that are not boundary
-                # or transport reactions
-                if reaction.boundary is True or len(reaction.get_compartments()) > 1:
-                    continue
-                flux = solution[reaction.id] * reaction.stoichiometry[metabolite]
-                if flux > 0:
-                    production += flux
-                elif flux < 0:
-                    consumption -= flux
-
-        # Add result to result dictionary
-        turnover[name] = production
-    return turnover
-
-
 def get_yields(solution, model):
     """ Calculate the yields for the individual metabolites that are produced
 

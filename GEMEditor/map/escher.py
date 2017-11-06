@@ -85,6 +85,7 @@ class MapListDialog(QDialog, Ui_MapListDialog):
 
 
 class MapDisplayDialog(QDialog, Ui_WebViewDialog):
+
     def __init__(self, map_builder):
         super(MapDisplayDialog, self).__init__()
         self.setupUi(self)

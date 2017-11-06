@@ -1,6 +1,7 @@
 import pytest
-from GEMEditor.analysis.networks import circular_positions, get_parting_node, filter_dictionary, secondary_position_factor, split_metabolites
 from GEMEditor.cobraClasses import Reaction, Metabolite
+from GEMEditor.map.turnover.generate import circular_positions, get_parting_node, filter_dictionary, secondary_position_factor, \
+    split_metabolites
 
 
 @pytest.mark.parametrize("n", (1, 5, 10, 100))

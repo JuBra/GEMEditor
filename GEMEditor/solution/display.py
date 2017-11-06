@@ -1,15 +1,13 @@
 from collections import OrderedDict
-from PyQt5.QtWidgets import QWidget, QDialog, QAction, QMenu, QApplication
-from PyQt5.QtGui import QStandardItemModel, QStandardItem, QBrush, QKeySequence
-from PyQt5.QtCore import Qt, QSortFilterProxyModel, QSettings, pyqtSlot, QPoint
+from GEMEditor.map.turnover import TurnoverDialog
+from GEMEditor.solution.base import status_objective_from_solution, set_objective_to_label, set_status_to_label, \
+    fluxes_from_solution, shadow_prices_from_solution
 from GEMEditor.solution.ui import Ui_SearchTab, Ui_SolutionDialog
 from GEMEditor.widgets.proxymodels import FluxTableProxyFilter
 from GEMEditor.widgets.tables import ReactionBaseTable, MetaboliteTable
-from GEMEditor.data_classes import EscherMapGenerator
-from GEMEditor.analysis.networks import setup_turnover_map
-from GEMEditor.map.escher import MapDisplayDialog
-from GEMEditor.solution.base import status_objective_from_solution, set_objective_to_label, set_status_to_label,\
-    fluxes_from_solution, shadow_prices_from_solution
+from PyQt5.QtCore import Qt, QSortFilterProxyModel, QSettings, pyqtSlot, QPoint
+from PyQt5.QtGui import QStandardItemModel, QStandardItem, QBrush, QKeySequence
+from PyQt5.QtWidgets import QWidget, QDialog, QAction, QMenu, QApplication
 
 
 class BaseSolutionTab(QWidget, Ui_SearchTab):
@@ -200,13 +198,8 @@ class MetaboliteTab(BaseSolutionTab):
             met_id = self.dataTable.item(source_idx.row()).text()
             metabolite = self.model.metabolites.get_by_id(met_id)
 
-            # Generate turnover map and dialog
-            map_string = setup_turnover_map(metabolite)
-            builder = EscherMapGenerator(map_string)
-            dialog = MapDisplayDialog(builder.get_escher_map())
-            dialog.setWindowTitle("{0!s} turnover".format(met_id))
-            fluxes = fluxes_from_solution(self.solution)
-            dialog.set_reaction_data(fluxes)
+            dialog = TurnoverDialog()
+            dialog.set_solution(self.solution, metabolite)
             self.model.dialogs.add(dialog)
             dialog.show()
 

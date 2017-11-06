@@ -936,14 +936,9 @@ class AnalysesTab(QWidget, Ui_AnalysisTab):
             self.show_infeasible_message(solution)
             return
 
-        # Get maps
-        try:
-            maps = self.window().maps
-        except AttributeError:
-            return
-        else:
-            # Todo: implement the selection of maps and dialog opening
-            QMessageBox().critical(None, "Not implemented", "This feature is not implemented yet.")
+        for dialog in self.model.dialogs._windows:
+            if hasattr(dialog, "set_reaction_data"):
+                dialog.set_reaction_data(solution)
 
     def show_infeasible_message(self, solution):
         QMessageBox.critical(self,

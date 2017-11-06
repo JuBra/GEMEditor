@@ -171,71 +171,100 @@ def add_standard_nodes_to_graph(graph, reaction):
     return substrate, middle, product
 
 
-def layout_circular(metabolite, x_dim=20, y_dim=20):
+def layout_circular(metabolite, reactions, x_dim=20, y_dim=20, cutoff_simplify=10):
     """ Get a circular layout of all reactions that have the metabolite as a participant
 
     Parameters
     ----------
-    metabolite: Metabolite
-    radius: int
+    metabolite: Metabolite, Metabolite for which to draw the map
+    reactions: list or set or dict, Reactions to include in the map
+    x_dim: int, Map dimension in x direction
+    y_dim: int, Map dimension in y direction
+    cutoff_simplify: int,   Reduce map to two nodes per reaction if number of reactions
+                            exceeds that number
 
     Returns
     -------
 
     """
+    # Calculate layout parameters
     center = (x_dim/2, y_dim/2)
     radius = min(x_dim, y_dim) * 0.4
     center_node = metabolite
     positions = {center_node: center}
 
+    # Layout reactions using the graph
     graph = nx.Graph()
     graph.add_node(center_node)
-    for reaction, end_position in zip(metabolite.reactions, circular_positions(radius, len(metabolite.reactions), center)):
+    for reaction, end_position in zip(reactions, circular_positions(radius, len(reactions), center)):
 
+        # Divide metabolites in products and metabolites
         substrates, products = split_metabolites(reaction)
         if metabolite in products:
             substrates, products = products, substrates
         substrates.pop(metabolite)
-        if len(metabolite.reactions) > 20:
-            substrates.clear()
 
+        # Choose end node for reaction
         if products:
-            # Use the metabolite that has less reactions
+            # Use least connected metabolite as end node
+            # This prevents cofactors of being drawn as
+            # end nodes.
             end_item = sorted(products.keys(), key=lambda x: len(x.reactions))[0]
             end_node = (reaction, end_item)
             products.pop(end_item)
         else:
             end_node = (reaction, "end")
 
-        if len(metabolite.reactions) > 20:
-            substrates.clear()
-            products.clear()
-
+        # Add end node to graph
         graph.add_node(end_node)
         positions[end_node] = end_position
 
-        # Add the standard nodes to the graph
-        substrates_node, middle_node, products_node = add_standard_nodes_to_graph(graph, reaction)
-        # Add edges from the start and end node to standard nodes
-        graph.add_edges_from([(center_node, substrates_node), (products_node, end_node)])
-        middle_position = get_parting_node(center, end_position)
-        positions[middle_node] = middle_position
-        positions[products_node] = get_parting_node(center, end_position, 0.4)
-        positions[substrates_node] = get_parting_node(center, end_position, 0.6)
+        # Remove metabolites to draw if the map should be simplified
+        if len(reactions) > cutoff_simplify:
+            substrates.clear()
+            products.clear()
 
-        # Add substrates to graph
-        for substrate, metabolite_position in zip(substrates.keys(), secondary_positions(center, end_position, len(substrates), 0.3)):
-            metabolite_node = (reaction, substrate)
-            graph.add_node(metabolite_node)
-            positions[metabolite_node] = metabolite_position
-            graph.add_edge(metabolite_node, substrates_node)
+        # Get standard nodes
+        substrates_node, middle_node, products_node = get_subnodes(reaction)
+        graph.add_node(middle_node)
+        positions[middle_node] = get_parting_node(center, end_position)
 
-        # Add products to graph
-        for product, metabolite_position in zip(products.keys(), secondary_positions(center, end_position, len(products), 0.7)):
-            metabolite_node = (reaction, product)
-            graph.add_node(metabolite_node)
-            positions[metabolite_node] = metabolite_position
-            graph.add_edge(metabolite_node, products_node)
+        # Add substrates if any
+        if substrates:
+            # Add node
+            graph.add_node(substrates_node)
+            graph.add_edges_from([(center_node, substrates_node), (substrates_node, middle_node)])
+            positions[substrates_node] = get_parting_node(center, end_position, 0.4)
+
+            # Add substrates to graph
+            for substrate, metabolite_position in zip(substrates.keys(),
+                                                      secondary_positions(center, end_position, len(substrates), 0.3)):
+                metabolite_node = (reaction, substrate)
+                graph.add_node(metabolite_node)
+                positions[metabolite_node] = metabolite_position
+                graph.add_edge(metabolite_node, substrates_node)
+
+        else:
+            # Do not add any intermediate nodes
+            graph.add_edge(center_node, middle_node)
+
+        # Add products if any
+        if products:
+            graph.add_node(products_node)
+            graph.add_edges_from([(middle_node, products_node), (products_node, end_node)])
+            positions[products_node] = get_parting_node(center, end_position, 0.6)
+
+            # Add products to graph
+            for product, metabolite_position in zip(products.keys(),
+                                                    secondary_positions(center, end_position, len(products), 0.7)):
+                metabolite_node = (reaction, product)
+                graph.add_node(metabolite_node)
+                positions[metabolite_node] = metabolite_position
+                graph.add_edge(metabolite_node, products_node)
+
+        else:
+            # Do not add any intermediate nodes
+            graph.add_edge(middle_node, end_node)
 
     return graph, positions
 
@@ -324,14 +353,14 @@ def entry_from_metabolite(metabolite, position, scaling=1, x_margin=0, y_margin=
             "node_is_primary": is_primary}
 
 
-def entry_from_reaction(reaction, node_index, positions, scaling, x_margin, y_margin):
+def entry_from_reaction(graph, reaction, node_index, positions, scaling, x_margin, y_margin):
 
     segments = {}
     json_metabolites = []
     educt_node, middle_node, product_node = get_subnodes(reaction)
-    educt_node_id = node_index[educt_node]
+
+    # Get the middle node of the reaction
     middle_node_id = node_index[middle_node]
-    product_node_id = node_index[product_node]
     mid_pos = positions[middle_node]
     x = mid_pos[0] * scaling + x_margin
     y = mid_pos[1] * scaling + y_margin
@@ -339,21 +368,16 @@ def entry_from_reaction(reaction, node_index, positions, scaling, x_margin, y_ma
     for metabolite, stoichiometry in reaction.metabolites.items():
         json_metabolites.append({"coefficient": stoichiometry, "bigg_id": metabolite.id})
 
-        try:
-            node_id = node_index[metabolite]
-        except KeyError:
-            try:
-                node_id = node_index[(reaction, metabolite)]
-            except KeyError:
-                continue
+        for node in (metabolite, (reaction, metabolite)):
+            for edge in graph.edges([node]):
+                node1, node2 = edge
+                segments[counter()] = {"from_node_id": node_index[node1], "to_node_id": node_index[node2], "b1": None, "b2": None}
 
-        if stoichiometry < 0.:
-            segments[counter()] = {"from_node_id": node_id, "to_node_id": educt_node_id, "b1":None, "b2": None}
-        elif stoichiometry > 0.:
-            segments[counter()] = {"from_node_id": product_node_id, "to_node_id": node_id, "b1":None, "b2": None}
-
-    segments[counter()] = {"from_node_id": educt_node_id, "to_node_id": middle_node_id, "b1":None, "b2": None}
-    segments[counter()] = {"from_node_id": middle_node_id, "to_node_id": product_node_id, "b1": None, "b2": None}
+    # Connect intermediate nodes to middle node
+    for intermediate_node in (educt_node, product_node):
+        if intermediate_node in node_index:
+            segments[counter()] = {"from_node_id": node_index[intermediate_node],
+                                   "to_node_id": middle_node_id, "b1": None, "b2": None}
 
     return {"name": reaction.name or reaction.id,
             "bigg_id": reaction.id,
@@ -400,7 +424,7 @@ def get_escher_graph(reactions, graph, final_positions, scaling, x_margin, y_mar
 
     reactions_dict = {}
     for reaction in reactions:
-        reactions_dict[counter()] = entry_from_reaction(reaction, node_index, final_positions, scaling, x_margin, y_margin)
+        reactions_dict[counter()] = entry_from_reaction(graph, reaction, node_index, final_positions, scaling, x_margin, y_margin)
 
     result.append({"reactions": reactions_dict,
                    "nodes": nodes,
@@ -416,27 +440,8 @@ def setup_map(reactions, cofactors, k=0.1, iterations=30, scaling=3000, x_margin
     return json.dumps(escher_json)
 
 
-def setup_turnover_map(metabolite):
-
-    graph, pos = layout_circular(metabolite, 200, 200)
-    escher_json = get_escher_graph(metabolite.reactions, graph, pos, 10, 0, 0)
+def setup_turnover_map(metabolite, reactions=()):
+    reactions = reactions or metabolite.reactions
+    graph, pos = layout_circular(metabolite, reactions, 200, 200)
+    escher_json = get_escher_graph(reactions, graph, pos, 10, 0, 0)
     return json.dumps(escher_json)
-
-
-if __name__ == "__main__":
-    # cofactor_names = ["ADP", "ADPm", "ATP", "ATPm", "CO2",
-    #                   "CO2m", "H+", "H2O", "H2Om", "NAD",
-    #                   "NADH", "PI", "H+m"]
-    #
-    # model = read_sbml_model(r"C:\Coding\GEMEditor\analysis\test\glycolysis.xml")
-    #
-    # cofactors = set([model.metabolites.get_by_id(x) for x in cofactor_names])
-    #
-    # escher_graph = setup_map(model.reactions, cofactors)
-    # # Check consistency - Raises Error if map is not ma
-    # validate_map(escher_graph)
-    #
-    # with open("test.json", "w") as open_file:
-    #     json.dump(escher_graph, open_file)
-
-    print(sorted([(1,1), (0,0), (0,1), (1,0)]))
