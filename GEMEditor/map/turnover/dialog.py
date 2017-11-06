@@ -49,8 +49,9 @@ class TurnoverDialog(QDialog, Ui_TurnoverDialog):
         self.mapView.settings().setAttribute(QWebEngineSettings.JavascriptCanOpenWindows, True)
         self.mapView.settings().setAttribute(QWebEngineSettings.LocalContentCanAccessFileUrls, True)
 
-        # Connect checkbox
+        # Connect signals/slots
         self.checkBox_hide_inactive.stateChanged.connect(self._refresh_map)
+        self.finished.connect(self._save_settings)
 
         # Restore settings
         self._restore_settings()
@@ -165,6 +166,13 @@ class TurnoverDialog(QDialog, Ui_TurnoverDialog):
             self.dataView.expand(self.datatable.indexFromItem(item))
 
     def _restore_settings(self):
+        """ Restore dialog geometry from setting
+
+        Returns
+        -------
+
+        """
+
         settings = QSettings()
         settings.beginGroup(self.__class__.__name__)
 
@@ -189,19 +197,13 @@ class TurnoverDialog(QDialog, Ui_TurnoverDialog):
 
         settings.endGroup()
 
-    def closeEvent(self, QCloseEvent):
-        """ Event triggered when closing dialog
-
-        Store the current state of the dialog
-        in the settings
-
-        Parameters
-        ----------
-        QCloseEvent
+    @pyqtSlot()
+    def _save_settings(self):
+        """ Store dialog geometry in settings
 
         Returns
         -------
-
+        None
         """
 
         settings = QSettings()
@@ -212,4 +214,3 @@ class TurnoverDialog(QDialog, Ui_TurnoverDialog):
         settings.setValue("DialogGeometry", self.saveGeometry())
         settings.endGroup()
         settings.sync()
-        super(TurnoverDialog, self).closeEvent(QCloseEvent)

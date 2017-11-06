@@ -2,6 +2,7 @@ import logging
 from PyQt5 import QtCore
 from configparser import ConfigParser
 from urllib.request import urlopen, URLError, HTTPError
+from distutils.version import StrictVersion
 from GEMEditor import __versionlookup__, __version__
 
 
@@ -45,9 +46,13 @@ class UpdateCheck(QtCore.QObject):
 
         # Get version in Git repository
         self.current_version = config.get("DEFAULT", "version")
-        if self.current_version != __version__:
+        LOGGER.debug("Remote version: {0!s}".format(self.current_version))
+        LOGGER.debug("Local version: {0!s}".format(__version__))
+
+        if StrictVersion(self.current_version) > StrictVersion(__version__):
             LOGGER.info("A new version is available!")
             self.new_version.emit()
         else:
             LOGGER.debug("Installation is up-to-date!")
+
         self.finished.emit()
