@@ -8,7 +8,7 @@ from GEMEditor.main.update import UpdateAvailableDialog
 from GEMEditor.dialogs.model import EditModelDialog
 from GEMEditor.dialogs.reference import PubmedBrowser
 from GEMEditor.dialogs.qualitychecks import factory_duplicate_dialog
-from GEMEditor.map.escher import MapListDialog
+from GEMEditor.map.dialog import MapListDialog
 from GEMEditor.dialogs import BatchEvidenceDialog
 import GEMEditor.rw.sbml3 as sbml3
 from GEMEditor.ui.MainWindow import Ui_MainWindow
@@ -41,7 +41,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.thread = None
         self.worker = None
         self.model = None
-        self.maps = {}
         self.model_path = None
 
         # Check if there is a new version of the software
@@ -431,7 +430,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     @QtCore.pyqtSlot()
     def show_map_list(self):
-        dialog = MapListDialog(None, self.maps, self.model)
+        dialog = MapListDialog(None, self.model)
         self.model.dialogs.add(dialog)
         dialog.show()
 

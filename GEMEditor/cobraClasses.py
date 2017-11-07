@@ -334,6 +334,9 @@ class Model(QtCore.QObject, BaseEvidenceElement, cobraModel):
         # to be able to link them in evidences
         self.gem_compartments = dict()
 
+        # Keep track of maps for this model
+        self.gem_maps = {}
+
         # Setup model
         self.setup_tables()
         self.setup_connections()
