@@ -1,5 +1,6 @@
 from collections import OrderedDict
 from GEMEditor.map.turnover import TurnoverDialog
+from GEMEditor.map.dialog import MapDisplayDialog
 from GEMEditor.solution.base import status_objective_from_solution, set_objective_to_label, set_status_to_label, \
     fluxes_from_solution, shadow_prices_from_solution
 from GEMEditor.solution.ui import Ui_SearchTab, Ui_SolutionDialog
@@ -7,7 +8,7 @@ from GEMEditor.widgets.proxymodels import FluxTableProxyFilter
 from GEMEditor.widgets.tables import ReactionBaseTable, MetaboliteTable
 from PyQt5.QtCore import Qt, QSortFilterProxyModel, QSettings, pyqtSlot, QPoint
 from PyQt5.QtGui import QStandardItemModel, QStandardItem, QBrush, QKeySequence
-from PyQt5.QtWidgets import QWidget, QDialog, QAction, QMenu, QApplication
+from PyQt5.QtWidgets import QWidget, QDialog, QAction, QMenu, QApplication, QMessageBox
 
 
 class BaseSolutionTab(QWidget, Ui_SearchTab):
@@ -132,6 +133,9 @@ class ReactionTab(BaseSolutionTab):
         super(ReactionTab, self).__init__(FluxTableProxyFilter, parent)
         self.dataTable.setHorizontalHeaderLabels(ReactionBaseTable.header + ("Flux",))
 
+        self.dataView.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.dataView.customContextMenuRequested.connect(self.show_context_menu)
+
     def populate_table(self, model, solution):
         self.dataTable.setRowCount(0)
         if not solution or not model:
@@ -160,6 +164,34 @@ class ReactionTab(BaseSolutionTab):
             # Color flux value if close to boundary
             if value >= 0.99 * upper_bound or value <= 0.99 * lower_bound:
                 flux_item.setForeground(QBrush(Qt.red, Qt.SolidPattern))
+
+    @pyqtSlot(QPoint)
+    def show_context_menu(self, pos):
+        idx = self.dataView.indexAt(pos)
+        if idx.isValid():
+            menu = QMenu()
+            action_maps = QAction("Show on maps")
+            action_maps.triggered.connect(lambda x: self.open_maps(idx))
+            menu.addAction(action_maps)
+            menu.exec_(self.dataView.viewport().mapToGlobal(pos))
+
+    @pyqtSlot()
+    def open_maps(self, idx):
+        if idx.isValid():
+            # Get selected metabolite
+            source_idx = self.proxyModel.mapToSource(idx)
+            reaction_id = self.dataTable.item(source_idx.row()).text()
+            reaction = self.model.reactions.get_by_id(reaction_id)
+
+            maps = [m for m in self.model.gem_maps.values()
+                    if reaction in m]
+            if not maps:
+                QMessageBox().information(None, "Not found", "No map containing this reaction found.")
+            else:
+                dialog = MapDisplayDialog(maps)
+                dialog.set_reaction_data(self.solution)
+                self.model.dialogs.add(dialog)
+                dialog.show()
 
 
 class MetaboliteTab(BaseSolutionTab):
