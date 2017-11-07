@@ -50,8 +50,8 @@ class TurnoverDialog(QDialog, Ui_TurnoverDialog):
         self.mapView.settings().setAttribute(QWebEngineSettings.LocalContentCanAccessFileUrls, True)
 
         # Connect signals/slots
-        self.checkBox_hide_inactive.stateChanged.connect(self._refresh_map)
-        self.finished.connect(self._save_settings)
+        self.checkBox_hide_inactive.stateChanged.connect(self.refresh_map)
+        self.finished.connect(self.save_settings)
 
         # Restore settings
         self._restore_settings()
@@ -61,12 +61,12 @@ class TurnoverDialog(QDialog, Ui_TurnoverDialog):
         self.solution = solution
 
         if metabolite:
-            self._refresh_map(self.checkBox_hide_inactive.isChecked())
+            self.refresh_map(self.checkBox_hide_inactive.isChecked())
             self._populate_tree()
             self.setWindowTitle("{0!s} turnover".format(metabolite.id))
 
-    @pyqtSlot(int)
-    def _refresh_map(self, hide_inactive):
+    @pyqtSlot(int, name="refresh_map")
+    def refresh_map(self, hide_inactive):
         """ Refresh the map being displayed
 
         Generate a map from the set solution
@@ -197,8 +197,8 @@ class TurnoverDialog(QDialog, Ui_TurnoverDialog):
 
         settings.endGroup()
 
-    @pyqtSlot()
-    def _save_settings(self):
+    @pyqtSlot(name="save_settings")
+    def save_settings(self):
         """ Store dialog geometry in settings
 
         Returns
