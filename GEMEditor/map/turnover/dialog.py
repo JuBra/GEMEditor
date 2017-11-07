@@ -65,7 +65,7 @@ class TurnoverDialog(QDialog, Ui_TurnoverDialog):
             self._populate_tree()
             self.setWindowTitle("{0!s} turnover".format(metabolite.id))
 
-    @pyqtSlot(int)
+    @pyqtSlot(int, name="refresh_map")
     def _refresh_map(self, hide_inactive):
         """ Refresh the map being displayed
 
@@ -197,7 +197,7 @@ class TurnoverDialog(QDialog, Ui_TurnoverDialog):
 
         settings.endGroup()
 
-    @pyqtSlot()
+    @pyqtSlot(name="save_settings")
     def _save_settings(self):
         """ Store dialog geometry in settings
 
