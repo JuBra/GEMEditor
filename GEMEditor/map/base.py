@@ -101,7 +101,6 @@ class MapWrapper:
             return str(self._file_path)
 
     def __contains__(self, item):
-        logging.warning(str(self._reaction_ids))
         if hasattr(item, "id"):
             return item.id in self._reaction_ids
         elif isinstance(item, str):
