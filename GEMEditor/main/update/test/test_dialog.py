@@ -6,7 +6,13 @@ from unittest.mock import Mock
 from GEMEditor import VERSION_IGNORED
 from GEMEditor.main.update.dialog import UpdateAvailableDialog
 
-app = QApplication([])
+# Make sure to only start an application
+# if there is no active one. Opening multiple
+# applications will lead to a crash.
+app = QApplication.instance()
+if app is None:
+    app = QApplication([])
+
 
 @pytest.fixture()
 def patch_ignored_version(monkeypatch):

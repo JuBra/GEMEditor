@@ -1,10 +1,14 @@
 from GEMEditor.dialogs.input import SetFluxValueDialog
 from PyQt5 import QtTest, QtCore
 from PyQt5.QtWidgets import QApplication, QDialogButtonBox
-import sys
 
 
-app = QApplication(sys.argv)
+# Make sure to only start an application
+# if there is no active one. Opening multiple
+# applications will lead to a crash.
+app = QApplication.instance()
+if app is None:
+    app = QApplication([])
 
 
 class TestSetFluxValueDialog:

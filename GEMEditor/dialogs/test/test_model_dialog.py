@@ -2,13 +2,17 @@ import pytest
 from GEMEditor.dialogs.model import AddCompartmentDialog, EditModelDialog
 from GEMEditor.cobraClasses import Model, Metabolite
 from GEMEditor.widgets.tables import CompartmentTable
-from GEMEditor.data_classes import ModelStats
 from PyQt5 import QtTest, QtCore
 from PyQt5.QtWidgets import QApplication, QDialogButtonBox, QToolTip, QWidget, QProgressDialog
 from unittest.mock import Mock, MagicMock
-import sys
 
-app = QApplication(sys.argv)
+
+# Make sure to only start an application
+# if there is no active one. Opening multiple
+# applications will lead to a crash.
+app = QApplication.instance()
+if app is None:
+    app = QApplication([])
 
 
 def lenmock(n):

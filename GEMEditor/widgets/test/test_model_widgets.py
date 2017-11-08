@@ -7,9 +7,14 @@ from GEMEditor.evidence_class import Evidence
 import gc
 from unittest.mock import Mock
 import pytest
-import sys
 
-app = QApplication(sys.argv)
+
+# Make sure to only start an application
+# if there is no active one. Opening multiple
+# applications will lead to a crash.
+app = QApplication.instance()
+if app is None:
+    app = QApplication([])
 
 
 class MockSlot(QWidget):

@@ -3,7 +3,12 @@ from PyQt5.QtWidgets import QApplication, QDialog
 from GEMEditor.base.classes import WindowManager
 
 
-app = QApplication([])
+# Make sure to only start an application
+# if there is no active one. Opening multiple
+# applications will lead to a crash.
+app = QApplication.instance()
+if app is None:
+    app = QApplication([])
 
 
 class TestWindowManager:

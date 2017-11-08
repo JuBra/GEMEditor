@@ -1,5 +1,4 @@
 import pytest
-import sys
 from GEMEditor.tabs import *
 from cobra.core.solution import Solution
 from GEMEditor.cobraClasses import Model, Reaction, Metabolite, Gene
@@ -10,7 +9,12 @@ from PyQt5.QtWidgets import QApplication, QErrorMessage
 from unittest.mock import Mock
 
 
-app = QApplication(sys.argv)
+# Make sure to only start an application
+# if there is no active one. Opening multiple
+# applications will lead to a crash.
+app = QApplication.instance()
+if app is None:
+    app = QApplication([])
 
 
 @pytest.fixture()

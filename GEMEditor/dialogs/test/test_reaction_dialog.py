@@ -2,10 +2,14 @@ from GEMEditor.dialogs.reaction import ReactionInputDialog
 from PyQt5.QtWidgets import QApplication, QDialogButtonBox
 from GEMEditor.cobraClasses import Reaction, Model
 from unittest.mock import Mock
-import sys
 
 
-app = QApplication(sys.argv)
+# Make sure to only start an application
+# if there is no active one. Opening multiple
+# applications will lead to a crash.
+app = QApplication.instance()
+if app is None:
+    app = QApplication([])
 
 
 class TestReactionInputDialog:

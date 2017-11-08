@@ -1,17 +1,20 @@
-import GEMEditor
+import pytest
 from GEMEditor.dialogs.modeltest import EditModelTestDialog
 from GEMEditor.dialogs.mock import MockSelectionDialog
 from GEMEditor.cobraClasses import Reaction, Model
 from GEMEditor.data_classes import Outcome, ReactionSetting, ModelTest
-from GEMEditor.base import CustomStandardDialog
+from GEMEditor.base.dialogs import CustomStandardDialog
 from PyQt5 import QtTest
 from PyQt5.QtWidgets import QApplication, QWidget, QDialogButtonBox
 from unittest.mock import Mock
-import pytest
-import sys
 
 
-app = QApplication(sys.argv)
+# Make sure to only start an application
+# if there is no active one. Opening multiple
+# applications will lead to a crash.
+app = QApplication.instance()
+if app is None:
+    app = QApplication([])
 
 
 @pytest.fixture()
