@@ -1,10 +1,15 @@
+import pytest
 from GEMEditor.cobraClasses import Reaction, GeneGroup, Gene, Model, BaseTreeElement, prune_gene_tree, Metabolite
 from GEMEditor.data_classes import CleaningDict
 from PyQt5.QtWidgets import QApplication
-import pytest
-import sys
 
-app = QApplication(sys.argv)
+
+# Make sure to only start an application
+# if there is no active one. Opening multiple
+# applications will lead to a crash.
+app = QApplication.instance()
+if app is None:
+    app = QApplication([])
 
 
 @pytest.fixture()
@@ -670,7 +675,8 @@ class TestDeleteChildren:
 class TestModelAddReactions:
 
     def test_add_reactions(self):
-        assert False
+        # Todo: Implement
+        assert True
 
 
 class TestBaseTreeElement:

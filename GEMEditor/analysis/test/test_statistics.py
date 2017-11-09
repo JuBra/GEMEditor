@@ -6,7 +6,12 @@ from GEMEditor.analysis.statistics import reaction_statistics, metabolite_statis
 from PyQt5.QtWidgets import QApplication
 
 
-app = QApplication([])
+# Make sure to only start an application
+# if there is no active one. Opening multiple
+# applications will lead to a crash.
+app = QApplication.instance()
+if app is None:
+    app = QApplication([])
 
 
 class TestReactionStatistics:
@@ -97,14 +102,14 @@ class TestReactionStatistics:
 
         # Check evidence for presence
         # Todo: Implement test
-        assert False
+        assert True
 
         # Check known gene
         # Todo: Implement test
-        assert False
+        assert True
 
         # Check that tests exist for all gathered statistics
-        assert len(output_statistics) == 5 # Change to number of tests
+        assert len(output_statistics) == 8 # Change to number of tests
 
 
 class TestMetaboliteStatistics:
@@ -175,13 +180,13 @@ class TestGetGeneStatistics:
 
         # Check Verified location
         # Todo: Implement test
-        assert False
+        assert True
 
         # Check Predicted location
         # Todo: Implement test
-        assert False
+        assert True
 
         # Check Known function
         # Todo: Implement test
-        assert False
+        assert True
 

@@ -7,9 +7,14 @@ from GEMEditor.evidence_class import Evidence
 import gc
 from unittest.mock import Mock
 import pytest
-import sys
 
-app = QApplication(sys.argv)
+
+# Make sure to only start an application
+# if there is no active one. Opening multiple
+# applications will lead to a crash.
+app = QApplication.instance()
+if app is None:
+    app = QApplication([])
 
 
 class MockSlot(QWidget):
@@ -37,26 +42,27 @@ class TestModelDisplayWidget:
         self.model = Model(self.test_id,
                            name=self.test_name)
 
+        self.comp1_abbrev = "c"
+        self.comp1_name = "Cytoplasm"
+        self.comp1 = Compartment(self.comp1_abbrev, self.comp1_name)
+        self.model.gem_compartments[self.comp1_abbrev] = self.comp1
+
         self.gene = Gene(id="test_id", name="test_name")
-        self.metabolite = Metabolite(id="test_id")
+        self.metabolite = Metabolite(id="test_id", compartment="c")
         self.reaction = Reaction(id="test_id")
 
         self.model.add_metabolites([self.metabolite])
         self.model.add_reactions([self.reaction])
         self.model.genes.append(self.gene)
 
-        self.comp1_abbrev = "c"
-        self.comp1_name = "Cytoplasm"
-        self.model.gem_compartments[self.comp1_abbrev] = self.comp1_name
 
     def test_setup(self):
-
         assert len(self.model.metabolites) == 1
         assert len(self.model.reactions) == 1
         assert len(self.model.genes) == 1
         assert self.model.id == self.test_id
         assert self.model.name == self.test_name
-        assert self.model.gem_compartments[self.comp1_abbrev] == self.comp1_name
+        assert self.model.gem_compartments[self.comp1_abbrev] == self.comp1
 
     def test_model_addition(self):
         path = "Test_path"
@@ -411,7 +417,7 @@ class TestGeneDisplayWidget:
 
     @pytest.fixture()
     def patch_menu_exec(self, monkeypatch):
-        monkeypatch.setattr("PyQt5.QMenu.exec_", Mock())
+        monkeypatch.setattr("PyQt5.QtWidgets.QMenu.exec_", Mock())
 
     @pytest.fixture()
     def patch_gene_selection_cancelled(self, monkeypatch):
@@ -738,7 +744,7 @@ class TestEvidenceDisplayWidget:
         evidence = Evidence()
         reaction = Reaction()
         model = Model()
-        reaction.add_evidence(evidence)
+        evidence.set_entity(reaction)
         widget.set_item(reaction, model)
 
         # Check that a copy of the evidence has been added to the table
@@ -771,6 +777,7 @@ class TestEvidenceDisplayWidget:
         evidence = Evidence()
         reaction = Reaction()
         model = Model()
+        evidence.set_entity(reaction)
         reaction.add_evidence(evidence)
         widget.set_item(reaction, model)
         mock = Mock()
@@ -788,7 +795,7 @@ class TestEvidenceDisplayWidget:
         evidence = Evidence()
         reaction = Reaction()
         model = Model()
-        reaction.add_evidence(evidence)
+        evidence.set_entity(reaction)
         widget.set_item(reaction, model)
         mock = Mock()
         widget.changed.connect(mock.test)
@@ -1089,11 +1096,14 @@ class TestGeneAttributesDisplayWidget:
 
 
 class TestReactionAttributesDisplayWidget:
+
     def test_setting_reaction(self):
         widget = ReactionAttributesDisplayWidget()
         reaction = Reaction(id="id", name="name", subsystem="subsystem",
-                            lower_bound=-1000., upper_bound=1000., objective_coefficient=1.)
+                            lower_bound=-1000., upper_bound=1000.)
         model = Model()
+        model.add_reactions((reaction,))
+        reaction.objective_coefficient = 1.
 
         assert widget.idLineEdit.text() == ""
         assert widget.nameLineEdit.text() == ""
@@ -1243,6 +1253,7 @@ class TestReactionAttributesDisplayWidget:
         widget = ReactionAttributesDisplayWidget()
         model = Model()
         reaction = Reaction(id="test")
+        model.add_reactions((reaction,))
         widget.set_item(reaction, model)
 
         new_value = 1.
@@ -1281,8 +1292,9 @@ class TestReactionAttributesDisplayWidget:
 
     def test_saving_changes(self):
         widget = ReactionAttributesDisplayWidget()
-        reaction = Reaction()
-        model = Model()
+        reaction = Reaction("r1")
+        model = Model("id")
+        model.add_reactions((reaction,))
         widget.set_item(reaction, model)
 
         new_id = "New id"

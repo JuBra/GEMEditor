@@ -187,7 +187,7 @@ class ReactionTab(StandardTab):
             col_index = selected_index[0].column()
             edit_reaction = self.dataTable.item_from_row(row_index)
 
-            dialog = ReactionInputDialog(self, edit_reaction, self.model)
+            dialog = ReactionInputDialog(edit_reaction, self.model, parent=self)
 
             # Todo: Move this to the dialog
             if col_index == 0:
@@ -213,7 +213,7 @@ class ReactionTab(StandardTab):
     @QtCore.pyqtSlot()
     def addItemSlot(self):
         new_reaction = Reaction()
-        dialog = ReactionInputDialog(self, new_reaction, self.model)
+        dialog = ReactionInputDialog(new_reaction, self.model, parent=self)
         status = dialog.exec_()
         if status:
             self.model.add_reaction(new_reaction)

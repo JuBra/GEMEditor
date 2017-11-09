@@ -6,7 +6,7 @@ from GEMEditor.ui.ReactionEditDialog import Ui_ReactionEditDialog
 
 class ReactionInputDialog(CustomStandardDialog, Ui_ReactionEditDialog):
 
-    def __init__(self, parent=None, reaction=None, model=None):
+    def __init__(self, reaction=None, model=None, parent=None):
         CustomStandardDialog.__init__(self, parent)
         self.setupUi(self)
         self.reaction = None

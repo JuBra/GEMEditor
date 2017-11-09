@@ -1,3 +1,5 @@
+|Build Status|
+
 ==========
 GEMEditor
 ==========
@@ -35,3 +37,6 @@ Options
 
 ``--debug``
   Run in debug mode for more detailed logging
+
+.. |Build Status| image:: https://travis-ci.org/JuBra/GEMEditor.svg?branch=master
+   :target: https://travis-ci.org/JuBra/GEMEditor

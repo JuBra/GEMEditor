@@ -1,8 +1,8 @@
+import pytest
+from unittest.mock import Mock, patch, PropertyMock, call
 from GEMEditor.data_classes import Annotation, Reference, Author, ModelTest, Outcome, ReactionSetting, \
     CleaningDict, ModelStats, GeneSetting
 from GEMEditor.cobraClasses import Reaction, Gene, Compartment
-from unittest.mock import Mock
-import pytest
 
 
 class TestAnnotation:
@@ -273,35 +273,40 @@ class TestSetting:
         old_ub = 1000.
         old_obj_value = 1.
 
-        reaction = Reaction("test_id",
-                            lower_bound=old_lb,
-                            upper_bound=old_ub,
-                            objective_coefficient=old_obj_value)
-        new_lb = -500.
-        new_ub = 500.
-        new_obj_value = 0.
-        setting = ReactionSetting(reaction, upper_bound=new_ub, lower_bound=new_lb, objective_coefficient=new_obj_value)
+        with patch('GEMEditor.cobraClasses.Reaction.objective_coefficient', new_callable=PropertyMock) as objective_coefficient:
+            objective_coefficient.return_value = old_obj_value
+            reaction = Reaction("test_id",
+                                lower_bound=old_lb,
+                                upper_bound=old_ub)
 
-        assert reaction.upper_bound == old_ub
-        assert reaction.lower_bound == old_lb
-        assert reaction.objective_coefficient == old_obj_value
+            new_lb = -500.
+            new_ub = 500.
+            new_obj_value = 0.
+            setting = ReactionSetting(reaction, upper_bound=new_ub, lower_bound=new_lb, objective_coefficient=new_obj_value)
 
-        setting.do()
+            assert reaction.upper_bound == old_ub
+            assert reaction.lower_bound == old_lb
+            assert reaction.objective_coefficient == old_obj_value
 
-        assert reaction.upper_bound == new_ub
-        assert reaction.lower_bound == new_lb
-        assert reaction.objective_coefficient == new_obj_value
+            setting.do()
 
-        setting.undo()
-        assert reaction.upper_bound == old_ub
-        assert reaction.lower_bound == old_lb
-        assert reaction.objective_coefficient == old_obj_value
+            assert reaction.upper_bound == new_ub
+            assert reaction.lower_bound == new_lb
+            assert objective_coefficient.call_args == call(new_obj_value)
+            objective_coefficient.return_value = new_obj_value
 
-        # Check that calling undo a second time does not change the valud
-        setting.undo()
-        assert reaction.upper_bound == old_ub
-        assert reaction.lower_bound == old_lb
-        assert reaction.objective_coefficient == old_obj_value
+            setting.undo()
+            assert reaction.upper_bound == old_ub
+            assert reaction.lower_bound == old_lb
+            assert objective_coefficient.call_args == call(old_obj_value)
+            objective_coefficient.return_value = old_obj_value
+
+            # Check that calling undo a second time does not change the value
+            prior_call_count = objective_coefficient.call_count
+            setting.undo()
+            assert reaction.upper_bound == old_ub
+            assert reaction.lower_bound == old_lb
+            assert objective_coefficient.call_count == prior_call_count
 
 
 class TestCleanupDict:

@@ -8,9 +8,14 @@ from GEMEditor.evidence_class import Evidence
 from GEMEditor.cobraClasses import Model, Reaction, Gene, Metabolite, GeneGroup
 from GEMEditor.rw.test.ex_evidences import minimal_evidence, full_evidence
 from PyQt5.QtWidgets import QApplication
-import sys
 
-app = QApplication(sys.argv)
+
+# Make sure to only start an application
+# if there is no active one. Opening multiple
+# applications will lead to a crash.
+app = QApplication.instance()
+if app is None:
+    app = QApplication([])
 
 
 class TestEvidence:

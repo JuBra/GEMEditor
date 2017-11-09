@@ -9,8 +9,8 @@ def legacy_solution():
 
 @pytest.fixture()
 def new_solution():
-    return Solution(status="optimal", objective_value=0.8, reactions=["r1"],
-                    fluxes=Series(data=[0.8], index=["r1"]), shadow_prices=Series(data=[0.7], index=["m1"]))
+    return Solution(status="optimal", objective_value=0.8, fluxes=Series(data=[0.8], index=["r1"]),
+                    shadow_prices=Series(data=[0.7], index=["m1"]))
 
 
 class TestGetAttributesFromSolution:

@@ -313,8 +313,10 @@ class Model(QtCore.QObject, BaseEvidenceElement, cobraModel):
 
     modelChanged = QtCore.pyqtSignal()
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, id_or_model=None, name=None):
         super(Model, self).__init__()
+        self._id = id_or_model
+        self.name = name
 
         self.QtReactionTable = ReactionTable(self)
         self.QtMetaboliteTable = MetaboliteTable(self)
@@ -437,6 +439,9 @@ class Model(QtCore.QObject, BaseEvidenceElement, cobraModel):
         super(Model, self).add_metabolites(metabolite_list)
 
     def remove_metabolites(self, list_of_metabolites, destructive=False):
+
+        if not hasattr(list_of_metabolites, "__iter__"):
+            list_of_metabolites = [list_of_metabolites]
 
         # Remove GEMEditor specific links
         for metabolite in list_of_metabolites:

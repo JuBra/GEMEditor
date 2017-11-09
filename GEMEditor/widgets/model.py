@@ -1330,7 +1330,7 @@ class OutcomeDisplayWidget(QWidget, Ui_SettingsDisplayWidget):
         self.dataTable.rowsInserted.connect(self.changed.emit)
         self.dataTable.dataChanged.connect(self.changed.emit)
 
-    def set_item(self, model_test, model, solution):
+    def set_item(self, model_test, model, solution=None):
         """ Set the item to the current widget
 
         Parameters

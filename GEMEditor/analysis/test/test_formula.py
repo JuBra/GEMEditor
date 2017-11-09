@@ -2,6 +2,13 @@ from PyQt5.QtWidgets import QApplication
 from GEMEditor.cobraClasses import Reaction, Metabolite, Model
 from GEMEditor.analysis.formula import *
 
+# Make sure to only start an application
+# if there is no active one. Opening multiple
+# applications will lead to a crash.
+app = QApplication.instance()
+if app is None:
+    app = QApplication([])
+
 
 class Test_update_formula_from_neighborhood:
 
@@ -96,7 +103,6 @@ class Test_update_formulae_iteratively:
                                 met4: 1})
 
         # Setup model
-        app = QApplication([])
         model = Model("id")
         model.add_metabolites([met1, met2, met3, met4])
         model.add_reactions([react, react1])
