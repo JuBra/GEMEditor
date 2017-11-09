@@ -1,6 +1,6 @@
 import pytest
 from GEMEditor.tabs import *
-from cobra.core.solution import Solution
+from cobra.core.solution import LegacySolution
 from GEMEditor.cobraClasses import Model, Reaction, Metabolite, Gene
 from GEMEditor.data_classes import ModelTest, ReactionSetting, Outcome, Reference
 from GEMEditor.dialogs.mock import MockModelTestDialog
@@ -553,36 +553,36 @@ class TestModelTestsTab:
     @pytest.fixture()
     def patch_solvers_none(self, monkeypatch):
         monkeypatch.setattr("cobra.solvers", Mock(solver_dict={}))
-        monkeypatch.setattr("PyQt5.QErrorMessage", Mock())
+        monkeypatch.setattr("PyQt5.QtWidgets.QErrorMessage", Mock())
 
     @pytest.fixture()
     def patch_solvers_gurobi(self, monkeypatch):
         monkeypatch.setattr("cobra.solvers", Mock(solver_dict={"gurobi": None}))
-        monkeypatch.setattr("PyQt5.QErrorMessage", Mock())
+        monkeypatch.setattr("PyQt5.QtWidgets.QErrorMessage", Mock())
 
     @pytest.fixture()
     def patch_getitem_accept_gurobi(self, monkeypatch):
         monkeypatch.setattr("PyQt5.QInputDialog.getItem", Mock(return_value=("gurobi", True)))
-        monkeypatch.setattr("PyQt5.QErrorMessage", Mock())
+        monkeypatch.setattr("PyQt5.QtWidgets.QErrorMessage", Mock())
 
     @pytest.fixture()
     def patch_getitm_reject(self, monkeypatch):
         monkeypatch.setattr("PyQt5.QInputDialog.getItem", Mock(return_value=(None, False)))
-        monkeypatch.setattr("PyQt5.QErrorMessage", Mock())
+        monkeypatch.setattr("PyQt5.QtWidgets.QErrorMessage", Mock())
 
     @pytest.fixture()
     def patch_run_test_infeasible(self, monkeypatch):
-        monkeypatch.setattr("GEMEditor.tabs.run_test", Mock(return_value=(False, Solution(f=None,
+        monkeypatch.setattr("GEMEditor.tabs.run_test", Mock(return_value=(False, LegacySolution(f=None,
                                                                                           status="infeasible"))))
 
     @pytest.fixture()
     def patch_run_test_passed(self, monkeypatch):
-        monkeypatch.setattr("GEMEditor.tabs.run_test", Mock(return_value=(True, Solution(f=None,
+        monkeypatch.setattr("GEMEditor.tabs.run_test", Mock(return_value=(True, LegacySolution(f=None,
                                                                                          status="optimal"))))
 
     @pytest.fixture()
     def patch_run_test_failed(self, monkeypatch):
-        monkeypatch.setattr("GEMEditor.tabs.run_test", Mock(return_value=(False, Solution(f=None,
+        monkeypatch.setattr("GEMEditor.tabs.run_test", Mock(return_value=(False, LegacySolution(f=None,
                                                                                           status="optimal"))))
 
     @pytest.fixture(autouse=True)

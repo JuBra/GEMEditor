@@ -1,6 +1,6 @@
 import pytest
 from GEMEditor.dialogs.model import AddCompartmentDialog, EditModelDialog
-from GEMEditor.cobraClasses import Model, Metabolite
+from GEMEditor.cobraClasses import Model, Metabolite, Compartment
 from GEMEditor.widgets.tables import CompartmentTable
 from PyQt5 import QtTest, QtCore
 from PyQt5.QtWidgets import QApplication, QDialogButtonBox, QToolTip, QWidget, QProgressDialog
@@ -26,19 +26,16 @@ class TestAddCompartmentDialog:
     @pytest.fixture(autouse=True)
     def setup_items(self):
         self.model = Model("Test")
-        self.comp1_abbreviation = "c"
-        self.comp1_name = "Cytoplasm"
-        self.comp2_abbreviation = "e"
-        self.comp2_name = "Extracellular"
-        self.model.gem_compartments[self.comp1_abbreviation] = self.comp1_name
+        self.c1 = Compartment(id="c", name="Cytoplasm")
+        self.c2 = Compartment(id="e", name="Extracellular")
+        self.model.gem_compartments[self.c1.id] = self.c1
         self.compartment_table = CompartmentTable()
         self.compartment_table.populate_table(self.model.gem_compartments.items())
-
         self.wrong_format_abbreviation = "ca"
 
     @pytest.fixture()
     def patch_tooltip(self, monkeypatch):
-        monkeypatch.setattr("PyQt5.QToolTip.showText", Mock())
+        monkeypatch.setattr("PyQt5.QtWidgets.QToolTip.showText", Mock())
 
     def test_setup(self):
         dialog = AddCompartmentDialog(self.compartment_table)
@@ -47,17 +44,17 @@ class TestAddCompartmentDialog:
         assert dialog.nameInput.text() == ""
         assert dialog.buttonBox.button(QDialogButtonBox.Ok).isEnabled() is False
 
-        assert self.compartment_table.findItems(self.comp1_abbreviation, QtCore.Qt.MatchExactly, 0) != []
+        assert self.compartment_table.findItems(self.c1.id, QtCore.Qt.MatchExactly, 0) != []
 
     def test_setting_new_compartment(self):
         dialog = AddCompartmentDialog(self.compartment_table)
 
-        QtTest.QTest.keyClicks(dialog.abbreviationInput, self.comp2_abbreviation)
-        QtTest.QTest.keyClicks(dialog.nameInput, self.comp2_name)
+        QtTest.QTest.keyClicks(dialog.abbreviationInput, self.c2.id)
+        QtTest.QTest.keyClicks(dialog.nameInput, self.c2.name)
 
-        assert dialog.abbreviationInput.text() == self.comp2_abbreviation
+        assert dialog.abbreviationInput.text() == self.c2.id
         assert dialog.buttonBox.button(QDialogButtonBox.Ok).isEnabled() is True
-        assert dialog.nameInput.text() == self.comp2_name
+        assert dialog.nameInput.text() == self.c2.name
         assert dialog.buttonBox.button(QDialogButtonBox.Ok).isEnabled() is True
 
     @pytest.mark.usefixtures("patch_tooltip")
@@ -65,10 +62,10 @@ class TestAddCompartmentDialog:
         dialog = AddCompartmentDialog(self.compartment_table)
         assert QToolTip.showText.called is False
 
-        QtTest.QTest.keyClicks(dialog.abbreviationInput, self.comp1_abbreviation)
+        QtTest.QTest.keyClicks(dialog.abbreviationInput, self.c1.id)
         assert dialog.buttonBox.button(QDialogButtonBox.Ok).isEnabled() is False
         assert QToolTip.showText.called is True
-        assert dialog.abbreviationInput.toolTip() == dialog.existing_msg.format(self.comp1_abbreviation)
+        assert dialog.abbreviationInput.toolTip() == dialog.existing_msg.format(self.c1.id)
 
     @pytest.mark.usefixtures("patch_tooltip")
     def test_wrong_format_abbreviation(self):
@@ -82,10 +79,10 @@ class TestAddCompartmentDialog:
 
     def test_getting_compartment(self):
         dialog = AddCompartmentDialog(self.compartment_table)
-        QtTest.QTest.keyClicks(dialog.abbreviationInput, self.comp2_abbreviation)
-        QtTest.QTest.keyClicks(dialog.nameInput, self.comp2_name)
+        QtTest.QTest.keyClicks(dialog.abbreviationInput, self.c2.id)
+        QtTest.QTest.keyClicks(dialog.nameInput, self.c2.name)
 
-        assert dialog.get_compartment == (self.comp2_abbreviation, self.comp2_name)
+        assert dialog.get_compartment == (self.c2.id, self.c2.name)
 
 
 class TestEditModelSettings:
@@ -100,23 +97,23 @@ class TestEditModelSettings:
         self.comp1_id = "c"
         self.new_comp_id = "n"
         self.new_comp_name = "Nucleus"
-        self.model.gem_compartments[self.comp1_id] = self.comp1_name
+        self.new_comp = Compartment(self.new_comp_id, self.new_comp_name)
+        self.comp1 = Compartment(self.comp1_id, self.comp1_name)
+        self.model.gem_compartments[self.comp1_id] = self.comp1
         self.metabolite = Metabolite("test", compartment=self.comp1_id)
         self.model.add_metabolites([self.metabolite])
-
         self.dialog = EditModelDialog(parent=self.parent, model=self.model)
 
     @pytest.fixture()
     def patch_progress(self, monkeypatch):
-        monkeypatch.setattr("PyQt5.QProgressDialog", Mock())
-        monkeypatch.setattr("PyQt5.QApplication.processEvents", Mock())
-
+        monkeypatch.setattr("PyQt5.QtWidgets.QWQProgressDialog", Mock())
+        monkeypatch.setattr("PyQt5.QtWidgets.QApplication.processEvents", Mock())
 
     def test_setup(self):
         assert self.model.name == self.test_name
         assert self.model.id == self.test_id
         assert self.comp1_id in self.model.gem_compartments
-        assert self.model.gem_compartments[self.comp1_id] == self.comp1_name
+        assert self.model.gem_compartments[self.comp1_id] == self.comp1
 
         assert self.dialog.buttonBox.button(QDialogButtonBox.Ok).isEnabled() is False
         assert self.dialog.modelNameInput.text() == self.test_name
@@ -137,7 +134,7 @@ class TestEditModelSettings:
 
     def test_add_compartment(self):
         row_count = self.dialog.compartmentTable.rowCount()
-        self.dialog.compartmentTable.update_row_from_item((self.new_comp_id, self.new_comp_name))
+        self.dialog.compartmentTable.update_row_from_item((self.new_comp_id, self.new_comp))
         assert self.dialog.compartmentTable.rowCount() == row_count + 1
         assert self.dialog.buttonBox.button(QDialogButtonBox.Ok).isEnabled() is True
         assert self.dialog.input_changed() is True
@@ -164,11 +161,11 @@ class TestEditModelSettings:
         assert self.model.name == self.test_name + self.test_name
 
     def test_save_changes_compartment_addition(self):
-        self.dialog.compartmentTable.update_row_from_item((self.new_comp_id, self.new_comp_name))
+        self.dialog.compartmentTable.update_row_from_item((self.new_comp_id, self.new_comp))
         assert self.dialog.compartmentTable.rowCount() == 2
         self.dialog.save_changes()
-        assert self.model.gem_compartments == {self.comp1_id: self.comp1_name,
-                                               self.new_comp_id: self.new_comp_name}
+        assert self.model.gem_compartments == {self.comp1_id: self.comp1,
+                                               self.new_comp_id: self.new_comp}
         assert self.metabolite in self.model.metabolites
 
     @pytest.mark.usefixtures("patch_progress")
@@ -187,5 +184,5 @@ class TestEditModelSettings:
         self.dialog.compartmentTable.item(0, 1).setText(self.new_comp_name)
         assert self.dialog.buttonBox.button(QDialogButtonBox.Ok).isEnabled() is True
         self.dialog.save_changes()
-        assert self.model.gem_compartments == {self.comp1_id: self.new_comp_name}
+        assert self.model.gem_compartments[self.comp1_id].name == self.new_comp_name
 

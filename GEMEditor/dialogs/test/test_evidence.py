@@ -171,13 +171,13 @@ class TestEvidenceInputDialog:
     @pytest.fixture()
     def patch_reference_selection_accepted(self, monkeypatch):
         reference = Reference()
-        monkeypatch.setattr("GEMEditor.dialogs.reference.ReferenceSelectionDialog", Mock(return_value=Mock(**{"exec_": Mock(return_value=True),
+        monkeypatch.setattr("GEMEditor.dialogs.standard.ReferenceSelectionDialog", Mock(return_value=Mock(**{"exec_": Mock(return_value=True),
                                                                                                              "selected_items": Mock(return_value=[reference])})))
         return reference
 
     @pytest.fixture()
     def patch_reference_selection_cancelled(self, monkeypatch):
-        monkeypatch.setattr("GEMEditor.dialogs.reference.ReferenceSelectionDialog.exec_", Mock(return_value=False))
+        monkeypatch.setattr("GEMEditor.dialogs.standard.ReferenceSelectionDialog.exec_", Mock(return_value=False))
 
     @pytest.mark.usefixtures("patch_reference_selection_cancelled")
     def test_add_reference_cancelled(self):
