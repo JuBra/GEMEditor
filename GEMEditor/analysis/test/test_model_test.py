@@ -1,6 +1,6 @@
 from GEMEditor.cobraClasses import Reaction, Metabolite, Model
 from GEMEditor.data_classes import ReactionSetting, Outcome, ModelTest
-from cobra.core.solution import Solution
+from cobra.core.solution import LegacySolution
 from GEMEditor.analysis.model_test import get_original_settings, run_test
 import GEMEditor
 from unittest.mock import Mock
@@ -10,41 +10,45 @@ import pytest
 
 class TestGetOriginalSettings:
 
-    @pytest.fixture(autouse=True)
-    def setup_items(self):
-        self.model = Model("id")
-
     @pytest.fixture()
     def setup_r1(self):
+        self.model = Model("id")
         self.metabolite1 = Metabolite("m1")
-        self.r1 = Reaction(id="r1", objective_coefficient=0.,
-                           lower_bound=-200., upper_bound=200.)
+        self.r1 = Reaction(id="r1", lower_bound=-200., upper_bound=200.)
         self.r1.add_metabolites({self.metabolite1: -1})
+        self.model.add_reactions((self.r1,))
+        self.r1.objective_coefficient = 0.
 
     @pytest.fixture()
     def setup_r2(self):
+        self.model = Model("id")
         self.metabolite1 = Metabolite("m1")
-        self.r2 = Reaction(id="r2", objective_coefficient=1.,
-                           lower_bound=-200., upper_bound=200.)
+        self.r2 = Reaction(id="r2", lower_bound=-200., upper_bound=200.)
         self.r2.add_metabolites({self.metabolite1: -1})
+        self.model.add_reactions((self.r2,))
+        self.r2.objective_coefficient = 1.
 
     @pytest.fixture()
     def setup_r3(self):
+        self.model = Model("id")
         self.metabolite1 = Metabolite("m1")
         self.metabolite2 = Metabolite("m2")
-        self.r3 = Reaction(id="r3", objective_coefficient=0.,
-                           lower_bound=-200., upper_bound=200.)
+        self.r3 = Reaction(id="r3", lower_bound=-200., upper_bound=200.)
         self.r3.add_metabolites({self.metabolite1: -1,
                                  self.metabolite2: 1})
+        self.model.add_reactions((self.r3,))
+        self.r3.objective_coefficient = 0.
 
     @pytest.fixture()
     def setup_r4(self):
+        self.model = Model("id")
         self.metabolite1 = Metabolite("m1")
         self.metabolite2 = Metabolite("m2")
-        self.r4 = Reaction(id="r3", objective_coefficient=1.,
-                           lower_bound=-200., upper_bound=200.)
+        self.r4 = Reaction(id="r4", lower_bound=-200., upper_bound=200.)
         self.r4.add_metabolites({self.metabolite1: -1,
                                  self.metabolite2: 1})
+        self.model.add_reactions((self.r4,))
+        self.r4.objective_coefficient = 1.
 
     @pytest.mark.usefixtures("setup_r1")
     def test_r1(self):
@@ -159,7 +163,7 @@ class TestGetOriginalSettings:
 
 @pytest.fixture()
 def solution():
-    solution = Solution(f=None)
+    solution = LegacySolution(f=None)
     solution.x_dict = {"r1": 10.,
                        "r2": 0.}
     return solution
@@ -167,19 +171,20 @@ def solution():
 
 @pytest.fixture()
 def infeasible_solution():
-    return Solution(f=None, status="infeasible")
+    return LegacySolution(f=None, status="infeasible")
 
 
 class TestRunTest:
 
     @pytest.fixture(autouse=True)
     def setup_test(self):
-
+        self.model = Model("id")
         self.metabolite1 = Metabolite("m1")
         self.metabolite2 = Metabolite("m2")
 
-        self.reaction1 = Reaction("r1", lower_bound=-1000.,
-                                  upper_bound=1000., objective_coefficient=0.)
+        self.reaction1 = Reaction("r1", lower_bound=-1000., upper_bound=1000.)
+        self.model.add_reactions((self.reaction1,))
+        self.reaction1.objective_coefficient = 0.
         self.r1_init_setting = self.reaction1.get_setting()
         self.reaction1.add_metabolites({self.metabolite1: -1,
                                         self.metabolite2: 1})
@@ -189,8 +194,9 @@ class TestRunTest:
                                         lower_bound=0.,
                                         objective_coefficient=1.)
 
-        self.reaction2 = Reaction("r2", lower_bound=0., upper_bound=50.,
-                                  objective_coefficient=1.)
+        self.reaction2 = Reaction("r2", lower_bound=0., upper_bound=50.)
+        self.model.add_reactions((self.reaction2,))
+        self.reaction2.objective_coefficient = 1.
         self.setting2 = ReactionSetting(reaction=self.reaction2,
                                         upper_bound=1000.,
                                         lower_bound=-1000.,
@@ -274,19 +280,19 @@ class TestRunTest:
 
     @pytest.mark.usefixtures("mock_optimize", "mock_get_original_settings")
     def test_restore_initial_get_original_not_called(self):
-        GEMEditor.analysis.model_test.get_original_settings.called is False
+        assert GEMEditor.analysis.model_test.get_original_settings.called is False
         model_test = ModelTest()
         model_test.outcomes = [self.true_outcome1]
         status, _ = run_test(model_test, Model(), None, restore_initial=False)
-        GEMEditor.analysis.model_test.get_original_settings.called is False
+        assert GEMEditor.analysis.model_test.get_original_settings.called is False
 
     @pytest.mark.usefixtures("mock_optimize")
     def test_restore_initial_get_original_called(self, mock_get_original_settings):
         original_settings = mock_get_original_settings
-        GEMEditor.analysis.model_test.get_original_settings.called is False
+        assert GEMEditor.analysis.model_test.get_original_settings.called is False
         model_test = ModelTest()
         model_test.outcomes = [self.true_outcome1]
         status, _ = run_test(model_test, Model(), None, restore_initial=True)
-        GEMEditor.analysis.model_test.get_original_settings.called is True
+        assert GEMEditor.analysis.model_test.get_original_settings.called is True
         for x in original_settings:
             assert x.do.called is True

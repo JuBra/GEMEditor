@@ -19,7 +19,7 @@ if app is None:
 
 @pytest.fixture()
 def monkeypatch_proxymodel_setfilterfixedstring(monkeypatch):
-    monkeypatch.setattr("PyQt5.QSortFilterProxyModel.setFilterFixedString", Mock())
+    monkeypatch.setattr("PyQt5.QtCore.QSortFilterProxyModel.setFilterFixedString", Mock())
 
 
 class TestStandardTab:

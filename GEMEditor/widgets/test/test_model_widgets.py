@@ -416,7 +416,7 @@ class TestGeneDisplayWidget:
 
     @pytest.fixture()
     def patch_menu_exec(self, monkeypatch):
-        monkeypatch.setattr("PyQt5.QMenu.exec_", Mock())
+        monkeypatch.setattr("PyQt5.QtWidgets.QMenu.exec_", Mock())
 
     @pytest.fixture()
     def patch_gene_selection_cancelled(self, monkeypatch):
@@ -1094,11 +1094,14 @@ class TestGeneAttributesDisplayWidget:
 
 
 class TestReactionAttributesDisplayWidget:
+
     def test_setting_reaction(self):
         widget = ReactionAttributesDisplayWidget()
         reaction = Reaction(id="id", name="name", subsystem="subsystem",
-                            lower_bound=-1000., upper_bound=1000., objective_coefficient=1.)
+                            lower_bound=-1000., upper_bound=1000.)
         model = Model()
+        model.add_reactions((reaction,))
+        reaction.objective_coefficient = 1.
 
         assert widget.idLineEdit.text() == ""
         assert widget.nameLineEdit.text() == ""
@@ -1248,6 +1251,7 @@ class TestReactionAttributesDisplayWidget:
         widget = ReactionAttributesDisplayWidget()
         model = Model()
         reaction = Reaction(id="test")
+        model.add_reactions((reaction,))
         widget.set_item(reaction, model)
 
         new_value = 1.
@@ -1286,8 +1290,9 @@ class TestReactionAttributesDisplayWidget:
 
     def test_saving_changes(self):
         widget = ReactionAttributesDisplayWidget()
-        reaction = Reaction()
-        model = Model()
+        reaction = Reaction("r1")
+        model = Model("id")
+        model.add_reactions((reaction,))
         widget.set_item(reaction, model)
 
         new_id = "New id"

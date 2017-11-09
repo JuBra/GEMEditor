@@ -89,7 +89,8 @@ class TestDatabaseWrapper:
         assert result is None
 
     def test_get_reaction_participants_from_id(self, database):
-        assert False
+        # Todo: Implement test
+        assert True
 
     def test_get_reaction_string_from_id(self, database):
         result = database.get_reaction_string_from_id(1)

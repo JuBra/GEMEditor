@@ -68,7 +68,7 @@ def monkeypatch_QMessageBox_No(monkeypatch):
 
 @pytest.fixture()
 def monkeypatch_editsettingsdialog(monkeypatch):
-    monkeypatch.setattr("GEMEditor.dialogs.program.EditSettingsDialog.exec_", Mock())
+    monkeypatch.setattr("GEMEditor.main.settings.EditSettingsDialog.exec_", Mock())
 
 
 @pytest.fixture()
@@ -77,7 +77,7 @@ def monkeypatch_setwindowtitle(monkeypatch):
 
 @pytest.fixture()
 def monkeypatch_about_dialog(monkeypatch):
-    monkeypatch.setattr("GEMEditor.dialogs.program.AboutDialog.exec_", Mock())
+    monkeypatch.setattr("GEMEditor.main.about.AboutDialog.exec_", Mock())
 
 @pytest.fixture()
 def monkeypatch_qdesktopservices_openurl(monkeypatch):
@@ -93,21 +93,21 @@ def monkeypatch_editmodeldialog_return_false(monkeypatch):
 
 @pytest.fixture()
 def monkeypatch_getopenfilename_return_empty_string(monkeypatch):
-    monkeypatch.setattr("PyQt5.QFileDialog.getOpenFileName", Mock(return_value=""))
+    monkeypatch.setattr("PyQt5.QtWidgets.QFileDialog.getOpenFileName", Mock(return_value=("", None)))
 
 @pytest.fixture()
 def monkeypatch_getopenfilename_return_xml_path(monkeypatch, tmpdir):
-    path = tmpdir.tmpdir.mkdir("xml")
-    monkeypatch.setattr("PyQt5.QFileDialog.getOpenFileName", Mock(return_value=str(path)))
+    path = tmpdir.mkdir("xml")
+    monkeypatch.setattr("PyQt5.QtWidgets.QFileDialog.getOpenFileName", Mock(return_value=(str(path), ".xml")))
 
 @pytest.fixture()
 def monkeypatch_getsavefilename_return_empty_string(monkeypatch):
-    monkeypatch.setattr("PyQt5.QFileDialog.getSaveFileName", Mock(return_value=""))
+    monkeypatch.setattr("PyQt5.QtWidgets.QFileDialog.getSaveFileName", Mock(return_value=("", None)))
 
 @pytest.fixture()
 def monkeypatch_getsavefilename_return_xml_path(monkeypatch, tmpdir):
-    path = tmpdir.tmpdir.mkdir("xml")
-    monkeypatch.setattr("PyQt5.QFileDialog.getSaveFileName", Mock(return_value=str(path)))
+    path = tmpdir.mkdir("xml")
+    monkeypatch.setattr("PyQt5.QtWidgets.QFileDialog.getSaveFileName", Mock(return_value=(str(path)+".xml", "*.xml")))
 
 @pytest.fixture()
 def monkeypatch_qsettings_complete(monkeypatch):
@@ -116,7 +116,7 @@ def monkeypatch_qsettings_complete(monkeypatch):
 
 @pytest.fixture()
 def monkeypatch_progress(monkeypatch):
-    monkeypatch.setattr("PyQt5.QProgressDialog", Mock())
+    monkeypatch.setattr("PyQt5.QtWidgets.QProgressDialog", Mock())
 
 @pytest.fixture()
 def mock_read_sbml3(monkeypatch):
@@ -156,29 +156,29 @@ class TestMainWindow:
     def test_check_email_none(self):
         main_window = MainWindow()
         # Check email already called upon MainWindow.__init__
-        assert GEMEditor.dialogs.program.EditSettingsDialog.exec_.called is True
-        previous_call_count = GEMEditor.dialogs.program.EditSettingsDialog.exec_.call_count
+        assert GEMEditor.main.settings.EditSettingsDialog.exec_.called is True
+        previous_call_count = GEMEditor.main.settings.EditSettingsDialog.exec_.call_count
 
         assert QtCore.QSettings().value("Email") is None
         main_window.check_email()
-        assert GEMEditor.dialogs.program.EditSettingsDialog.exec_.call_count == previous_call_count + 1
+        assert GEMEditor.main.settings.EditSettingsDialog.exec_.call_count == previous_call_count + 1
 
     @pytest.mark.usefixtures("monkeypatch_check_updates", "monkeypatch_editsettingsdialog", "set_email")
     def test_check_email_set(self):
         main_window = MainWindow()
         # Check email already called upon MainWindow.__init__
-        assert GEMEditor.dialogs.program.EditSettingsDialog.exec_.called is False
-        previous_call_count = GEMEditor.dialogs.program.EditSettingsDialog.exec_.call_count
+        assert GEMEditor.main.settings.EditSettingsDialog.exec_.called is False
+        previous_call_count = GEMEditor.main.settings.EditSettingsDialog.exec_.call_count
 
         assert QtCore.QSettings().value("Email") is not None
         main_window.check_email()
-        assert GEMEditor.dialogs.program.EditSettingsDialog.exec_.call_count == previous_call_count
+        assert GEMEditor.main.settings.EditSettingsDialog.exec_.call_count == previous_call_count
 
     @pytest.mark.usefixtures("monkeypatch_about_dialog")
     def test_show_about_dialog(self, main_window):
-        assert GEMEditor.dialogs.program.AboutDialog.exec_.called is False
+        assert GEMEditor.main.about.AboutDialog.exec_.called is False
         main_window.showAbout()
-        assert GEMEditor.dialogs.program.AboutDialog.exec_.called is True
+        assert GEMEditor.main.about.AboutDialog.exec_.called is True
 
     @pytest.mark.usefixtures("monkeypatch_QMessageBox_Yes")
     def test_check_model_closing_accept(self, main_window):
@@ -218,47 +218,61 @@ class TestMainWindow:
 
     @pytest.mark.usefixtures("monkeypatch_editsettingsdialog")
     def test_editsettings_dialog_shown(self, main_window):
-        assert GEMEditor.dialogs.program.EditSettingsDialog.exec_.called is False
+        assert GEMEditor.main.settings.EditSettingsDialog.exec_.called is False
         main_window.editSettings()
-        assert GEMEditor.dialogs.program.EditSettingsDialog.exec_.called is True
+        assert GEMEditor.main.settings.EditSettingsDialog.exec_.called is True
 
     @pytest.mark.usefixtures("monkeypatch_setwindowtitle")
     def test_model_loaded(self, main_window):
         model_id = "test_id"
         model = Model(model_id)
         main_window.model = model
+        main_window = MainWindow()
 
-        assert main_window.actionCloseModel.isEnabled() is False
-        assert main_window.actionSaveModel.isEnabled() is False
-        assert main_window.actionStatistics.isEnabled() is False
-        assert main_window.modelTab.editModelSettingButton.isEnabled() is False
-        assert main_window.tabWidget.currentIndex() == 0
-        for n in range(1, main_window.tabWidget.count()):
-            assert main_window.tabWidget.isTabEnabled(n) is False
-        previous_call_count = GEMEditor.main.MainWindow.set_window_title.call_count
+        # Check active actions/menus
+        # -> File
+        assert main_window.menuFile.isEnabled()
+        assert main_window.actionOpenModel.isEnabled()
+        assert main_window.actionNewModel.isEnabled()
+        assert main_window.actionLoadTestModel.isEnabled()
+        assert main_window.actionCloseEditor.isEnabled()
+        # -> Edit
+        assert main_window.menuEdit.isEnabled()
+        for action in main_window.menuEdit.actions():
+            assert action.isEnabled()
+        # -> Help
+        assert main_window.menuHelp.isEnabled()
+        for action in main_window.menuHelp.actions():
+            assert action.isEnabled()
+
+        # Check inactive actions/menus
+        # -> File
+        assert not main_window.actionSaveModel.isEnabled()
+        assert not main_window.actionCloseModel.isEnabled()
+        # -> Model
+        assert not main_window.menuModel.isEnabled()
+        # -> MetaNetX
+        assert not main_window.menuSimulation.isEnabled()
 
         main_window.modelLoaded(True)
 
-        assert main_window.actionCloseModel.isEnabled() is True
-        assert main_window.actionSaveModel.isEnabled() is True
-        assert main_window.actionStatistics.isEnabled() is True
-        assert main_window.modelTab.editModelSettingButton.isEnabled() is True
-        assert main_window.tabWidget.currentIndex() == 0
-        for n in range(1, main_window.tabWidget.count()):
-            assert main_window.tabWidget.isTabEnabled(n) is True
-        assert GEMEditor.main.MainWindow.set_window_title.call_count == previous_call_count + 1
-        main_window.tabWidget.setCurrentIndex(2)
-        assert main_window.tabWidget.currentIndex() == 2
-
-        main_window.modelLoaded(False)
-        assert main_window.actionCloseModel.isEnabled() is False
-        assert main_window.actionSaveModel.isEnabled() is False
-        assert main_window.actionStatistics.isEnabled() is False
-        assert main_window.modelTab.editModelSettingButton.isEnabled() is False
-        assert main_window.tabWidget.currentIndex() == 0
-        for n in range(1, main_window.tabWidget.count()):
-            assert main_window.tabWidget.isTabEnabled(n) is False
-        assert GEMEditor.main.MainWindow.set_window_title.call_count == previous_call_count + 2
+        # Check active actions/menus
+        # -> File
+        assert main_window.menuFile.isEnabled()
+        for action in main_window.menuFile.actions():
+            assert action.isEnabled()
+        # -> Edit
+        assert main_window.menuEdit.isEnabled()
+        for action in main_window.menuEdit.actions():
+            assert action.isEnabled()
+        # -> Model
+        assert main_window.menuModel.isEnabled()
+        # -> MetaNetX
+        assert main_window.menuSimulation.isEnabled()
+        # -> Help
+        assert main_window.menuHelp.isEnabled()
+        for action in main_window.menuHelp.actions():
+            assert action.isEnabled()
 
     def test_set_window_title_none(self, main_window):
         test_title = "XYZ"
@@ -268,17 +282,6 @@ class TestMainWindow:
 
         main_window.set_window_title()
         assert main_window.windowTitle() == app_name
-
-    def test_set_window_title_model_id(self, main_window):
-        test_title = "XYZ"
-        main_window.setWindowTitle(test_title)
-        model_id = "Test model_id"
-        main_window.model = Model(model_id)
-        assert main_window.windowTitle() == test_title
-
-        main_window.set_window_title()
-        assert main_window.windowTitle().startswith(model_id)
-        assert main_window.windowTitle().endswith(app_name)
 
     def test_set_model(self, main_window):
         assert main_window.model is None
@@ -464,7 +467,7 @@ class TestMainWindow:
         assert QtCore.QSettings.call_count == previous_calls + 1
         QtCore.QSettings.return_value.value.assert_called_with("LastPath")
         assert QFileDialog.getSaveFileName.called is True
-        GEMEditor.rw.sbml3.write_sbml3_model.assert_called_with(QFileDialog.getSaveFileName.return_value,
+        GEMEditor.rw.sbml3.write_sbml3_model.assert_called_with(QFileDialog.getSaveFileName.return_value[0],
                                                                 model)
         #QtCore.QSettings.return_value.setValue.assert_called_with("LastPath", os.path.dirname(ecoli_sbml))
         # Todo: Reenable test
