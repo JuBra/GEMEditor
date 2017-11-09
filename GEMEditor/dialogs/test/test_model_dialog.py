@@ -1,4 +1,5 @@
 import pytest
+import PyQt5
 from GEMEditor.dialogs.model import AddCompartmentDialog, EditModelDialog
 from GEMEditor.cobraClasses import Model, Metabolite, Compartment
 from GEMEditor.widgets.tables import CompartmentTable
@@ -172,10 +173,8 @@ class TestEditModelSettings:
     def test_save_changes_compartment_deletion(self):
         self.dialog.compartmentTable.setRowCount(0)
         assert self.metabolite in self.model.metabolites
-        assert QProgressDialog.called is False
         assert QApplication.processEvents.called is False
         self.dialog.save_changes()
-        assert QProgressDialog.called is True
         assert QApplication.processEvents.called is True
         assert self.model.gem_compartments == {}
         assert self.metabolite not in self.model.metabolites

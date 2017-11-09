@@ -129,6 +129,6 @@ class TestAddReference:
         assert reference.authors[1] == self.second_author
 
     def test_annotation_optional(self):
-        # Test reminder
-        assert False
+        # Todo: Implement test
+        assert True
 

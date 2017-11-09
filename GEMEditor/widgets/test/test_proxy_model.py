@@ -55,7 +55,7 @@ class TestReactionProxyFilter:
 
         assert self.proxyModel.custom_filter == 1
 
-    @pytest.mark.parametrize("n, expectation", [(0, True), (1, True), (2, False), (3, True), (4, True)])
+    @pytest.mark.parametrize("n, expectation", [(0, True), (1, True), (2, False), (3, False), (4, False)])
     def test_row_accepted_boundary(self, n, expectation, boundary_reaction):
 
         self.proxyModel.custom_filter = n
@@ -97,7 +97,7 @@ class TestReactionProxyFilter:
         assert self.proxyModel.filterAcceptsRow(0, parent) is False
         assert self.proxyModel.passes_custom_filter(normal_reaction) is expectation
 
-    @pytest.mark.parametrize("n, expectation", [(0, True), (1, False), (2, True), (3, True), (4, True)])
+    @pytest.mark.parametrize("n, expectation", [(0, True), (1, False), (2, True), (3, False), (4, True)])
     def test_row_accepted_transport(self, n, expectation, transport_reaction):
 
         self.proxyModel.custom_filter = n

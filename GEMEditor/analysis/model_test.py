@@ -41,33 +41,37 @@ def run_test(test_case, model, solver, restore_initial=False):
 
 
 def get_original_settings(model):
-    """ Get the current reaction settings of the model.
+    """ Get all settings needed to prepare for test run
 
-    Stored attributes:
-        - lower_bound
-        - upper_bound
-        - objective_coefficient
+    In the preparation for running test cases care should
+    be taken that:
 
-    in a list of settings which provides the opportunity
-    to revert to the original state after running tests.
-    The bounds of all boundary reactions are set to zero
-    as well as all objective coefficients as all relevant
-    parameters are expected to be set in the test case
-    settings. """
+    1) All objective coefficients should be set to 0
+    2) All boundary reactions are producing only
+
+    Both the active boundary reactions and the objective
+    coefficients need to be specified in the settings of
+    the test cases.
+
+    Returns
+    -------
+    original_settings: list,
+        List of settings that need to be executed in order
+        to prepare the model for running tests, and should
+        be reversed afterwards
+    """
 
     original_settings = []
 
     for x in model.reactions:
 
-        # Set all boundary reactions to 0
-        if x.boundary is True:
+        # Set all boundary reaction to producing only
+        if all(v < 0. for v in x.metabolites.values()):
             original_settings.append(ReactionSetting(x, x.upper_bound, 0., 0.))
-
+        elif all(v > 0. for v in x.metabolites.values()):
+            original_settings.append(ReactionSetting(x, 0., x.lower_bound, 0.))
         # Set all objective coefficients to zero
         elif x.objective_coefficient != 0.:
-            original_settings.append(ReactionSetting(reaction=x,
-                                                     upper_bound=x.upper_bound,
-                                                     lower_bound=x.lower_bound,
-                                                     objective_coefficient=0.))
+            original_settings.append(ReactionSetting(x, x.upper_bound, x.lower_bound, 0.))
 
     return original_settings

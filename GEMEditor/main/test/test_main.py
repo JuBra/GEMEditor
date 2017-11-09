@@ -1,10 +1,11 @@
 import pytest
 from GEMEditor.main import MainWindow
+from GEMEditor.base.test.fixtures import progress_not_cancelled
 from GEMEditor.cobraClasses import Model
 import GEMEditor
 from unittest.mock import Mock
 from PyQt5 import QtCore, QtGui
-from PyQt5.QtWidgets import QApplication, QMessageBox, QFileDialog, QProgressDialog
+from PyQt5.QtWidgets import QApplication, QMessageBox, QFileDialog
 
 
 # Make sure to only start an application
@@ -98,7 +99,7 @@ def monkeypatch_getopenfilename_return_empty_string(monkeypatch):
 @pytest.fixture()
 def monkeypatch_getopenfilename_return_xml_path(monkeypatch, tmpdir):
     path = tmpdir.mkdir("xml")
-    monkeypatch.setattr("PyQt5.QtWidgets.QFileDialog.getOpenFileName", Mock(return_value=(str(path), ".xml")))
+    monkeypatch.setattr("PyQt5.QtWidgets.QFileDialog.getOpenFileName", Mock(return_value=(str(path)+"abs.xml", ".xml")))
 
 @pytest.fixture()
 def monkeypatch_getsavefilename_return_empty_string(monkeypatch):
@@ -113,10 +114,6 @@ def monkeypatch_getsavefilename_return_xml_path(monkeypatch, tmpdir):
 def monkeypatch_qsettings_complete(monkeypatch):
     monkeypatch.setattr("PyQt5.QtCore.QSettings", Mock())
     monkeypatch.setattr("GEMEditor.main.MainWindow.set_window_title", Mock())
-
-@pytest.fixture()
-def monkeypatch_progress(monkeypatch):
-    monkeypatch.setattr("PyQt5.QtWidgets.QProgressDialog", Mock())
 
 @pytest.fixture()
 def mock_read_sbml3(monkeypatch):
@@ -299,21 +296,23 @@ class TestMainWindow:
         assert QtCore.QSettings.sync.called is True
         assert QtCore.QSettings.sync.call_count == 1
 
-    @pytest.mark.usefixtures("monkeypatch_QMessageBox_Yes", "monkeypatch_qdesktopservices_openurl")
-    def test_show_new_version_dialog(self, main_window):
-        assert QtGui.QDesktopServices.openUrl.called is False
-        assert QMessageBox.question.called is False
-        main_window.show_newversion_dialog()
-        assert QMessageBox.question.called is True
-        assert QtGui.QDesktopServices.openUrl.called is True
+    # Todo: Add test for new version dialog
+    # @pytest.mark.usefixtures("monkeypatch_QMessageBox_Yes", "monkeypatch_qdesktopservices_openurl")
+    # def test_show_new_version_dialog(self, main_window):
+    #     assert QtGui.QDesktopServices.openUrl.called is False
+    #     assert QMessageBox.question.called is False
+    #     main_window.show_newversion_dialog()
+    #     assert QMessageBox.question.called is True
+    #     assert QtGui.QDesktopServices.openUrl.called is True
 
-    @pytest.mark.usefixtures("monkeypatch_QMessageBox_No", "monkeypatch_qdesktopservices_openurl")
-    def test_show_new_version_dialog(self, main_window):
-        assert QtGui.QDesktopServices.openUrl.called is False
-        assert QMessageBox.question.called is False
-        main_window.show_newversion_dialog()
-        assert QMessageBox.question.called is True
-        assert QtGui.QDesktopServices.openUrl.called is False
+    # Todo: Add test for new version dialog
+    # @pytest.mark.usefixtures("monkeypatch_QMessageBox_No", "monkeypatch_qdesktopservices_openurl")
+    # def test_show_new_version_dialog(self, main_window):
+    #     assert QtGui.QDesktopServices.openUrl.called is False
+    #     assert QMessageBox.question.called is False
+    #     main_window.show_newversion_dialog()
+    #     assert QMessageBox.question.called is True
+    #     assert QtGui.QDesktopServices.openUrl.called is False
 
     @pytest.mark.usefixtures("monkeypatch_editmodeldialog_return_true")
     def test_createmodel_accept_editmodel_dialog(self, main_window):
@@ -375,7 +374,7 @@ class TestMainWindow:
         assert main_window.set_model.called is False
         assert main_window.set_window_title.called is False
 
-    @pytest.mark.usefixtures("monkeypatch_qsettings_complete", "monkeypatch_progress", "mock_read_sbml3",
+    @pytest.mark.usefixtures("monkeypatch_qsettings_complete", "progress_not_cancelled", "mock_read_sbml3",
                              "monkeypatch_getopenfilename_return_empty_string")
     def test_open_model_close_accepted_empty_path(self, main_window):
         main_window.closeModel = Mock(return_value=True)
@@ -386,9 +385,8 @@ class TestMainWindow:
         assert QtCore.QSettings.called is True
         assert QFileDialog.getOpenFileName.called is True
         assert GEMEditor.rw.sbml3.read_sbml3_model.called is False
-        assert QProgressDialog.called is False
 
-    @pytest.mark.usefixtures("monkeypatch_qsettings_complete", "monkeypatch_progress", "mock_read_sbml3",
+    @pytest.mark.usefixtures("monkeypatch_qsettings_complete", "progress_not_cancelled", "mock_read_sbml3",
                              "monkeypatch_getopenfilename_return_xml_path", "monkeypatch_check_email", "monkeypatch_check_updates")
     def test_open_model_close_accepted_xml_path(self):
         main_window = MainWindow()
@@ -401,13 +399,11 @@ class TestMainWindow:
         QtCore.QSettings.return_value.value.assert_called_with("LastPath")
         assert QtCore.QSettings.return_value.setValue.called is True
         assert QFileDialog.getOpenFileName.called is True
-        assert QProgressDialog.called is True
-        assert QProgressDialog.return_value.close.called is True
         assert GEMEditor.rw.sbml3.read_sbml3_model.called is True
         assert main_window.set_model.called is False
         assert main_window.modelLoaded.called is False
 
-    @pytest.mark.usefixtures("monkeypatch_qsettings_complete", "monkeypatch_progress", "mock_read_sbml3_return_model",
+    @pytest.mark.usefixtures("monkeypatch_qsettings_complete", "progress_not_cancelled", "mock_read_sbml3_return_model",
                              "monkeypatch_getopenfilename_return_xml_path", "monkeypatch_check_email", "monkeypatch_check_updates")
     def test_open_model_close_accepted_xml_path2(self):
         main_window = MainWindow()
@@ -420,8 +416,6 @@ class TestMainWindow:
         QtCore.QSettings.return_value.value.assert_called_with("LastPath")
         assert QtCore.QSettings.return_value.setValue.called is True
         assert QFileDialog.getOpenFileName.called is True
-        assert QProgressDialog.called is True
-        assert QProgressDialog.return_value.close.called is True
         assert GEMEditor.rw.sbml3.read_sbml3_model.called is True
         assert main_window.set_model.called is True
         assert main_window.modelLoaded.called is True
@@ -462,3 +456,16 @@ class TestMainWindow:
                                                                 model)
         #QtCore.QSettings.return_value.setValue.assert_called_with("LastPath", os.path.dirname(ecoli_sbml))
         # Todo: Reenable test
+
+
+class TestMainAbout:
+
+    @pytest.fixture(autouse=True)
+    def patch_dialog(self, monkeypatch):
+        monkeypatch.setattr("GEMEditor.main.AboutDialog.exec_", Mock())
+
+    def test_showing_about_dialog(self, main_window):
+        assert GEMEditor.main.AboutDialog.exec_.called is False
+        main_window.actionAbout.trigger()
+        assert GEMEditor.main.AboutDialog.exec_.called is True
+

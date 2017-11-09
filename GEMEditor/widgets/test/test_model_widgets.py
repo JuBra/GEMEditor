@@ -42,18 +42,19 @@ class TestModelDisplayWidget:
         self.model = Model(self.test_id,
                            name=self.test_name)
 
+        self.comp1_abbrev = "c"
+        self.comp1_name = "Cytoplasm"
+        self.comp1 = Compartment(self.comp1_abbrev, self.comp1_name)
+        self.model.gem_compartments[self.comp1_abbrev] = self.comp1
+
         self.gene = Gene(id="test_id", name="test_name")
-        self.metabolite = Metabolite(id="test_id")
+        self.metabolite = Metabolite(id="test_id", compartment="c")
         self.reaction = Reaction(id="test_id")
 
         self.model.add_metabolites([self.metabolite])
         self.model.add_reactions([self.reaction])
         self.model.genes.append(self.gene)
 
-        self.comp1_abbrev = "c"
-        self.comp1_name = "Cytoplasm"
-        self.comp1 = Compartment(self.comp1_abbrev, self.comp1_name)
-        self.model.gem_compartments[self.comp1_abbrev] = self.comp1
 
     def test_setup(self):
         assert len(self.model.metabolites) == 1
@@ -743,7 +744,7 @@ class TestEvidenceDisplayWidget:
         evidence = Evidence()
         reaction = Reaction()
         model = Model()
-        reaction.add_evidence(evidence)
+        evidence.set_entity(reaction)
         widget.set_item(reaction, model)
 
         # Check that a copy of the evidence has been added to the table
@@ -776,6 +777,7 @@ class TestEvidenceDisplayWidget:
         evidence = Evidence()
         reaction = Reaction()
         model = Model()
+        evidence.set_entity(reaction)
         reaction.add_evidence(evidence)
         widget.set_item(reaction, model)
         mock = Mock()
@@ -793,7 +795,7 @@ class TestEvidenceDisplayWidget:
         evidence = Evidence()
         reaction = Reaction()
         model = Model()
-        reaction.add_evidence(evidence)
+        evidence.set_entity(reaction)
         widget.set_item(reaction, model)
         mock = Mock()
         widget.changed.connect(mock.test)

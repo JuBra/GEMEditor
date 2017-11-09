@@ -109,7 +109,7 @@ class TestReactionStatistics:
         assert True
 
         # Check that tests exist for all gathered statistics
-        assert len(output_statistics) == 5 # Change to number of tests
+        assert len(output_statistics) == 8 # Change to number of tests
 
 
 class TestMetaboliteStatistics:

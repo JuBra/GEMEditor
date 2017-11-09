@@ -1,5 +1,9 @@
+import logging
 from PyQt5.QtWidgets import QProgressDialog
-from PyQt5.QtCore import QObject, pyqtSlot
+from PyQt5.QtCore import QObject, pyqtSlot, QSettings
+
+
+LOGGER = logging.getLogger(__name__)
 
 
 class BaseModelItem:
@@ -104,6 +108,16 @@ class ProgressDialog(QProgressDialog):
         # Schedule dialog for deletion
         # Fixes external destruction warning
         self.deleteLater()
+
+
+class Settings(QSettings):
+
+    def __init__(self, *args):
+        super(Settings, self).__init__(*args)
+
+    def setValue(self, p_str, Any):
+        super(Settings, self).setValue(p_str, Any)
+        LOGGER.debug("Setting '{0!s}' changed to '{1!s}'".format(p_str, Any))
 
 
 class WindowManager(QObject):

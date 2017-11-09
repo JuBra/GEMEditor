@@ -199,9 +199,9 @@ class TestAssertionPresent:
     def test_fixing_not_implemented(self):
         self.reaction.lower_bound = 0
         self.reaction.upper_bound = 0
-
-        with pytest.raises(NotImplementedError):
-            self.evidence.fix()
+        self.evidence.fix()
+        assert self.reaction.lower_bound == 0.
+        assert self.reaction.upper_bound == 0.
 
 
 class TestAssertionAbsent:
@@ -244,9 +244,10 @@ class TestAssertionAbsent:
     def test_fixing_not_implemented(self):
         self.reaction.lower_bound = -1000
         self.reaction.upper_bound = 1000
-
-        with pytest.raises(NotImplementedError):
-            self.evidence.fix()
+        result = self.evidence.fix()
+        assert result is False
+        assert self.reaction.lower_bound == -1000.
+        assert self.reaction.upper_bound == 1000.
 
 
 class TestAssertionLocalization:
