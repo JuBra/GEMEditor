@@ -13,6 +13,6 @@ def test_get_turnover():
     solution = LegacySolution(f=1, x_dict={r1.id: 500, r2.id: 1000})
     assert get_turnover(solution, met) == 1000
 
-    solution = Solution(objective_value=1, status="optimal", reactions=[],
+    solution = Solution(objective_value=1, status="optimal",
                         fluxes=pd.Series(data=[500, 1000], index=[r1.id, r2.id]))
     assert get_turnover(solution, met) == 1000
