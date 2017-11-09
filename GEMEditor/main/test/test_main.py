@@ -143,15 +143,6 @@ class TestMainWindow:
         assert main_window.check_email.called is True
         assert main_window.windowTitle() == app_name
 
-        assert main_window.actionNewModel.isEnabled() is True
-        assert main_window.actionOpenModel.isEnabled() is True
-        assert main_window.actionLoadTestModel.isEnabled() is True
-        assert main_window.actionSaveModel.isEnabled() is False
-        assert main_window.actionCloseModel.isEnabled() is False
-        assert main_window.actionCloseEditor.isEnabled() is True
-        assert main_window.actionEditSettings.isEnabled() is True
-        assert main_window.actionStatistics.isEnabled() is False
-
     @pytest.mark.usefixtures("monkeypatch_check_updates", "monkeypatch_editsettingsdialog")
     def test_check_email_none(self):
         main_window = MainWindow()

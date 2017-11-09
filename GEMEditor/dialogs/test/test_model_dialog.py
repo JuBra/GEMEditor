@@ -106,7 +106,7 @@ class TestEditModelSettings:
 
     @pytest.fixture()
     def patch_progress(self, monkeypatch):
-        monkeypatch.setattr("PyQt5.QtWidgets.QWQProgressDialog", Mock())
+        monkeypatch.setattr("PyQt5.QtWidgets.QProgressDialog", Mock())
         monkeypatch.setattr("PyQt5.QtWidgets.QApplication.processEvents", Mock())
 
     def test_setup(self):
