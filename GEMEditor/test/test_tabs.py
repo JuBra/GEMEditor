@@ -569,7 +569,7 @@ class TestModelTestsTab:
 
     @pytest.fixture()
     def patch_getitm_reject(self, monkeypatch):
-        monkeypatch.setattr("PyQt5..QtWidgets.QInputDialog.getItem", Mock(return_value=(None, False)))
+        monkeypatch.setattr("PyQt5.QtWidgets.QInputDialog.getItem", Mock(return_value=(None, False)))
         monkeypatch.setattr("PyQt5.QtWidgets.QErrorMessage", Mock())
 
     @pytest.fixture()

@@ -1,3 +1,4 @@
 include GEMEditor/evidence/eco.obo
+include GEMEditor/evidence/test/eco_obo_sample.txt
 include README.rst
 include GEMEditor/GEMEditor.cfg
