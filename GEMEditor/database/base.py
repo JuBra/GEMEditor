@@ -6,6 +6,7 @@ from PyQt5.QtWidgets import QMessageBox, QWidget, QTableWidgetItem
 from GEMEditor.cobraClasses import Metabolite, Reaction
 from GEMEditor.data_classes import Annotation
 from GEMEditor.database import database_path as DB_PATH
+from GEMEditor.base.classes import Settings
 from GEMEditor.database.ui import Ui_MetaboliteEntryDisplayWidget, Ui_ReactionEntryDisplayWidget
 
 
@@ -335,14 +336,14 @@ class DatabaseWrapper:
 
     @staticmethod
     def store_database_path(database_path):
-        settings = QtCore.QSettings()
+        settings = Settings()
         settings.setValue("DATABASE_PATH", database_path)
         LOGGER.debug("Database path changed to: {0!s}".format(database))
         settings.sync()
 
     @staticmethod
     def get_database_path():
-        settings = QtCore.QSettings()
+        settings = Settings()
         return settings.value("DATABASE_PATH", DB_PATH)
 
     def __enter__(self):

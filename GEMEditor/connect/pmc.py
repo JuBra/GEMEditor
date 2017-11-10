@@ -2,6 +2,7 @@ from PyQt5 import QtCore
 from six.moves.urllib.error import URLError
 from six.moves.urllib.request import urlopen
 from six.moves.urllib.parse import quote
+from GEMEditor.base.classes import Settings
 from lxml import etree as ET
 
 
@@ -17,7 +18,7 @@ class IdConverter(QtCore.QObject):
 
     @QtCore.pyqtSlot()
     def retrieve_data(self):
-        settings = QtCore.QSettings()
+        settings = Settings()
         email = settings.value("Email")
         tool = quote(settings.applicationName())
         if not email:

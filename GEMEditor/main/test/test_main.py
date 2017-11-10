@@ -1,6 +1,7 @@
 import pytest
 from GEMEditor.main import MainWindow
 from GEMEditor.base.test.fixtures import progress_not_cancelled
+from GEMEditor.base.classes import Settings
 from GEMEditor.cobraClasses import Model
 import GEMEditor
 from unittest.mock import Mock
@@ -23,13 +24,13 @@ app.setApplicationName(app_name)
 def set_email(monkeypatch):
     def f(*args, **kwargs):
         return "test@testmail.com"
-    monkeypatch.setattr(QtCore.QSettings, "value", f)
+    monkeypatch.setattr(GEMEditor.base.classes.Settings, "value", f)
 
 
 @pytest.fixture()
 def monkeypatch_settings(monkeypatch):
-    monkeypatch.setattr(QtCore.QSettings, "setValue", Mock())
-    monkeypatch.setattr(QtCore.QSettings, "sync", Mock())
+    monkeypatch.setattr("GEMEditor.base.classes.Settings", "setValue", Mock())
+    monkeypatch.setattr("GEMEditor.base.classes.Settings", "sync", Mock())
 
 
 @pytest.fixture()
@@ -55,16 +56,6 @@ def monkeypatched_close_model(main_window):
     main_window.modelLoaded = Mock()
     main_window.set_model = Mock()
     return main_window
-
-
-@pytest.fixture()
-def monkeypatch_QMessageBox_Yes(monkeypatch):
-    monkeypatch.setattr(QMessageBox, "question", Mock(return_value=QMessageBox.Yes))
-
-
-@pytest.fixture()
-def monkeypatch_QMessageBox_No(monkeypatch):
-    monkeypatch.setattr(QMessageBox, "question", Mock(return_value=QMessageBox.No))
 
 
 @pytest.fixture()
@@ -97,11 +88,6 @@ def monkeypatch_getopenfilename_return_empty_string(monkeypatch):
     monkeypatch.setattr("PyQt5.QtWidgets.QFileDialog.getOpenFileName", Mock(return_value=("", None)))
 
 @pytest.fixture()
-def monkeypatch_getopenfilename_return_xml_path(monkeypatch, tmpdir):
-    path = tmpdir.mkdir("xml")
-    monkeypatch.setattr("PyQt5.QtWidgets.QFileDialog.getOpenFileName", Mock(return_value=(str(path)+"abs.xml", ".xml")))
-
-@pytest.fixture()
 def monkeypatch_getsavefilename_return_empty_string(monkeypatch):
     monkeypatch.setattr("PyQt5.QtWidgets.QFileDialog.getSaveFileName", Mock(return_value=("", None)))
 
@@ -112,7 +98,7 @@ def monkeypatch_getsavefilename_return_xml_path(monkeypatch, tmpdir):
 
 @pytest.fixture()
 def monkeypatch_qsettings_complete(monkeypatch):
-    monkeypatch.setattr("PyQt5.QtCore.QSettings", Mock())
+    monkeypatch.setattr("GEMEditor.base.classes.Settings", Mock())
     monkeypatch.setattr("GEMEditor.main.MainWindow.set_window_title", Mock())
 
 @pytest.fixture()
@@ -128,6 +114,7 @@ def mock_write_sbml3(monkeypatch):
     monkeypatch.setattr("GEMEditor.rw.sbml3.write_sbml3_model", Mock())
 
 
+
 class TestMainWindow:
 
     def test_setup(self, main_window):
@@ -140,69 +127,7 @@ class TestMainWindow:
         assert main_window.check_email.called is True
         assert main_window.windowTitle() == app_name
 
-    @pytest.mark.usefixtures("monkeypatch_check_updates", "monkeypatch_editsettingsdialog")
-    def test_check_email_none(self):
-        main_window = MainWindow()
-        # Check email already called upon MainWindow.__init__
-        assert GEMEditor.main.settings.EditSettingsDialog.exec_.called is True
-        previous_call_count = GEMEditor.main.settings.EditSettingsDialog.exec_.call_count
 
-        assert QtCore.QSettings().value("Email") is None
-        main_window.check_email()
-        assert GEMEditor.main.settings.EditSettingsDialog.exec_.call_count == previous_call_count + 1
-
-    @pytest.mark.usefixtures("monkeypatch_check_updates", "monkeypatch_editsettingsdialog", "set_email")
-    def test_check_email_set(self):
-        main_window = MainWindow()
-        # Check email already called upon MainWindow.__init__
-        assert GEMEditor.main.settings.EditSettingsDialog.exec_.called is False
-        previous_call_count = GEMEditor.main.settings.EditSettingsDialog.exec_.call_count
-
-        assert QtCore.QSettings().value("Email") is not None
-        main_window.check_email()
-        assert GEMEditor.main.settings.EditSettingsDialog.exec_.call_count == previous_call_count
-
-    @pytest.mark.usefixtures("monkeypatch_about_dialog")
-    def test_show_about_dialog(self, main_window):
-        assert GEMEditor.main.about.AboutDialog.exec_.called is False
-        main_window.showAbout()
-        assert GEMEditor.main.about.AboutDialog.exec_.called is True
-
-    @pytest.mark.usefixtures("monkeypatch_QMessageBox_Yes")
-    def test_check_model_closing_accept(self, main_window):
-        main_window.model = Model()
-        assert main_window.check_model_closing() is True
-
-    @pytest.mark.usefixtures("monkeypatch_QMessageBox_No")
-    def test_check_model_closing_cancel(self, main_window):
-        main_window.model = Model()
-        assert main_window.check_model_closing() is False
-
-    def test_close_model_none(self, monkeypatched_close_model):
-        main_window = monkeypatched_close_model
-        assert main_window.model is None
-        assert main_window.closeModel() is True
-        assert main_window.save_table_headers.called is False
-        assert main_window.modelLoaded.called is False
-        assert main_window.set_model.called is False
-
-    @pytest.mark.usefixtures("monkeypatch_QMessageBox_Yes")
-    def test_close_model_model_accept(self, monkeypatched_close_model):
-        main_window = monkeypatched_close_model
-        main_window.model = Model()
-        assert main_window.closeModel() is True
-        assert main_window.save_table_headers.call_count == 1
-        main_window.modelLoaded.assert_called_once_with(False)
-        main_window.set_model.assert_called_once_with(None, None)
-
-    @pytest.mark.usefixtures("monkeypatch_QMessageBox_No")
-    def test_close_model_model_cancel(self, monkeypatched_close_model):
-        main_window = monkeypatched_close_model
-        main_window.model = Model()
-        assert main_window.closeModel() is False
-        assert main_window.save_table_headers.called is False
-        assert main_window.modelLoaded.called is False
-        assert main_window.set_model.called is False
 
     @pytest.mark.usefixtures("monkeypatch_editsettingsdialog")
     def test_editsettings_dialog_shown(self, main_window):
@@ -287,14 +212,15 @@ class TestMainWindow:
 
     @pytest.mark.usefixtures("monkeypatch_settings")
     def test_save_table_header(self, main_window):
-        assert QtCore.QSettings.setValue.called is False
-        assert QtCore.QSettings.sync.called is False
+        settings = GEMEditor.base.classes.Settings
+        assert settings.setValue.called is False
+        assert settings.sync.called is False
         main_window.save_table_headers()
 
-        assert QtCore.QSettings.setValue.called is True
-        assert QtCore.QSettings.setValue.call_count == 5
-        assert QtCore.QSettings.sync.called is True
-        assert QtCore.QSettings.sync.call_count == 1
+        assert settings.setValue.called is True
+        assert settings.setValue.call_count == 5
+        assert settings.sync.called is True
+        assert settings.sync.call_count == 1
 
     # Todo: Add test for new version dialog
     # @pytest.mark.usefixtures("monkeypatch_QMessageBox_Yes", "monkeypatch_qdesktopservices_openurl")
@@ -380,41 +306,35 @@ class TestMainWindow:
         main_window.closeModel = Mock(return_value=True)
         main_window.set_model = Mock()
         main_window.modelLoaded = Mock()
-        assert QtCore.QSettings.called is False
+        assert GEMEditor.base.classes.Settings.called is False
         main_window.openModel()
-        assert QtCore.QSettings.called is True
+        assert GEMEditor.base.classes.Settings.called is True
         assert QFileDialog.getOpenFileName.called is True
         assert GEMEditor.rw.sbml3.read_sbml3_model.called is False
 
     @pytest.mark.usefixtures("monkeypatch_qsettings_complete", "progress_not_cancelled", "mock_read_sbml3",
-                             "monkeypatch_getopenfilename_return_xml_path", "monkeypatch_check_email", "monkeypatch_check_updates")
-    def test_open_model_close_accepted_xml_path(self):
+                             "monkeypatch_check_email", "monkeypatch_check_updates")
+    def test_open_model_close_accepted_xml_path(self, openfile_xml_path):
         main_window = MainWindow()
         main_window.closeModel = Mock(return_value=True)
         main_window.set_model = Mock()
         main_window.modelLoaded = Mock()
-        previous_calls = QtCore.QSettings.call_count
         main_window.openModel()
-        assert QtCore.QSettings.call_count == previous_calls + 1
-        QtCore.QSettings.return_value.value.assert_called_with("LastPath")
-        assert QtCore.QSettings.return_value.setValue.called is True
-        assert QFileDialog.getOpenFileName.called is True
+        GEMEditor.base.classes.Settings.value.assert_called_with("LastPath", openfile_xml_path)
         assert GEMEditor.rw.sbml3.read_sbml3_model.called is True
         assert main_window.set_model.called is False
         assert main_window.modelLoaded.called is False
 
     @pytest.mark.usefixtures("monkeypatch_qsettings_complete", "progress_not_cancelled", "mock_read_sbml3_return_model",
-                             "monkeypatch_getopenfilename_return_xml_path", "monkeypatch_check_email", "monkeypatch_check_updates")
-    def test_open_model_close_accepted_xml_path2(self):
+                             "monkeypatch_check_email", "monkeypatch_check_updates")
+    def test_open_model_close_accepted_xml_path2(self, openfile_xml_path):
         main_window = MainWindow()
         main_window.closeModel = Mock(return_value=True)
         main_window.set_model = Mock()
         main_window.modelLoaded = Mock()
-        previous_calls = QtCore.QSettings.call_count
         main_window.openModel()
-        assert QtCore.QSettings.call_count == previous_calls + 1
-        QtCore.QSettings.return_value.value.assert_called_with("LastPath")
-        assert QtCore.QSettings.return_value.setValue.called is True
+        GEMEditor.base.classes.Settings.return_value.value.assert_called_with("LastPath", openfile_xml_path)
+        assert GEMEditor.base.classes.Settings.return_value.setValue.called is True
         assert QFileDialog.getOpenFileName.called is True
         assert GEMEditor.rw.sbml3.read_sbml3_model.called is True
         assert main_window.set_model.called is True
@@ -432,13 +352,13 @@ class TestMainWindow:
     def test_saving_file_user_cancelled(self):
         main_window = MainWindow()
 
-        previous_calls = QtCore.QSettings.call_count
+        previous_calls = GEMEditor.base.classes.Settings.call_count
         main_window.saveModel()
-        assert QtCore.QSettings.call_count == previous_calls + 1
-        QtCore.QSettings.return_value.value.assert_called_with("LastPath")
+        assert GEMEditor.base.classes.Settings.call_count == previous_calls + 1
+        GEMEditor.base.classes.Settings.return_value.value.assert_called_with("LastPath")
         assert QFileDialog.getSaveFileName.called is True
         assert GEMEditor.rw.sbml3.write_sbml3_model.called is False
-        assert QtCore.QSettings.setValue.called is False
+        assert GEMEditor.base.classes.Settings.setValue.called is False
 
     @pytest.mark.usefixtures("monkeypatch_qsettings_complete", "mock_write_sbml3", "monkeypatch_check_updates",
                              "monkeypatch_check_email", "monkeypatch_getsavefilename_return_xml_path")
@@ -449,13 +369,90 @@ class TestMainWindow:
 
         previous_calls = QtCore.QSettings.call_count
         main_window.saveModel()
-        assert QtCore.QSettings.call_count == previous_calls + 1
-        QtCore.QSettings.return_value.value.assert_called_with("LastPath")
+        assert GEMEditor.base.classes.Settings.call_count == previous_calls + 1
+        GEMEditor.base.classes.Settings.return_value.value.assert_called_with("LastPath")
         assert QFileDialog.getSaveFileName.called is True
         GEMEditor.rw.sbml3.write_sbml3_model.assert_called_with(QFileDialog.getSaveFileName.return_value[0],
                                                                 model)
         #QtCore.QSettings.return_value.setValue.assert_called_with("LastPath", os.path.dirname(ecoli_sbml))
         # Todo: Reenable test
+
+
+@pytest.fixture()
+def no_update_check(monkeypatch):
+    # Prevent main window of checking if a new version is available
+    monkeypatch.setattr("GEMEditor.main.MainWindow.check_updates", Mock())
+
+@pytest.fixture()
+def xml_file_selected(monkeypatch, tmpdir):
+    path = str(tmpdir.mkdir("xml"))+"abs.xml"
+    monkeypatch.setattr("PyQt5.QtWidgets.QFileDialog.getOpenFileName", Mock(return_value=(path, ".xml")))
+    return path
+
+@pytest.fixture()
+def no_file_selected(monkeypatch):
+    monkeypatch.setattr("PyQt5.QtWidgets.QFileDialog.getOpenFileName", Mock(return_value=("", None)))
+
+@pytest.fixture()
+def QMessageBox_Yes(monkeypatch):
+    monkeypatch.setattr(QMessageBox, "question", Mock(return_value=QMessageBox.Yes))
+
+@pytest.fixture()
+def QMessageBox_No(monkeypatch):
+    monkeypatch.setattr(QMessageBox, "question", Mock(return_value=QMessageBox.No))
+
+
+
+
+class TestModelClosing():
+
+    @pytest.mark.usefixtures("QMessageBox_Yes")
+    def test_return_true_if_yes_selected(self, main_window):
+        main_window.model = Model()
+        assert main_window.check_model_closing() is True
+
+    @pytest.mark.usefixtures("QMessageBox_No")
+    def test_return_false_if_no_selected(self, main_window):
+        main_window.model = Model()
+        assert main_window.check_model_closing() is False
+
+    def test_close_model_none(self, monkeypatched_close_model):
+        main_window = monkeypatched_close_model
+        assert main_window.model is None
+        assert main_window.closeModel() is True
+        assert main_window.save_table_headers.called is False
+        assert main_window.modelLoaded.called is False
+        assert main_window.set_model.called is False
+
+    @pytest.mark.usefixtures("QMessageBox_Yes")
+    def test_close_model_model_accept(self, monkeypatched_close_model):
+        main_window = monkeypatched_close_model
+        main_window.model = Model()
+        assert main_window.closeModel() is True
+        assert main_window.save_table_headers.call_count == 1
+        main_window.modelLoaded.assert_called_once_with(False)
+        main_window.set_model.assert_called_once_with(None, None)
+
+    @pytest.mark.usefixtures("QMessageBox_No")
+    def test_close_model_model_cancel(self, monkeypatched_close_model):
+        main_window = monkeypatched_close_model
+        main_window.model = Model()
+        assert main_window.closeModel() is False
+        assert main_window.save_table_headers.called is False
+        assert main_window.modelLoaded.called is False
+        assert main_window.set_model.called is False
+
+
+class TestMainEditSettings:
+
+    @pytest.fixture(autouse=True)
+    def patch_dialog(self, monkeypatch):
+        monkeypatch.setattr("GEMEditor.main.EditSettingsDialog.exec_", Mock())
+
+    def test_showing_settings_dialog(self, main_window):
+        assert GEMEditor.main.EditSettingsDialog.exec_.called is False
+        main_window.actionEditSettings.trigger()
+        assert GEMEditor.main.EditSettingsDialog.exec_.called is True
 
 
 class TestMainAbout:

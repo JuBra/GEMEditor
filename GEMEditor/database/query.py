@@ -1,11 +1,11 @@
 import logging
 from PyQt5 import QtCore
 from PyQt5.QtWidgets import QApplication, QInputDialog, QWidget, QMessageBox, QDialogButtonBox, QDialog, QHBoxLayout, QCheckBox, QVBoxLayout, QTabWidget, QPushButton, QGroupBox, QProgressDialog
-from PyQt5.QtCore import QSettings
 from PyQt5.QtSql import QSqlQuery, QSqlQueryModel, QSql
 from collections import OrderedDict
 from GEMEditor.base.functions import generate_copy_id, invert_mapping, get_annotation_to_item_map, convert_to_bool
 from GEMEditor.base.dialogs import DialogMapCompartment, CustomStandardDialog
+from GEMEditor.base.classes import Settings
 from GEMEditor.database.base import DatabaseWrapper, pyqt_database_connection, factory_entry_widget
 from GEMEditor.database.ui import Ui_AnnotationSettingsDialog, Ui_DatabaseSearchWidget, Ui_ItemSettingWidget
 from GEMEditor import DB_GET_MET_NAME, DB_NEW_MET_PREFIX, DB_GET_FL_AND_CH, DB_NEW_REACT_PREFIX, DB_GET_REACT_NAME
@@ -204,7 +204,7 @@ class MetaboliteSettingWidget(DatabaseSettingWidget):
         self.checkBox_use_formula.stateChanged.connect(self.store_settings)
 
     def populate_widget(self):
-        settings = QSettings()
+        settings = Settings()
 
         # Update prefix
         prefix = settings.value("DB_NEW_MET_PREFIX", DB_NEW_MET_PREFIX)
@@ -219,7 +219,7 @@ class MetaboliteSettingWidget(DatabaseSettingWidget):
 
     @QtCore.pyqtSlot()
     def store_settings(self):
-        settings = QSettings()
+        settings = Settings()
 
         settings.setValue("DB_NEW_MET_PREFIX", self.lineEdit_prefix.text())
         settings.setValue("DB_GET_MET_NAME", self.checkBox_use_name.isChecked())
@@ -244,7 +244,7 @@ class ReactionSettingWidget(DatabaseSettingWidget):
         self.checkBox_use_formula.hide()
 
     def populate_widget(self):
-        settings = QSettings()
+        settings = Settings()
 
         # Update prefix
         prefix = settings.value("DB_NEW_REACT_PREFIX", DB_NEW_REACT_PREFIX)
@@ -256,7 +256,7 @@ class ReactionSettingWidget(DatabaseSettingWidget):
 
     @QtCore.pyqtSlot()
     def store_settings(self):
-        settings = QSettings()
+        settings = Settings()
 
         settings.setValue("DB_NEW_REACT_PREFIX", self.lineEdit_prefix.text())
         settings.setValue("DB_GET_REACT_NAME", self.checkBox_use_name.isChecked())

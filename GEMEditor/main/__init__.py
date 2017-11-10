@@ -45,7 +45,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # Check if there is a new version of the software
         self.check_updates()
-        self.check_email()
         # Create all widgets, layouts and connects
         self.createConnects()
         # Set initial state of editor
@@ -101,16 +100,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # Debugging class
         LOGGER.debug("MainWindow menu signals connected.")
 
-    def check_email(self):
-        settings = QtCore.QSettings()
-        email = settings.value("Email")
-        if email is None:
-            dialog = EditSettingsDialog(self)
-            dialog.exec_()
-
-        # Debugging class
-        LOGGER.debug("E-mail checked.")
-
     def check_updates(self):
         self.thread = QtCore.QThread()
         self.worker = UpdateCheck()
@@ -131,7 +120,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     @QtCore.pyqtSlot()
     def openModel(self, filename=None):
         if self.closeModel():
-            settings = QtCore.QSettings()
+            settings = Settings()
             last_path = settings.value("LastPath") or QStandardPaths.DesktopLocation or None
 
             if filename is None:
@@ -174,7 +163,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     @QtCore.pyqtSlot()
     def saveModel(self):
-        settings = QtCore.QSettings()
+        settings = Settings()
         last_path = settings.value("LastPath") or QStandardPaths.DesktopLocation or None
         filename, filter = QFileDialog.getSaveFileName(self, self.tr("Save Model"), last_path,
                                                        self.tr("Sbml files (*.xml *.sbml)"))
@@ -252,7 +241,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     @QtCore.pyqtSlot()
     def set_window_title(self):
-        app_name = QtCore.QSettings().applicationName()
+        app_name = Settings().applicationName()
         if self.model is not None:
             self.setWindowTitle(" - ".join([app_name, str(self.model.id)]))
         else:
@@ -273,7 +262,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             dialog.exec_()
 
     def save_table_headers(self):
-        settings = QtCore.QSettings()
+        settings = Settings()
         settings.setValue("ReactionTableViewState", self.reactionTab.dataView.horizontalHeader().saveState())
         settings.setValue("MetaboliteTableViewState", self.metaboliteTab.dataView.horizontalHeader().saveState())
         settings.setValue("GenesTableViewState", self.geneTab.dataView.horizontalHeader().saveState())
@@ -430,17 +419,13 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     @QtCore.pyqtSlot()
     def show_map_list(self):
-        dialog = MapListDialog(None, self.model)
-        self.model.dialogs.add(dialog)
-        dialog.show()
+        if self.model is not None:
+            MapListDialog(None, self.model).exec_()
 
     @QtCore.pyqtSlot()
     def check_all_evidences(self):
-        if not self.model:
-            return
-
-        dialog = DialogEvidenceStatus(self.model)
-        dialog.exec_()
+        if self.model is not None:
+            DialogEvidenceStatus(self.model).exec_()
 
     @QtCore.pyqtSlot()
     def prune_gene_trees(self):

@@ -4,6 +4,7 @@ from PyQt5.QtCore import QSortFilterProxyModel
 from GEMEditor.ui.SelectionDialog import Ui_SelectionDialog
 from GEMEditor.ui.GeneTreeSelectionDialog import Ui_GeneTreeSelection
 from GEMEditor.base.dialogs import CustomStandardDialog
+from GEMEditor.base.classes import Settings
 
 
 class TableDisplayDialog(CustomStandardDialog, Ui_SelectionDialog):
@@ -34,13 +35,13 @@ class TableDisplayDialog(CustomStandardDialog, Ui_SelectionDialog):
 
     def restore_dialog_geometry(self):
         super(TableDisplayDialog, self).restore_dialog_geometry()
-        header_state = QtCore.QSettings().value(self.__class__.__name__ + "TableHeader")
+        header_state = Settings().value(self.__class__.__name__ + "TableHeader")
         if header_state:
             self.dataView.horizontalHeader().restoreState(header_state)
 
     def save_dialog_geometry(self):
         super(TableDisplayDialog, self).save_dialog_geometry()
-        QtCore.QSettings().setValue(self.__class__.__name__ + "TableHeader",
+        Settings().setValue(self.__class__.__name__ + "TableHeader",
                                     self.dataView.horizontalHeader().saveState())
 
 

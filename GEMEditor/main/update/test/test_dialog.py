@@ -16,9 +16,9 @@ if app is None:
 
 @pytest.fixture()
 def patch_ignored_version(monkeypatch):
-    monkeypatch.setattr(GEMEditor.main.update.dialog.QSettings, "value", Mock(return_value="0.1.5"))
-    monkeypatch.setattr(GEMEditor.main.update.dialog.QSettings, "sync", Mock())
-    monkeypatch.setattr(GEMEditor.main.update.dialog.QSettings, "setValue", Mock())
+    monkeypatch.setattr(GEMEditor.base.classes.Settings, "value", Mock(return_value="0.1.5"))
+    monkeypatch.setattr(GEMEditor.base.classes.Settings, "sync", Mock())
+    monkeypatch.setattr(GEMEditor.base.classes.Settings, "setValue", Mock())
 
 @pytest.fixture()
 def mock_desktopservice(monkeypatch):
@@ -39,22 +39,22 @@ class TestUpdateAvailableDialog:
         dialog = UpdateAvailableDialog(latest_version="0.1.6")
         dialog.checkBox.setChecked(True)
 
-        from GEMEditor.main.update.dialog import QSettings
-        assert QSettings.setValue.called is False
+        from GEMEditor.main.update.dialog import Settings
+        assert Settings.setValue.called is False
 
         QtTest.QTest.mouseClick(dialog.buttonBox.button(QDialogButtonBox.No), QtCore.Qt.LeftButton)
 
-        QSettings.setValue.assert_called_with(VERSION_IGNORED, "0.1.6")
+        Settings.setValue.assert_called_with(VERSION_IGNORED, "0.1.6")
 
     def test_version_not_ignored_if_yes_button_called(self, patch_ignored_version, mock_desktopservice):
         dialog = UpdateAvailableDialog(latest_version="0.1.6")
         dialog.checkBox.setChecked(True)
 
-        from GEMEditor.main.update.dialog import QSettings, QDesktopServices
-        assert QSettings.setValue.called is False
+        from GEMEditor.main.update.dialog import Settings, QDesktopServices
+        assert Settings.setValue.called is False
         assert QDesktopServices.openUrl.called is False
 
         QtTest.QTest.mouseClick(dialog.buttonBox.button(QDialogButtonBox.Yes), QtCore.Qt.LeftButton)
 
-        assert QSettings.setValue.called is False
+        assert Settings.setValue.called is False
         assert QDesktopServices.openUrl.called is True
