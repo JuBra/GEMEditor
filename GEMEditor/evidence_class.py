@@ -1,5 +1,4 @@
 from uuid import uuid4
-from copy import copy
 from GEMEditor.data_classes import LinkReference
 from GEMEditor.evidence.assertions import ASSERTIONS
 

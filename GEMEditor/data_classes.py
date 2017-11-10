@@ -1,5 +1,4 @@
 import operator
-import escher
 from GEMEditor.base_classes import BaseEvidenceElement
 from collections import namedtuple, OrderedDict, defaultdict
 from uuid import uuid4
@@ -446,34 +445,6 @@ class ModelStats:
     @property
     def genes_annotated(self):
         return self.genes_total - len(self.list_unannotated_genes)
-
-
-class EscherMapGenerator:
-
-    def __init__(self, map_string=None, map_path=None):
-        self.map_string = None
-        self.path = None
-        self.set_map_string(map_string)
-        self.set_map_path(map_path)
-
-    def set_map_string(self, map_string):
-        if map_string:
-            self.map_string = map_string
-        else:
-            self.map_string = None
-
-    def set_map_path(self, map_path):
-        if map_path:
-            self.path = map_path
-        else:
-            self.path = None
-
-    def get_escher_map(self):
-        if self.map_string:
-            new_map = escher.Builder(map_json=self.map_string)
-            return new_map
-        else:
-            return None
 
 
 class Compartment(BaseEvidenceElement):
