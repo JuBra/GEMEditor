@@ -90,7 +90,7 @@ class TestEvidence:
         assert reference_link_node.get("id") == self.reference.id
 
     def test_no_references_added_if_empty(self):
-        self.evidence.references.clear()
+        self.evidence.remove_all_references()
         add_evidences_to_xml(self.root, self.model)
 
         list_of_evidences = self.root.find(ge_listOfEvidences)

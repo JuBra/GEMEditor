@@ -824,3 +824,9 @@ class TestGeneTreePruning:
         assert reaction.genes == set([gene1, gene2, gene3])
         assert not gene_group2._children
         assert not gene_group2._parents
+
+
+class ModelDeleteItems:
+
+    def test_deletion_metabolite(self):
+        assert False

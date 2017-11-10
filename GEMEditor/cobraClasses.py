@@ -445,7 +445,7 @@ class Model(QtCore.QObject, BaseEvidenceElement, cobraModel):
 
         # Remove GEMEditor specific links
         for metabolite in list_of_metabolites:
-            metabolite.prepare_deletion()
+            metabolite.remove_all_evidences()
 
         # Remove metabolites from model
         super(Model, self).remove_metabolites(list_of_metabolites, destructive)
@@ -500,7 +500,7 @@ class Model(QtCore.QObject, BaseEvidenceElement, cobraModel):
     def remove_references(self, list_of_references):
         for reference in list_of_references:
             # Unlink reference
-            reference.prepare_deletion()
+            reference.remove_all_links()
             del self.references[reference.id]
 
     def gem_update_metabolites(self, metabolites, progress=None):
@@ -589,6 +589,19 @@ class Model(QtCore.QObject, BaseEvidenceElement, cobraModel):
         # Remove metabolites from table
         mapping = self.QtMetaboliteTable.get_item_to_row_mapping()
         self.QtMetaboliteTable.delete_rows([mapping[m] for m in metabolites])
+
+    def gem_remove_reactions(self, reactions):
+
+        # Remove evidence links
+        for r in reactions:
+            r.remove_all_evidences()
+
+        # Remove reactions from model
+        self.remove_reactions(reactions, remove_orphans=False)
+
+        # Remove reactions from table
+        mapping = self.QtReactionTable.get_item_to_row_mapping()
+        self.QtReactionTable.delete_rows([mapping[m] for m in reactions])
 
     def close(self):
         self.dialogs.remove_all()

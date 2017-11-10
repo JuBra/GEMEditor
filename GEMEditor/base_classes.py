@@ -60,7 +60,7 @@ class ReferenceLink:
         item: ReferenceLink
         reciprocal: bool
         """
-        self._references.remove(item)
+        self._references.discard(item)
         if reciprocal:
             item.remove_reference(self, reciprocal=False)
 
