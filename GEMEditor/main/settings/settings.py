@@ -1,8 +1,9 @@
 import logging
 from PyQt5.QtWidgets import QDialog, QDialogButtonBox, QFileDialog
-from PyQt5.QtCore import QSettings, QRegExp, pyqtSlot
+from PyQt5.QtCore import QRegExp, pyqtSlot
 from PyQt5.QtGui import QRegExpValidator
 from GEMEditor.main.settings.ui import Ui_EditSettingsDialog
+from GEMEditor.base.classes import Settings
 from GEMEditor.database import database_path as DB_PATH
 
 
@@ -12,7 +13,7 @@ class EditSettingsDialog(QDialog, Ui_EditSettingsDialog):
         self.setupUi(self)
 
         # Setup the email field with current value
-        self.settings = QSettings()
+        self.settings = Settings()
         self.eMailLineEdit.setText(self.settings.value("Email"))
         self.eMailLineEdit.setValidator(QRegExpValidator(QRegExp(r"[^@\s]+@[^@\s]+\.[^@\s.]+$")))
 
@@ -43,10 +44,8 @@ class EditSettingsDialog(QDialog, Ui_EditSettingsDialog):
     @pyqtSlot()
     def save_settings(self):
         """ Save the currently entered E-mail """
-        self.settings.setValue("Email", self.eMailLineEdit.text())
-        self.settings.setValue("DATABASE_PATH", self.label_database_path.text())
-        self.settings.sync()
 
+        # Switch debug mode before settings
         logger = logging.getLogger("GEMEditor")
         # Set logger to debug mode
         if self.debugModeCheckBox.isChecked() and not logger.isEnabledFor(logging.DEBUG):
@@ -56,3 +55,9 @@ class EditSettingsDialog(QDialog, Ui_EditSettingsDialog):
         elif not self.debugModeCheckBox.isChecked() and logger.isEnabledFor(logging.DEBUG):
             logging.disable(logging.DEBUG)
             logger.info("DEBUG MODE OFF")
+
+        # Save settings
+        self.settings.setValue("Email", self.eMailLineEdit.text())
+        self.settings.setValue("DATABASE_PATH", self.label_database_path.text())
+        self.settings.sync()
+

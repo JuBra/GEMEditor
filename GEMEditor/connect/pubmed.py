@@ -8,6 +8,7 @@ from GEMEditor.data_classes import Reference
 from PyQt5 import QtCore
 from GEMEditor.connect.ncbi import search_ncbi, month_int_mapping
 from GEMEditor.data_classes import Author
+from GEMEditor.base.classes import Settings
 
 
 class Journal:
@@ -84,7 +85,7 @@ class RetrievePubmedData(QtCore.QObject):
 
     @QtCore.pyqtSlot()
     def retrieve_data(self):
-        settings = QtCore.QSettings()
+        settings = Settings()
         email = settings.value("Email")
         tool = quote(settings.applicationName())
         if not email:

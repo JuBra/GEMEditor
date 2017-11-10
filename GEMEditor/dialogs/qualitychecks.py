@@ -1,6 +1,7 @@
 from PyQt5 import QtGui, QtCore
 from PyQt5.QtWidgets import QInputDialog, QMessageBox, QMenu, QAction
 from GEMEditor.base.dialogs import CustomStandardDialog
+from GEMEditor.base.classes import Settings
 from GEMEditor.dialogs.standard import TableDisplayDialog
 from GEMEditor.analysis.duplicates import merge_reactions, merge_metabolites
 from GEMEditor.ui.TreeViewDialog import Ui_Duplicates
@@ -102,7 +103,7 @@ class DuplicateDialog(CustomStandardDialog, Ui_Duplicates):
         """ Restore the geometry of the table from the settings """
 
         super(DuplicateDialog, self).restore_dialog_geometry()
-        header_state = QtCore.QSettings().value(self.__class__.__name__ + "TableHeader"+str(self.dialog_type))
+        header_state = Settings().value(self.__class__.__name__ + "TableHeader"+str(self.dialog_type))
         if header_state:
             self.treeView.header().restoreState(header_state)
 
@@ -110,7 +111,7 @@ class DuplicateDialog(CustomStandardDialog, Ui_Duplicates):
         """ Save the geometry of the table in settings """
 
         super(DuplicateDialog, self).save_dialog_geometry()
-        QtCore.QSettings().setValue(self.__class__.__name__ + "TableHeader"+str(self.dialog_type),
+        Settings().setValue(self.__class__.__name__ + "TableHeader"+str(self.dialog_type),
                                     self.treeView.header().saveState())
 
 

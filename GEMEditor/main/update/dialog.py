@@ -1,8 +1,9 @@
 from PyQt5.QtWidgets import QDialog, QDialogButtonBox
 from PyQt5.QtGui import QDesktopServices
-from PyQt5.QtCore import QUrl, pyqtSlot, QSettings
+from PyQt5.QtCore import QUrl, pyqtSlot
 from GEMEditor import __projectpage__, VERSION_IGNORED
 from GEMEditor.main.update.ui import Ui_UpdateAvailableDialog
+from GEMEditor.base.classes import Settings
 
 
 class UpdateAvailableDialog(QDialog, Ui_UpdateAvailableDialog):
@@ -21,7 +22,7 @@ class UpdateAvailableDialog(QDialog, Ui_UpdateAvailableDialog):
     @pyqtSlot()
     def store_ignore_version(self):
         if self.checkBox.isChecked():
-            settings = QSettings()
+            settings = Settings()
             settings.setValue(VERSION_IGNORED, self.latest_version)
             settings.sync()
 
@@ -30,6 +31,6 @@ class UpdateAvailableDialog(QDialog, Ui_UpdateAvailableDialog):
         QDesktopServices.openUrl(QUrl(__projectpage__))
 
     def version_is_ignored(self):
-        settings = QSettings()
+        settings = Settings()
         return self.latest_version == settings.value(VERSION_IGNORED)
 

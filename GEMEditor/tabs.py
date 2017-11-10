@@ -13,6 +13,7 @@ from PyQt5.QtWidgets import QWidget, QMessageBox, QApplication, QAction, QMenu, 
 from PyQt5.QtCore import QSortFilterProxyModel, QSize
 from cobra.core.solution import LegacySolution, Solution
 from cobra.flux_analysis import pfba
+from GEMEditor.base.classes import Settings
 from GEMEditor.dialogs.reaction import ReactionInputDialog
 from GEMEditor.dialogs.metabolite import MetaboliteEditDialog
 from GEMEditor.dialogs.gene import GeneEditDialog
@@ -404,7 +405,7 @@ class ReactionTab(StandardTab):
         if self.model is not None:
             self.dataTable = self.model.QtReactionTable
             self.proxyModel.setSourceModel(self.dataTable)
-            header_state = QtCore.QSettings().value("ReactionTableViewState")
+            header_state = Settings().value("ReactionTableViewState")
             if header_state is not None:
                 self.dataView.horizontalHeader().restoreState(header_state)
 
@@ -466,7 +467,7 @@ class MetaboliteTab(StandardTab):
             self.dataTable = self.model.QtMetaboliteTable
             self.proxyModel.setSourceModel(self.dataTable)
             self.dataTable.set_header()
-            header_state = QtCore.QSettings().value("MetaboliteTableViewState")
+            header_state = Settings().value("MetaboliteTableViewState")
             if header_state is not None:
                 self.dataView.horizontalHeader().restoreState(header_state)
 
@@ -590,7 +591,7 @@ class GeneTab(StandardTab):
         if self.model is not None:
             self.dataTable = self.model.QtGeneTable
             self.proxyModel.setSourceModel(self.dataTable)
-            header_state = QtCore.QSettings().value("GenesTableViewState")
+            header_state = Settings().value("GenesTableViewState")
             if header_state is not None:
                 self.dataView.horizontalHeader().restoreState(header_state)
 
@@ -664,7 +665,7 @@ class ReferenceTab(StandardTab):
         if self.model is not None:
             self.dataTable = self.model.QtReferenceTable
             self.proxyModel.setSourceModel(self.dataTable)
-            header_state = QtCore.QSettings().value("ReferenceTableViewState")
+            header_state = Settings().value("ReferenceTableViewState")
             if header_state is not None:
                 self.dataView.horizontalHeader().restoreState(header_state)
 
@@ -725,7 +726,7 @@ class ModelTestsTab(StandardTab):
         if self.model is not None:
             self.dataTable = self.model.QtTestsTable
             self.proxyModel.setSourceModel(self.dataTable)
-            header_state = QtCore.QSettings().value("TestsTableViewState")
+            header_state = Settings().value("TestsTableViewState")
             if header_state is not None:
                 self.dataView.horizontalHeader().restoreState(header_state)
 

@@ -2,6 +2,7 @@ from PyQt5 import QtCore, QtGui
 from PyQt5.QtWidgets import QErrorMessage, QDialogButtonBox, QMessageBox, QDialog, QInputDialog, QLineEdit, QFileDialog
 from PyQt5.QtCore import QStandardPaths
 from GEMEditor.base.dialogs import CustomStandardDialog
+from GEMEditor.base.classes import Settings
 from GEMEditor.ui.ReferenceEditDialog import Ui_ReferenceEditDialog
 from GEMEditor.ui.AddAuthorName import Ui_AddAuthorName
 
@@ -244,7 +245,7 @@ class PubmedBrowser(QDialog, Ui_PubmedBrowser):
         self.pmid_worker.finished.connect(self.update_info_from_online)
 
         # Search parameters
-        settings = QtCore.QSettings()
+        settings = Settings()
         self.email = settings.value("Email")
         self.tool = quote(settings.applicationName())
 
@@ -376,7 +377,7 @@ class PubmedBrowser(QDialog, Ui_PubmedBrowser):
 
     @QtCore.pyqtSlot()
     def load_knowns(self):
-        settings = QtCore.QSettings()
+        settings = Settings()
         last_path = settings.value("LastPath") or QStandardPaths.DesktopLocation or None
         filename, filters = QFileDialog.getOpenFileName(self, self.tr("Open known publications"),
                                                         last_path, self.tr("Text file (*.txt)"))

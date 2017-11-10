@@ -1,6 +1,7 @@
 from PyQt5 import QtCore
 from PyQt5.QtWidgets import QDialog, QGridLayout, QLabel, QComboBox
 from GEMEditor.base.ui import Ui_EmptyDialogHorzButtons, Ui_ListDisplayDialog
+from GEMEditor.base.classes import Settings
 
 
 class CustomStandardDialog(QDialog):
@@ -14,14 +15,14 @@ class CustomStandardDialog(QDialog):
     @QtCore.pyqtSlot()
     def save_dialog_geometry(self):
         # Store the geometry of the dialog during the closing
-        settings = QtCore.QSettings()
+        settings = Settings()
         settings.setValue(self.__class__.__name__+"Geometry"+str(self.dialog_type), self.saveGeometry())
         settings.sync()
 
     def restore_dialog_geometry(self):
         # Restore the geometry of the dialog
         # Should be called in the __init__(self) of the subclass
-        settings = QtCore.QSettings()
+        settings = Settings()
         geometry = settings.value(self.__class__.__name__+"Geometry"+str(self.dialog_type))
         if geometry is not None:
             self.restoreGeometry(geometry)

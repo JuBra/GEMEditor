@@ -1,4 +1,5 @@
 from collections import OrderedDict
+from GEMEditor.base.classes import Settings
 from GEMEditor.map.turnover import TurnoverDialog
 from GEMEditor.map.dialog import MapDisplayDialog
 from GEMEditor.solution.base import status_objective_from_solution, set_objective_to_label, set_status_to_label, \
@@ -6,7 +7,7 @@ from GEMEditor.solution.base import status_objective_from_solution, set_objectiv
 from GEMEditor.solution.ui import Ui_SearchTab, Ui_SolutionDialog
 from GEMEditor.widgets.proxymodels import FluxTableProxyFilter
 from GEMEditor.widgets.tables import ReactionBaseTable, MetaboliteTable
-from PyQt5.QtCore import Qt, QSortFilterProxyModel, QSettings, pyqtSlot, QPoint
+from PyQt5.QtCore import Qt, QSortFilterProxyModel, pyqtSlot, QPoint
 from PyQt5.QtGui import QStandardItemModel, QStandardItem, QBrush, QKeySequence
 from PyQt5.QtWidgets import QWidget, QDialog, QAction, QMenu, QApplication, QMessageBox
 
@@ -89,12 +90,12 @@ class BaseSolutionTab(QWidget, Ui_SearchTab):
         self.proxyModel.setSourceModel(self.dataTable)
 
     def save_geometry(self, prefix="", settings=None):
-        settings = settings or QSettings()
+        settings = settings or Settings()
         settings.setValue(prefix+self.__class__.__name__,
                           self.dataView.horizontalHeader().saveState())
 
     def restore_geometry(self, prefix="", settings=None):
-        settings = settings or QSettings()
+        settings = settings or Settings()
         state = settings.value(prefix+self.__class__.__name__)
         if state:
             self.dataView.horizontalHeader().restoreState(state)
@@ -280,7 +281,7 @@ class SolutionDialog(QDialog, Ui_SolutionDialog):
 
     @pyqtSlot()
     def save_geometry(self, prefix="", settings=None):
-        settings = settings or QSettings()
+        settings = settings or Settings()
         string = prefix+self.__class__.__name__
         settings.setValue(string, self.saveGeometry())
         for i in range(self.tabWidget.count()):
@@ -288,7 +289,7 @@ class SolutionDialog(QDialog, Ui_SolutionDialog):
         settings.sync()
 
     def restore_geometry(self, prefix="", settings=None):
-        settings = settings or QSettings()
+        settings = settings or Settings()
         string = prefix + self.__class__.__name__
         state = settings.value(string)
         if state:

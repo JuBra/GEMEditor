@@ -1,11 +1,12 @@
 from collections import defaultdict
 from PyQt5.QtWidgets import QDialog, QTreeView, QTableView, QProgressDialog, QAction, QMenu, QMessageBox
 from PyQt5.QtGui import QStandardItem
-from PyQt5.QtCore import QSortFilterProxyModel, QSettings, pyqtSlot, QPoint, Qt
+from PyQt5.QtCore import QSortFilterProxyModel, pyqtSlot, QPoint, Qt
 from GEMEditor.evidence.assertions import assertion_to_group
 from GEMEditor.widgets.tables import EvidenceTable
 from GEMEditor.widgets.proxymodels import RecursiveProxyFilter
 from GEMEditor.base.widgets import SearchTableWidget
+from GEMEditor.base.classes import Settings
 from GEMEditor.evidence.ui.DialogEvidenceStatus import Ui_DialogEvidenceStatus
 
 
@@ -125,7 +126,7 @@ class DialogEvidenceStatus(QDialog, Ui_DialogEvidenceStatus):
 
     @pyqtSlot()
     def save_dialog_state(self):
-        settings = QSettings()
+        settings = Settings()
         settings.setValue(self.__class__.__name__+"Geometry", self.saveGeometry())
         settings.setValue(self.__class__.__name__ + "ErrorTable",
                           self.tab_error.dataView.horizontalHeader().saveState())
@@ -138,7 +139,7 @@ class DialogEvidenceStatus(QDialog, Ui_DialogEvidenceStatus):
     def restore_dialog_geometry(self):
         # Restore the geometry of the dialog
         # Should be called in the __init__(self) of the subclass
-        settings = QSettings()
+        settings = Settings()
         geometry = settings.value(self.__class__.__name__+"Geometry")
         if geometry is not None:
             self.restoreGeometry(geometry)

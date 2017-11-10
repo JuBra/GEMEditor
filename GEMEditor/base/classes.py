@@ -114,10 +114,19 @@ class Settings(QSettings):
 
     def __init__(self, *args):
         super(Settings, self).__init__(*args)
+        self.prefix = ""
+
+    def beginGroup(self, p_str):
+        super(Settings, self).beginGroup(p_str)
+        self.prefix = p_str+"/" if p_str else ""
+
+    def endGroup(self):
+        super(Settings, self).endGroup()
+        self.prefix = ""
 
     def setValue(self, p_str, Any):
         super(Settings, self).setValue(p_str, Any)
-        LOGGER.debug("Setting '{0!s}' changed to '{1!s}'".format(p_str, Any))
+        LOGGER.debug("Setting '{0}{1!s}' changed to '{2!s:.100}'".format(self.prefix, p_str, Any))
 
 
 class WindowManager(QObject):

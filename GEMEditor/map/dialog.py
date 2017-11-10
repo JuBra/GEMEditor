@@ -4,8 +4,8 @@ import os
 from GEMEditor.map.base import MapWrapper, WrongEscherFormat
 from GEMEditor.map.ui import Ui_MapListDialog
 from GEMEditor.solution.base import fluxes_from_solution
+from GEMEditor.base.classes import Settings
 from PyQt5 import QtCore
-from PyQt5.QtCore import QSettings
 from PyQt5.QtWebEngineWidgets import QWebEngineSettings, QWebEnginePage, QWebEngineView
 from PyQt5.QtWidgets import QDialog, QFileDialog, QListWidgetItem, QMessageBox, QWidget, QVBoxLayout, QTabWidget
 
@@ -69,7 +69,7 @@ class MapListDialog(QDialog, Ui_MapListDialog):
 
     @QtCore.pyqtSlot()
     def load_maps(self):
-        settings = QSettings()
+        settings = Settings()
         last_path = settings.value("MapsLastPath", None)
 
         # Get file names to open
