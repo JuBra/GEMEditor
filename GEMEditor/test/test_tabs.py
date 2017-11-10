@@ -78,7 +78,7 @@ class TestReactionTab:
     @pytest.fixture()
     def patched_remove_reactions(self, monkeypatch):
         mock = Mock()
-        monkeypatch.setattr("GEMEditor.cobraClasses.Model.remove_reactions", mock)
+        monkeypatch.setattr("GEMEditor.cobraClasses.Model.gem_remove_reactions", mock)
         return mock
 
     @pytest.fixture()

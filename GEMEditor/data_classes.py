@@ -120,7 +120,7 @@ class Reference:
     def remove_all_links(self):
         """ Remove all reference links """
 
-        for item in self._linked_items:
+        for item in self.linked_items:
             self.remove_link(item, reciprocal=True)
 
     def reference_string(self):

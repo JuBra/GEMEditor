@@ -147,6 +147,8 @@ class TestReaction:
         assert reaction.lower_bound == 0.
         assert reaction.upper_bound == 1000.
         assert reaction.comment == ""
+        assert reaction.annotation == set()
+        assert reaction.model is None
         assert len(reaction._children) == 0
 
     def test_none_reaction_setup(self):
@@ -353,7 +355,8 @@ class TestGeneGroup:
 
     def test_genegroup_enabled_different_genes(self):
         group1 = GeneGroup()
-        gene1 = Gene(functional=False)
+        gene1 = Gene()
+        gene1.functional = False
         group1.add_child(gene1)
 
         group1.type = "and"
@@ -378,6 +381,14 @@ class TestGeneGroup:
 
 
 class TestGene:
+
+    def test_default_values(self):
+        gene = Gene()
+        assert gene.id == ""
+        assert gene.name == ""
+        assert gene.genome == ""
+        assert gene.annotation == set()
+        assert gene.functional is True
 
     @pytest.mark.parametrize("child", [Gene(), Reaction(), GeneGroup()])
     def test_gene_add_child(self, child):
@@ -442,6 +453,17 @@ class TestModel:
 
         # Reaction table updated
         assert met1.id in model.QtReactionTable.item(0, 2).text()
+
+
+class TestMetabolite:
+
+    def test_standard_values(self):
+        metabolite = Metabolite()
+        assert metabolite.id == ""
+        assert metabolite.name == ""
+        assert metabolite.charge == 0
+        assert metabolite.compartment == ""
+        assert metabolite.annotation == set()
 
 
 class TestReactionsAttribute:

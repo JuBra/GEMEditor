@@ -104,7 +104,7 @@ class Reaction(BaseTreeElement, EvidenceLink, cobraReaction):
 
     def __init__(self, id="", name='', subsystem='', lower_bound=0.,
                  upper_bound=1000., comment=""):
-
+        # Setup variables before calling
         self._model = None
         self._subsystem = None
         super(Reaction, self).__init__()
@@ -226,16 +226,15 @@ class Reaction(BaseTreeElement, EvidenceLink, cobraReaction):
         super(Reaction, self).prepare_deletion()
 
 
-class Gene(BaseTreeElement, cobraGene, EvidenceLink):
+class Gene(BaseTreeElement, EvidenceLink, cobraGene):
 
-    def __init__(self, id="", name="", genome="", functional=True):
+    def __init__(self, id="", name="", genome=""):
         super(Gene, self).__init__()
         EvidenceLink.__init__(self)
 
         self.id = id or ""
         self.name = name or ""
         self.genome = genome or ""
-        self._functional = functional
         self.annotation = set()
 
     @property
@@ -438,18 +437,6 @@ class Model(QtCore.QObject, EvidenceLink, cobraModel):
 
         super(Model, self).add_metabolites(metabolite_list)
 
-    def remove_metabolites(self, list_of_metabolites, destructive=False):
-
-        if not hasattr(list_of_metabolites, "__iter__"):
-            list_of_metabolites = [list_of_metabolites]
-
-        # Remove GEMEditor specific links
-        for metabolite in list_of_metabolites:
-            metabolite.remove_all_evidences()
-
-        # Remove metabolites from model
-        super(Model, self).remove_metabolites(list_of_metabolites, destructive)
-
     def add_reactions(self, list_of_reactions):
 
         # Add reactions to model
@@ -459,49 +446,9 @@ class Model(QtCore.QObject, EvidenceLink, cobraModel):
         for reaction in list_of_reactions:
             self.subsystems[reaction.subsystem].add(reaction)
 
-    def remove_reactions(self, list_of_reactions, remove_orphans=False):
-
-        # Remove GEMEditor specific links
-        for reaction in list_of_reactions:
-            reaction.prepare_deletion()
-
-        # Remove reactions from model
-        super(Model, self).remove_reactions(list_of_reactions)
-
     def add_genes(self, genes):
         for gene in genes:
             self.genes.add(gene)
-
-    def remove_genes(self, list_of_genes):
-
-        # Remove GEMEditor specific links
-        for gene in list_of_genes:
-            gene.prepare_deletion()
-
-            # Remove gene from model
-            self.genes.remove(gene)
-
-        # Remove all test cases that link to gene from model
-        for testcase in self.tests.copy():
-            if any(x.gene in list_of_genes for x in testcase.gene_settings):
-                self.remove_test(testcase)
-
-    def remove_test(self, test):
-        """ Remove the test from the model"""
-
-        try:
-            index = self.tests.index(test)
-        except ValueError:
-            return
-        else:
-            self.tests.pop(index)
-            self.QtTestsTable.removeRow(index)
-
-    def remove_references(self, list_of_references):
-        for reference in list_of_references:
-            # Unlink reference
-            reference.remove_all_links()
-            del self.references[reference.id]
 
     def gem_update_metabolites(self, metabolites, progress=None):
         """ Update the metabolite entries in the QTable
@@ -583,14 +530,40 @@ class Model(QtCore.QObject, EvidenceLink, cobraModel):
         self.QtReactionTable.all_data_changed()
 
     def gem_remove_metabolites(self, metabolites):
+        """ Delete metabolites from the model
+
+        Parameters
+        ----------
+        metabolites: list,
+            Metabolites to be removed
+
+        Returns
+        -------
+
+        """
+
+        # Remove evidence links
+        for m in metabolites:
+            m.remove_all_evidences()
+
         # Remove metabolites from model
         self.remove_metabolites(metabolites)
 
         # Remove metabolites from table
-        mapping = self.QtMetaboliteTable.get_item_to_row_mapping()
-        self.QtMetaboliteTable.delete_rows([mapping[m] for m in metabolites])
+        self._gem_remove_items_from_table(self.QtMetaboliteTable, metabolites)
 
     def gem_remove_reactions(self, reactions):
+        """ Delete reactions from the model
+
+        Parameters
+        ----------
+        reactions: list,
+            Reactions to be removed
+
+        Returns
+        -------
+        None
+        """
 
         # Remove evidence links
         for r in reactions:
@@ -600,18 +573,104 @@ class Model(QtCore.QObject, EvidenceLink, cobraModel):
         self.remove_reactions(reactions, remove_orphans=False)
 
         # Remove reactions from table
-        mapping = self.QtReactionTable.get_item_to_row_mapping()
-        self.QtReactionTable.delete_rows([mapping[m] for m in reactions])
+        self._gem_remove_items_from_table(self.QtReactionTable, reactions)
+
+        # Remove all test cases that link to reaction from model
+        tests_to_remove = []
+        for testcase in self.tests.copy():
+            if any(x.reaction in reactions for x in testcase.reaction_settings):
+                tests_to_remove.append(testcase)
+            elif any(x.reaction in reactions for x in testcase.outcomes):
+                tests_to_remove.append(testcase)
+
+        self.gem_remove_tests(tests_to_remove)
+
+    def gem_remove_genes(self, genes):
+        """ Delete genes from model
+
+        Parameters
+        ----------
+        genes: list,
+            Genes to be removed from model
+
+        Returns
+        -------
+        None
+        """
+        # Remove GEMEditor specific links
+        for gene in genes:
+            gene.prepare_deletion()
+
+            # Remove gene from model
+            self.genes.remove(gene)
+
+        # Remove reactions from table
+        self._gem_remove_items_from_table(self.QtGeneTable, genes)
+
+        # Remove all test cases that link to gene from model
+        tests_to_remove = []
+        for testcase in self.tests.copy():
+            if any(x.gene in genes for x in testcase.gene_settings):
+                tests_to_remove.append(testcase)
+        self.gem_remove_tests(tests_to_remove)
+
+    def gem_remove_references(self, references):
+        """ Remove reference items from model
+
+        Parameters
+        ----------
+        references: list,
+            References to be removed
+
+        Returns
+        -------
+        None
+        """
+        for reference in references:
+            reference.remove_all_links()
+            del self.references[reference.id]
+
+        # Remove reactions from table
+        self._gem_remove_items_from_table(self.QtReferenceTable, references)
+
+    def gem_remove_tests(self, testcases):
+        """ Remove test cases from model
+
+        Parameters
+        ----------
+        testcases: list,
+            Test cases to be removed
+
+        Returns
+        -------
+        None
+        """
+        for test in testcases:
+            test.remove_all_references()
+
+            # Todo: Change to more efficient data structure
+            try:
+                index = self.tests.index(test)
+            except ValueError:
+                return
+            else:
+                self.tests.pop(index)
+                self.QtTestsTable.removeRow(index)
+
+    @staticmethod
+    def _gem_remove_items_from_table(table, items):
+        mapping = table.get_item_to_row_mapping()
+        table.delete_rows([mapping[i] for i in items])
 
     def close(self):
         self.dialogs.remove_all()
 
 
-class Metabolite(cobraMetabolite, EvidenceLink):
+class Metabolite(EvidenceLink, cobraMetabolite):
 
     def __init__(self, id="", formula="", name="",
                  charge=0, compartment=""):
-        EvidenceLink.__init__(self)
+        super(Metabolite, self).__init__()
 
         self.id = id or ""
         self.name = name or ""
@@ -619,12 +678,9 @@ class Metabolite(cobraMetabolite, EvidenceLink):
         self.compartment = compartment or ""
         self.charge = charge or 0
 
+        # Override annotation
+        # Todo: Change to gem specific attribute name
         self.annotation = set()
-
-        self._constraint_sense = 'E'
-        self._bound = 0.
-        self._model = None
-        self._reaction = set()
 
     def get_annotation_by_collection(self, *args):
         return set([x.identifier for x in self.annotation if x.collection in args])
