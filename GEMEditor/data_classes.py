@@ -1,5 +1,5 @@
 import operator
-from GEMEditor.base_classes import BaseEvidenceElement
+from GEMEditor.base_classes import EvidenceLink
 from collections import namedtuple, OrderedDict, defaultdict
 from uuid import uuid4
 
@@ -447,7 +447,7 @@ class ModelStats:
         return self.genes_total - len(self.list_unannotated_genes)
 
 
-class Compartment(BaseEvidenceElement):
+class Compartment(EvidenceLink):
     def __init__(self, id=None, name=None):
         super(Compartment, self).__init__()
         self.id = id

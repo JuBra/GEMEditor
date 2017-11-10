@@ -1,10 +1,10 @@
 import logging
 
 
-class BaseEvidenceElement:
+class EvidenceLink:
 
     def __init__(self, *args, **kwargs):
-        super(BaseEvidenceElement, self).__init__(*args, **kwargs)
+        super(EvidenceLink, self).__init__(*args, **kwargs)
         self.evidences = set()
 
     def add_evidence(self, evidence):

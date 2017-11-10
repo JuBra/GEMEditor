@@ -10,7 +10,7 @@ from GEMEditor.base.functions import generate_copy_id
 from GEMEditor.base.classes import WindowManager
 from GEMEditor.widgets.tables import ReactionTable, MetaboliteTable, GeneTable, ReferenceTable, ModelTestTable, LinkedItem
 from GEMEditor.data_classes import ReactionSetting, CleaningDict, Compartment
-from GEMEditor.base_classes import BaseEvidenceElement
+from GEMEditor.base_classes import EvidenceLink
 from GEMEditor.base.functions import reaction_balance
 from six import string_types
 from difflib import SequenceMatcher
@@ -100,7 +100,7 @@ class BaseTreeElement:
             pass
 
 
-class Reaction(BaseTreeElement, BaseEvidenceElement, cobraReaction):
+class Reaction(BaseTreeElement, EvidenceLink, cobraReaction):
 
     def __init__(self, id="", name='', subsystem='', lower_bound=0.,
                  upper_bound=1000., comment=""):
@@ -226,11 +226,11 @@ class Reaction(BaseTreeElement, BaseEvidenceElement, cobraReaction):
         super(Reaction, self).prepare_deletion()
 
 
-class Gene(BaseTreeElement, cobraGene, BaseEvidenceElement):
+class Gene(BaseTreeElement, cobraGene, EvidenceLink):
 
     def __init__(self, id="", name="", genome="", functional=True):
         super(Gene, self).__init__()
-        BaseEvidenceElement.__init__(self)
+        EvidenceLink.__init__(self)
 
         self.id = id or ""
         self.name = name or ""
@@ -261,11 +261,11 @@ class Gene(BaseTreeElement, cobraGene, BaseEvidenceElement):
         return self.id
 
 
-class GeneGroup(BaseTreeElement, BaseEvidenceElement):
+class GeneGroup(BaseTreeElement, EvidenceLink):
 
     def __init__(self, id=None, genes=None, type="and"):
         super(GeneGroup, self).__init__()
-        BaseEvidenceElement.__init__(self)
+        EvidenceLink.__init__(self)
 
         self.id = id or str(uuid.uuid4())
         # Genes might appear more than once in the group
@@ -309,7 +309,7 @@ class GeneGroup(BaseTreeElement, BaseEvidenceElement):
         return item in self._children
 
 
-class Model(QtCore.QObject, BaseEvidenceElement, cobraModel):
+class Model(QtCore.QObject, EvidenceLink, cobraModel):
 
     modelChanged = QtCore.pyqtSignal()
 
@@ -607,11 +607,11 @@ class Model(QtCore.QObject, BaseEvidenceElement, cobraModel):
         self.dialogs.remove_all()
 
 
-class Metabolite(cobraMetabolite, BaseEvidenceElement):
+class Metabolite(cobraMetabolite, EvidenceLink):
 
     def __init__(self, id="", formula="", name="",
                  charge=0, compartment=""):
-        BaseEvidenceElement.__init__(self)
+        EvidenceLink.__init__(self)
 
         self.id = id or ""
         self.name = name or ""
