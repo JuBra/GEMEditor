@@ -1,10 +1,10 @@
 from uuid import uuid4
 from copy import copy
-from GEMEditor.base_classes import BaseReferenceElement
+from GEMEditor.base_classes import ReferenceLink
 from GEMEditor.evidence.assertions import ASSERTIONS
 
 
-class Evidence(BaseReferenceElement):
+class Evidence(ReferenceLink):
 
     _validity = dict((x.text, x.func_validity) for x in ASSERTIONS)
     _fixes = dict((x.text, x.func_fix) for x in ASSERTIONS)

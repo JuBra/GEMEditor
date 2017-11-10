@@ -1,11 +1,11 @@
 import operator
 import escher
-from GEMEditor.base_classes import BaseEvidenceElement, BaseReferenceElement
+from GEMEditor.base_classes import BaseEvidenceElement, ReferenceLink
 from collections import namedtuple, OrderedDict, defaultdict
 from uuid import uuid4
 
 
-class Reference(BaseEvidenceElement):
+class Reference(BaseEvidenceElement, ReferenceLink):
     """ ReferenceItem contains the information a pubmed or similar literature reference
     Authors are saved as author instances """
 
@@ -125,7 +125,7 @@ class Author(namedtuple("Author", ["lastname", "firstname", "initials"])):
             return self.lastname
 
 
-class ModelTest(BaseReferenceElement):
+class ModelTest(ReferenceLink):
 
     def __init__(self, id=None, description="", comment=""):
         super(ModelTest, self).__init__()
