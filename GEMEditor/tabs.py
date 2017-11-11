@@ -176,9 +176,8 @@ class ReactionTab(StandardTab):
     @QtCore.pyqtSlot()
     def deleteItemSlot(self):
         if self.confirmDeletion():
-            reactions = [self.dataTable.item_from_row(row) for row in self.dataView.get_selected_rows()]
-            self.model.remove_reactions(reactions)
-            self.dataView.delete_selected_rows()
+            reactions = self.dataView.get_selected_items()
+            self.model.gem_remove_reactions(reactions)
 
     @QtCore.pyqtSlot()
     def editItemSlot(self):
@@ -454,13 +453,8 @@ class MetaboliteTab(StandardTab):
     @QtCore.pyqtSlot()
     def deleteItemSlot(self):
         if self.confirmDeletion():
-
-            # Delete metabolites from model
-            metabolites = [self.dataTable.item_from_row(row) for row in self.dataView.get_selected_rows()]
-            self.model.remove_metabolites(metabolites)
-
-            # Delete metabolites from table
-            self.dataView.delete_selected_rows()
+            metabolites = self.dataView.get_selected_items()
+            self.model.gem_remove_metabolites(metabolites)
 
     def set_datatable(self):
         if self.model is not None:
@@ -582,9 +576,8 @@ class GeneTab(StandardTab):
     @QtCore.pyqtSlot()
     def deleteItemSlot(self):
         if self.confirmDeletion():
-            genes = [self.dataTable.item(row, 0).link for row in self.dataView.get_selected_rows()]
-            self.model.remove_genes(genes)
-            self.dataView.delete_selected_rows()
+            genes = self.dataView.get_selected_items()
+            self.model.gem_remove_genes(genes)
 
     def set_datatable(self):
         """ Set the datatable for the proxy model """
@@ -639,9 +632,8 @@ class ReferenceTab(StandardTab):
     @QtCore.pyqtSlot()
     def deleteItemSlot(self):
         if self.confirmDeletion():
-            references = [self.dataTable.item_from_row(row) for row in self.dataView.get_selected_rows()]
-            self.model.remove_references(references)
-            self.dataView.delete_selected_rows()
+            references = self.dataView.get_selected_items()
+            self.model.gem_remove_references(references)
 
     @QtCore.pyqtSlot()
     def editItemSlot(self):
@@ -694,9 +686,8 @@ class ModelTestsTab(StandardTab):
     @QtCore.pyqtSlot()
     def deleteItemSlot(self):
         if self.confirmDeletion():
-            for n in self.dataView.get_selected_rows():
-                self.model.tests.remove(self.dataTable.item_from_row(n))
-            self.dataView.delete_selected_rows()
+            selected_tests = self.dataView.get_selected_items()
+            self.model.gem_remove_tests(selected_tests)
 
     @QtCore.pyqtSlot()
     def editItemSlot(self, *args, dialog=None):

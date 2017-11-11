@@ -1,6 +1,8 @@
 import pytest
+import gc
 from GEMEditor.cobraClasses import Reaction, GeneGroup, Gene, Model, BaseTreeElement, prune_gene_tree, Metabolite
-from GEMEditor.data_classes import CleaningDict
+from GEMEditor.data_classes import CleaningDict, Reference, ModelTest, ReactionSetting, GeneSetting, Outcome
+from GEMEditor.evidence_class import Evidence
 from PyQt5.QtWidgets import QApplication
 
 
@@ -147,6 +149,8 @@ class TestReaction:
         assert reaction.lower_bound == 0.
         assert reaction.upper_bound == 1000.
         assert reaction.comment == ""
+        assert reaction.annotation == set()
+        assert reaction.model is None
         assert len(reaction._children) == 0
 
     def test_none_reaction_setup(self):
@@ -353,7 +357,8 @@ class TestGeneGroup:
 
     def test_genegroup_enabled_different_genes(self):
         group1 = GeneGroup()
-        gene1 = Gene(functional=False)
+        gene1 = Gene()
+        gene1.functional = False
         group1.add_child(gene1)
 
         group1.type = "and"
@@ -363,7 +368,8 @@ class TestGeneGroup:
         assert group1.functional is False
 
         # Add second functional gene
-        gene2 = Gene(functional=True)
+        gene2 = Gene()
+        gene2.functional = True
         group1.add_child(gene2)
 
         group1.type = "and"
@@ -378,6 +384,14 @@ class TestGeneGroup:
 
 
 class TestGene:
+
+    def test_default_values(self):
+        gene = Gene()
+        assert gene.id == ""
+        assert gene.name == ""
+        assert gene.genome == ""
+        assert gene.annotation == set()
+        assert gene.functional is True
 
     @pytest.mark.parametrize("child", [Gene(), Reaction(), GeneGroup()])
     def test_gene_add_child(self, child):
@@ -442,6 +456,17 @@ class TestModel:
 
         # Reaction table updated
         assert met1.id in model.QtReactionTable.item(0, 2).text()
+
+
+class TestMetabolite:
+
+    def test_standard_values(self):
+        metabolite = Metabolite()
+        assert metabolite.id == ""
+        assert metabolite.name == ""
+        assert metabolite.charge == 0
+        assert metabolite.compartment == ""
+        assert metabolite.annotation == set()
 
 
 class TestReactionsAttribute:
@@ -824,3 +849,583 @@ class TestGeneTreePruning:
         assert reaction.genes == set([gene1, gene2, gene3])
         assert not gene_group2._children
         assert not gene_group2._parents
+
+
+def metabolite_in_model(metabolite, model, valid=True):
+    assert (metabolite in model.metabolites) is valid
+    assert (metabolite in model.QtMetaboliteTable.get_items()) is valid
+    assert (model is metabolite.model) is valid
+
+
+def reaction_in_model(reaction, model, valid=True):
+    assert (reaction in model.reactions) is valid
+    assert (reaction in model.QtReactionTable.get_items()) is valid
+    assert (model is reaction.model) is valid
+
+
+def gene_in_model(gene, model, valid=True):
+    assert (gene in model.genes) is valid
+    assert (gene in model.QtGeneTable.get_items()) is valid
+    assert (model is gene.model) is valid
+
+
+def metabolite_in_reaction(metabolite, reaction, valid=True):
+    assert (reaction in metabolite.reactions) is valid
+    assert (metabolite in reaction.metabolites) is valid
+
+
+def case_in_model(case, model, valid=True):
+    assert (case in model.tests) is valid
+    assert (case in model.QtTestsTable.get_items()) is valid
+
+
+def item_in_evidence(item, evidence, valid=True):
+    assert (evidence in item.evidences) is valid
+    assert any(item is getattr(evidence, name) for name in ("entity", "target")) is valid
+
+
+def reference_in_model(reference, model, valid=True):
+    assert (reference in model.references.values()) is valid
+    assert (reference in model.QtReferenceTable.get_items()) is valid
+
+
+def evidence_in_model(evidence, model, valid=True):
+    if valid is not True:
+        raise ValueError("Cannot check evidence not in model as the test still holds a strong ref to evidence.")
+    gc.collect()
+    assert (evidence in model.all_evidences.values()) is valid
+
+
+def gene_in_reaction(gene, reaction, valid=True):
+    assert (gene in reaction.genes) is valid
+    assert (reaction in gene.reactions) is valid
+
+
+def reference_in_item(reference, item, valid=True):
+    assert (reference in item.references) is valid
+    assert (item in reference.linked_items) is valid
+
+
+class TestModelDeleteItems:
+
+    @pytest.fixture(autouse=True)
+    def setup_complete_model(self):
+        self.model = Model("model")
+
+        # Setup reaction1
+        self.metabolite = Metabolite("m1")
+        self.reaction = Reaction("r1")
+        self.gene = Gene("g1")
+        self.reaction.add_child(self.gene)
+        self.model.add_genes((self.gene,))
+        self.reaction.add_metabolites({self.metabolite: -1})
+        self.model.add_reactions((self.reaction,))
+
+        # Setup reaction2
+        self.metabolite2 = Metabolite("m2")
+        self.reaction2 = Reaction("r2")
+        self.gene2 = Gene("g2")
+        self.genegroup = GeneGroup()
+        self.genegroup.add_child(self.gene2)
+        self.reaction2.add_child(self.genegroup)
+        self.model.add_genes((self.gene2,))
+        self.reaction2.add_metabolites({self.metabolite2: 1})
+        self.model.add_reactions((self.reaction2,))
+
+        # Setup evidences
+        self.evidence = Evidence(assertion="Catalyzes")
+        self.evidence.set_entity(self.gene)
+        self.evidence.set_target(self.reaction)
+        self.reference = Reference()
+        self.model.add_reference(self.reference)
+        self.evidence.add_reference(self.reference)
+        self.model.add_evidence(self.evidence)
+
+        # Setup test case
+        self.testcase = ModelTest()
+        reaction_setting = ReactionSetting(self.reaction, 1000., -1000., 0.)
+        gene_setting = GeneSetting(gene=self.gene2, activity=False)
+        outcome = Outcome(self.reaction2, 0., "greater")
+        self.testcase.add_outcome(outcome)
+        self.testcase.add_setting(gene_setting)
+        self.testcase.add_setting(reaction_setting)
+        self.model.add_test(self.testcase)
+        self.reference2 = Reference()
+        self.model.add_reference(self.reference2)
+        self.testcase.add_reference(self.reference2)
+
+        self.model.setup_tables()
+
+    def test_setup(self):
+        # Test genes
+        gene_in_model(self.gene, self.model)
+        gene_in_model(self.gene2, self.model)
+
+        # Test reactions
+        reaction_in_model(self.reaction, self.model)
+        reaction_in_model(self.reaction2, self.model)
+
+        # Test metabolites
+        metabolite_in_model(self.metabolite, self.model)
+        metabolite_in_model(self.metabolite2, self.model)
+
+        # Test evidences
+        evidence_in_model(self.evidence, self.model)
+
+        # Test model test
+        case_in_model(self.testcase, self.model)
+
+        # Test references
+        reference_in_model(self.reference, self.model)
+        reference_in_model(self.reference2, self.model)
+
+        # Test connections
+        # Reference <-> Evidence
+        reference_in_item(self.reference, self.evidence)
+        # Reference2 <-> Testcase
+        reference_in_item(self.reference2, self.testcase)
+
+        # Gene1 <-> Reaction1
+        gene_in_reaction(self.gene, self.reaction)
+        gene_in_reaction(self.gene2, self.reaction2)
+
+        # Metabolite1 <-> Reaction1
+        metabolite_in_reaction(self.metabolite, self.reaction)
+        metabolite_in_reaction(self.metabolite2, self.reaction2)
+
+        # Evidence <-> Gene1/Reaction
+        item_in_evidence(self.gene, self.evidence)
+        item_in_evidence(self.reaction, self.evidence)
+
+    def test_deletion_metabolite(self):
+        # Action
+        self.model.gem_remove_metabolites((self.metabolite,))
+
+        # Test gene
+        gene_in_model(self.gene, self.model)
+        gene_in_model(self.gene2, self.model)
+
+        # Test reactions
+        reaction_in_model(self.reaction, self.model)
+        reaction_in_model(self.reaction2, self.model)
+
+        # Test metabolites
+        metabolite_in_model(self.metabolite, self.model, valid=False)
+        metabolite_in_model(self.metabolite2, self.model)
+
+        # Test evidences
+        evidence_in_model(self.evidence, self.model)
+
+        # Test model test
+        case_in_model(self.testcase, self.model)
+
+        # Test references
+        reference_in_model(self.reference, self.model)
+        reference_in_model(self.reference2, self.model)
+
+        # Test connections
+        # Reference <-> Evidence
+        reference_in_item(self.reference, self.evidence)
+        # Reference2 <-> Testcase
+        reference_in_item(self.reference2, self.testcase)
+
+        # Gene1 <-> Reaction1
+        gene_in_reaction(self.gene, self.reaction)
+        gene_in_reaction(self.gene2, self.reaction2)
+
+        # Metabolite1 <-> Reaction1
+        metabolite_in_reaction(self.metabolite, self.reaction, valid=False)
+        metabolite_in_reaction(self.metabolite2, self.reaction2)
+
+        # Evidence <-> Gene1/Reaction
+        item_in_evidence(self.gene, self.evidence)
+        item_in_evidence(self.reaction, self.evidence)
+
+    def test_deletion_metabolite2(self):
+        # Action
+        self.model.gem_remove_metabolites((self.metabolite2,))
+
+        # Test genes
+        gene_in_model(self.gene, self.model)
+        gene_in_model(self.gene2, self.model)
+
+        # Test reactions
+        reaction_in_model(self.reaction, self.model)
+        reaction_in_model(self.reaction2, self.model)
+
+        # Test metabolites
+        metabolite_in_model(self.metabolite, self.model)
+        metabolite_in_model(self.metabolite2, self.model, valid=False)
+
+        # Test evidences
+        evidence_in_model(self.evidence, self.model)
+
+        # Test model test
+        case_in_model(self.testcase, self.model)
+
+        # Test references
+        reference_in_model(self.reference, self.model)
+        reference_in_model(self.reference2, self.model)
+
+        # Test connections
+        # Reference <-> Evidence
+        reference_in_item(self.reference, self.evidence)
+        # Reference2 <-> Testcase
+        reference_in_item(self.reference2, self.testcase)
+
+        # Gene1 <-> Reaction1
+        gene_in_reaction(self.gene, self.reaction)
+        gene_in_reaction(self.gene2, self.reaction2)
+
+        # Metabolite1 <-> Reaction1
+        metabolite_in_reaction(self.metabolite, self.reaction)
+        metabolite_in_reaction(self.metabolite2, self.reaction2, valid=False)
+
+        # Evidence <-> Gene1/Reaction
+        item_in_evidence(self.gene, self.evidence)
+        item_in_evidence(self.reaction, self.evidence)
+
+    def test_delete_reaction1(self):
+        ####
+        # Delete reaction
+        # Check:
+        #   - gene present but removed from reaction1
+        #   - metabolite present but removed from reaction1
+        #   - reaction deleted
+        #   - evidence deleted
+        #   - testcase deleted
+        #   - reference present but removed from evidence
+        #   - reference2 present but removed from testcase
+        ####
+
+        # Action
+        self.model.gem_remove_reactions((self.reaction,))
+
+        # Test genes
+        gene_in_model(self.gene, self.model)
+        gene_in_model(self.gene2, self.model)
+
+        # Test reactions
+        reaction_in_model(self.reaction, self.model, valid=False)
+        reaction_in_model(self.reaction2, self.model)
+
+        # Test metabolites
+        metabolite_in_model(self.metabolite, self.model)
+        metabolite_in_model(self.metabolite2, self.model)
+
+        # Test model test
+        case_in_model(self.testcase, self.model, valid=False)
+
+        # Test references
+        reference_in_model(self.reference, self.model)
+        reference_in_model(self.reference2, self.model)
+
+        # Test connections
+        # Reference <-> Evidence
+        reference_in_item(self.reference, self.evidence, valid=False)
+        reference_in_item(self.reference2, self.testcase, valid=False)
+
+        # Gene1 <-> Reaction1
+        gene_in_reaction(self.gene, self.reaction, valid=False)
+        gene_in_reaction(self.gene2, self.reaction2)
+
+        # Metabolite1 <-> Reaction1
+        # Check metabolite is still in reaction, but reaction not in metabolite
+        assert self.metabolite in self.reaction.metabolites
+        assert self.reaction not in self.metabolite.reactions
+        metabolite_in_reaction(self.metabolite2, self.reaction2)
+
+        # Evidence <-> Gene1/Reaction
+        item_in_evidence(self.gene, self.evidence, valid=False)
+        item_in_evidence(self.reaction, self.evidence, valid=False)
+
+        # Check evidence is removed when reference deleted
+        del self.evidence
+        gc.collect()
+        assert len(self.model.all_evidences) == 0
+
+    def test_deletion_reaction2(self):
+        # Check:
+        #   - reaction2 removed
+        #   - test case removed
+        #   - reference removed from testcase
+        #   - gene2 removed from reaction
+
+        # Action
+        self.model.gem_remove_reactions((self.reaction2,))
+
+        # Test genes
+        gene_in_model(self.gene, self.model)
+        gene_in_model(self.gene2, self.model)
+
+        # Test reactions
+        reaction_in_model(self.reaction, self.model)
+        reaction_in_model(self.reaction2, self.model, valid=False)
+
+        # Test metabolites
+        metabolite_in_model(self.metabolite, self.model)
+        metabolite_in_model(self.metabolite2, self.model)
+
+        # Test evidences
+        evidence_in_model(self.evidence, self.model)
+
+        # Test model test
+        case_in_model(self.testcase, self.model, valid=False)
+
+        # Test references
+        reference_in_model(self.reference, self.model)
+        reference_in_model(self.reference2, self.model)
+
+        # Test connections
+        # Reference <-> Evidence
+        reference_in_item(self.reference, self.evidence)
+        # Reference2 <-> Testcase
+        reference_in_item(self.reference2, self.testcase, valid=False)
+
+        # Gene1 <-> Reaction1
+        gene_in_reaction(self.gene, self.reaction)
+        gene_in_reaction(self.gene2, self.reaction2, valid=False)
+
+        # Metabolite1 <-> Reaction1
+        metabolite_in_reaction(self.metabolite, self.reaction)
+        # Check metabolite still in reaction, but reaction not in metabolite
+        assert self.metabolite2 in self.reaction2.metabolites
+        assert self.reaction2 not in self.metabolite2.reactions
+
+        # Evidence <-> Gene1/Reaction
+        item_in_evidence(self.gene, self.evidence)
+        item_in_evidence(self.reaction, self.evidence)
+
+    def test_delete_gene1(self):
+        # Test gene deletion
+        # Check:
+        #   - Gene removed from model
+        #   - Evidence removed from model
+
+        # Action
+        self.model.gem_remove_genes((self.gene,))
+
+        # Test genes
+        gene_in_model(self.gene, self.model, valid=False)
+        gene_in_model(self.gene2, self.model)
+
+        # Test reactions
+        reaction_in_model(self.reaction, self.model)
+        reaction_in_model(self.reaction2, self.model)
+
+        # Test metabolites
+        metabolite_in_model(self.metabolite, self.model)
+        metabolite_in_model(self.metabolite2, self.model)
+
+        # Test model test
+        case_in_model(self.testcase, self.model)
+
+        # Test references
+        reference_in_model(self.reference, self.model)
+        reference_in_model(self.reference2, self.model)
+
+        # Test connections
+        # Reference <-> Evidence
+        reference_in_item(self.reference, self.evidence, valid=False)
+        # Reference2 <-> Testcase
+        reference_in_item(self.reference2, self.testcase)
+
+        # Gene1 <-> Reaction1
+        gene_in_reaction(self.gene, self.reaction, valid=False)
+        gene_in_reaction(self.gene2, self.reaction2)
+
+        # Metabolite1 <-> Reaction1
+        metabolite_in_reaction(self.metabolite, self.reaction)
+        metabolite_in_reaction(self.metabolite2, self.reaction2)
+
+        # Evidence <-> Gene1/Reaction
+        item_in_evidence(self.gene, self.evidence, valid=False)
+        item_in_evidence(self.reaction, self.evidence, valid=False)
+
+        # Check evidence is removed when reference deleted
+        del self.evidence
+        gc.collect()
+        assert len(self.model.all_evidences) == 0
+
+    def test_delete_gene2(self):
+        # Test removal of gene2
+        # Check:
+        #   - Gene2 removed from model
+        #   - Gene2 removed from reaction2
+        #   - Testcase deleted from model
+        #   - Reference2 removed from testcase
+
+        # Action
+        self.model.gem_remove_genes((self.gene2,))
+
+        # Test genes
+        gene_in_model(self.gene, self.model)
+        gene_in_model(self.gene2, self.model, valid=False)
+
+        # Test reactions
+        reaction_in_model(self.reaction, self.model)
+        reaction_in_model(self.reaction2, self.model)
+
+        # Test metabolites
+        metabolite_in_model(self.metabolite, self.model)
+        metabolite_in_model(self.metabolite2, self.model)
+
+        # Test evidences
+        evidence_in_model(self.evidence, self.model)
+
+        # Test model test
+        case_in_model(self.testcase, self.model, valid=False)
+
+        # Test references
+        reference_in_model(self.reference, self.model)
+        reference_in_model(self.reference2, self.model)
+
+        # Test connections
+        # Reference <-> Evidence
+        reference_in_item(self.reference, self.evidence)
+        # Reference2 <-> Testcase
+        reference_in_item(self.reference2, self.testcase, valid=False)
+
+        # Gene1 <-> Reaction1
+        gene_in_reaction(self.gene, self.reaction)
+        gene_in_reaction(self.gene2, self.reaction2, valid=False)
+
+        # Metabolite1 <-> Reaction1
+        metabolite_in_reaction(self.metabolite, self.reaction)
+        metabolite_in_reaction(self.metabolite2, self.reaction2)
+
+        # Evidence <-> Gene1/Reaction
+        item_in_evidence(self.gene, self.evidence)
+        item_in_evidence(self.reaction, self.evidence)
+
+    def test_delete_testcase(self):
+        # Action
+        self.model.gem_remove_tests((self.testcase,))
+
+        # Test genes
+        gene_in_model(self.gene, self.model)
+        gene_in_model(self.gene2, self.model)
+
+        # Test reactions
+        reaction_in_model(self.reaction, self.model)
+        reaction_in_model(self.reaction2, self.model)
+
+        # Test metabolites
+        metabolite_in_model(self.metabolite, self.model)
+        metabolite_in_model(self.metabolite2, self.model)
+
+        # Test evidences
+        evidence_in_model(self.evidence, self.model)
+
+        # Test model test
+        case_in_model(self.testcase, self.model, valid=False)
+
+        # Test references
+        reference_in_model(self.reference, self.model)
+        reference_in_model(self.reference2, self.model)
+
+        # Test connections
+        # Reference <-> Evidence
+        reference_in_item(self.reference, self.evidence)
+        # Reference2 <-> Testcase
+        reference_in_item(self.reference2, self.testcase, valid=False)
+
+        # Gene1 <-> Reaction1
+        gene_in_reaction(self.gene, self.reaction)
+        gene_in_reaction(self.gene2, self.reaction2)
+
+        # Metabolite1 <-> Reaction1
+        metabolite_in_reaction(self.metabolite, self.reaction)
+        metabolite_in_reaction(self.metabolite2, self.reaction2)
+
+        # Evidence <-> Gene1/Reaction
+        item_in_evidence(self.gene, self.evidence)
+        item_in_evidence(self.reaction, self.evidence)
+
+    def test_delete_referenec(self):
+        # Action
+        self.model.gem_remove_references((self.reference,))
+
+        # Test genes
+        gene_in_model(self.gene, self.model)
+        gene_in_model(self.gene2, self.model)
+
+        # Test reactions
+        reaction_in_model(self.reaction, self.model)
+        reaction_in_model(self.reaction2, self.model)
+
+        # Test metabolites
+        metabolite_in_model(self.metabolite, self.model)
+        metabolite_in_model(self.metabolite2, self.model)
+
+        # Test evidences
+        evidence_in_model(self.evidence, self.model)
+
+        # Test model test
+        case_in_model(self.testcase, self.model)
+
+        # Test references
+        reference_in_model(self.reference, self.model, valid=False)
+        reference_in_model(self.reference2, self.model)
+
+        # Test connections
+        # Reference <-> Evidence
+        reference_in_item(self.reference, self.evidence, valid=False)
+        # Reference2 <-> Testcase
+        reference_in_item(self.reference2, self.testcase)
+
+        # Gene1 <-> Reaction1
+        gene_in_reaction(self.gene, self.reaction)
+        gene_in_reaction(self.gene2, self.reaction2)
+
+        # Metabolite1 <-> Reaction1
+        metabolite_in_reaction(self.metabolite, self.reaction)
+        metabolite_in_reaction(self.metabolite2, self.reaction2)
+
+        # Evidence <-> Gene1/Reaction
+        item_in_evidence(self.gene, self.evidence)
+        item_in_evidence(self.reaction, self.evidence)
+
+    def test_delete_reference2(self):
+        # Action
+        self.model.gem_remove_references((self.reference2,))
+
+        # Test genes
+        gene_in_model(self.gene, self.model)
+        gene_in_model(self.gene2, self.model)
+
+        # Test reactions
+        reaction_in_model(self.reaction, self.model)
+        reaction_in_model(self.reaction2, self.model)
+
+        # Test metabolites
+        metabolite_in_model(self.metabolite, self.model)
+        metabolite_in_model(self.metabolite2, self.model)
+
+        # Test evidences
+        evidence_in_model(self.evidence, self.model)
+
+        # Test model test
+        case_in_model(self.testcase, self.model)
+
+        # Test references
+        reference_in_model(self.reference, self.model)
+        reference_in_model(self.reference2, self.model, valid=False)
+
+        # Test connections
+        # Reference <-> Evidence
+        reference_in_item(self.reference, self.evidence)
+        # Reference2 <-> Testcase
+        reference_in_item(self.reference2, self.testcase, valid=False)
+
+        # Gene1 <-> Reaction1
+        gene_in_reaction(self.gene, self.reaction)
+        gene_in_reaction(self.gene2, self.reaction2)
+
+        # Metabolite1 <-> Reaction1
+        metabolite_in_reaction(self.metabolite, self.reaction)
+        metabolite_in_reaction(self.metabolite2, self.reaction2)
+
+        # Evidence <-> Gene1/Reaction
+        item_in_evidence(self.gene, self.evidence)
+        item_in_evidence(self.reaction, self.evidence)

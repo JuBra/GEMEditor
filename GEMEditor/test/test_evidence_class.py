@@ -36,7 +36,7 @@ class TestEvidence:
 
         # Check the references
         assert reference in evidence.references
-        assert evidence in reference.evidences
+        assert evidence in reference.linked_items
 
     def test_override_entity(self):
         entity = Reaction()
@@ -124,18 +124,18 @@ class TestEvidence:
         evidence.eco = eco
         evidence.assertion = assertion
         evidence.comment = comment
-        evidence.references.add(reference)
+        evidence.add_reference(reference, reciprocal=False)
 
         assert evidence not in entity.evidences
         assert evidence not in link.evidences
-        assert evidence not in reference.evidences
+        assert evidence not in reference.linked_items
         assert evidence not in target.evidences
 
         evidence.setup_links()
 
         assert evidence in entity.evidences
         assert evidence in link.evidences
-        assert evidence in reference.evidences
+        assert evidence in reference.linked_items
         assert evidence in target.evidences
 
     def test_copy_evidence(self):
@@ -165,7 +165,7 @@ class TestEvidence:
         # Check that the copy is not linked
         assert copy not in entity.evidences
         assert copy not in link.evidences
-        assert copy not in reference.evidences
+        assert copy not in reference.linked_items
         assert copy not in target.evidences
 
     def test_equality(self):
@@ -214,7 +214,7 @@ class TestEvidence:
         evidence.add_reference(reference)
 
         new_copy = evidence.copy()
-        new_copy.references.clear()
+        new_copy.remove_all_references()
 
         assert new_copy != evidence
         assert not new_copy == evidence

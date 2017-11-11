@@ -1,5 +1,5 @@
 import pytest
-from GEMEditor.base_classes import BaseEvidenceElement
+from GEMEditor.base_classes import EvidenceLink
 from GEMEditor.evidence_class import Evidence
 
 
@@ -7,7 +7,7 @@ class TestBaseEvidenceElement:
 
     @pytest.fixture(autouse=True)
     def setup_class(self):
-        self.instance = BaseEvidenceElement()
+        self.instance = EvidenceLink()
         self.evidence = Evidence()
 
     def test_setup(self):

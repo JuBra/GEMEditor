@@ -1,10 +1,9 @@
 from uuid import uuid4
-from copy import copy
-from GEMEditor.base_classes import BaseReferenceElement
+from GEMEditor.data_classes import LinkReference
 from GEMEditor.evidence.assertions import ASSERTIONS
 
 
-class Evidence(BaseReferenceElement):
+class Evidence(LinkReference):
 
     _validity = dict((x.text, x.func_validity) for x in ASSERTIONS)
     _fixes = dict((x.text, x.func_fix) for x in ASSERTIONS)
@@ -105,21 +104,9 @@ class Evidence(BaseReferenceElement):
     def set_comment(self, comment):
         self.comment = comment or ""
 
-    def add_reference(self, reference, reciprocal=True):
-        super(Evidence, self).add_reference(reference)
-        if reciprocal:
-            reference.add_evidence(self)
-
-    def remove_reference(self, reference, reciprocal=True):
-        super(Evidence, self).remove_reference(reference)
-        if reciprocal:
-            reference.remove_evidence(self)
-
     def delete_links(self):
         # Delete references
-        for x in self.references:
-            x.remove_evidence(self)
-        self.references.clear()
+        self.remove_all_references()
 
         # Remove from items
         if self.entity:
@@ -143,7 +130,7 @@ class Evidence(BaseReferenceElement):
 
         # Set link for references
         for x in self.references:
-            x.add_evidence(self)
+            x.add_link(self, reciprocal=False)
 
         if self.entity:
             self.entity.add_evidence(self)
@@ -166,7 +153,8 @@ class Evidence(BaseReferenceElement):
         new_evidence.set_entity(self.entity, reciprocal=False)
         new_evidence.set_linked_item(self.link, reciprocal=False)
         new_evidence.set_target(self.target, reciprocal=False)
-        new_evidence.references = copy(self.references)
+        for reference in self.references:
+            new_evidence.add_reference(reference, reciprocal=False)
 
         return new_evidence
 

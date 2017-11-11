@@ -152,8 +152,10 @@ class EditEvidenceDialog(CustomStandardDialog, Ui_new):
         self.evidence.set_comment(self.textBox_comment.toPlainText())
 
         # Update references
-        self.evidence.references.clear()
-        self.evidence.references.update(self.referenceWidget.dataTable.get_items())
+        # Todo: Move to independent reference widget
+        self.evidence.remove_all_references()
+        for reference in self.referenceWidget.dataTable.get_items():
+            self.evidence.add_reference(reference)
 
         # Set either a term or a linked object depending on the current
         # selection.

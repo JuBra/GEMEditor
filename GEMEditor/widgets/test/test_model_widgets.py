@@ -844,7 +844,7 @@ class TestEvidenceDisplayWidget:
         # Test the setup i.e. that items are only linked in a one way (evidence -> item) fashion
         assert new_evidence not in reaction.evidences
         assert new_evidence not in gene.evidences
-        assert new_evidence not in reference.evidences
+        assert new_evidence not in reference.linked_items
 
         # Add new reference to widget table
         widget.dataTable.update_row_from_item(new_evidence)

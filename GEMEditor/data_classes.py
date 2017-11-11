@@ -1,17 +1,66 @@
 import operator
-import escher
-from GEMEditor.base_classes import BaseEvidenceElement, BaseReferenceElement
+from GEMEditor.base_classes import EvidenceLink
 from collections import namedtuple, OrderedDict, defaultdict
 from uuid import uuid4
 
 
-class Reference(BaseEvidenceElement):
+class LinkReference:
+    """ Base class for items
+
+    Implements all methods for items that
+    can contain a link to a reference item.
+
+    See Evidence and ModelTest classes """
+
+    def __init__(self, *args, **kwargs):
+        super(LinkReference, self).__init__(*args, **kwargs)
+        self._references = set()
+
+    @property
+    def references(self):
+        return self._references.copy()
+
+    def add_reference(self, reference, reciprocal=True):
+        """ Remove reference link from item
+
+        All items that inherit from this class
+        should be able to link to each other.
+
+        Parameters
+        ----------
+        reference: Reference
+        reciprocal: bool
+        """
+        self._references.add(reference)
+        if reciprocal:
+            reference.add_link(self, reciprocal=False)
+
+    def remove_reference(self, reference, reciprocal=True):
+        """ Remove reference link from item
+
+        Parameters
+        ----------
+        item: Reference
+        reciprocal: bool
+        """
+        self._references.discard(reference)
+        if reciprocal:
+            reference.remove_link(self, reciprocal=False)
+
+    def remove_all_references(self):
+        """ Remove all reference links """
+        for reference in self.references:
+            self.remove_reference(reference, reciprocal=True)
+
+
+class Reference:
     """ ReferenceItem contains the information a pubmed or similar literature reference
     Authors are saved as author instances """
 
     def __init__(self, id=None, pmid="", pmc="", doi="", url="",
                  authors=None, year="", title="", journal="", abstract=""):
         super(Reference, self).__init__()
+        self._linked_items = set()
         self.id = id or str(uuid4())
         self.pmid = pmid
         self.pmc = pmc
@@ -25,6 +74,54 @@ class Reference(BaseEvidenceElement):
         self.title = title
         self.journal = journal
         self.abstract = abstract
+
+    @property
+    def linked_items(self):
+        return self._linked_items.copy()
+
+    @property
+    def annotation(self):
+        result = set()
+        if self.pmid:
+            result.add(Annotation("pubmed", self.pmid))
+        if self.pmc:
+            result.add(Annotation("pmc", self.pmc))
+        if self.doi:
+            result.add(Annotation("doi", self.doi))
+        return result
+
+    def add_link(self, item, reciprocal=True):
+        """ Remove reference link from item
+
+        All items that inherit from this class
+        should be able to link to each other.
+
+        Parameters
+        ----------
+        reference: LinkReference
+        reciprocal: bool
+        """
+        self._linked_items.add(item)
+        if reciprocal:
+            item.add_reference(self, reciprocal=False)
+
+    def remove_link(self, item, reciprocal=True):
+        """ Remove reference link from item
+
+        Parameters
+        ----------
+        item: LinkReference
+        reciprocal: bool
+        """
+        self._linked_items.discard(item)
+        if reciprocal:
+            item.remove_reference(self, reciprocal=False)
+
+    def remove_all_links(self):
+        """ Remove all reference links """
+
+        for item in self.linked_items:
+            self.remove_link(item, reciprocal=True)
 
     def reference_string(self):
         """ Get the authors part of the usual citation of scientific literature i.e.:
@@ -46,17 +143,6 @@ class Reference(BaseEvidenceElement):
             return "{0}, {1}".format(self.authors[0].display_str, self.year)
         else:
             return ""
-
-    @property
-    def annotation(self):
-        result = set()
-        if self.pmid:
-            result.add(Annotation("pubmed", self.pmid))
-        if self.pmc:
-            result.add(Annotation("pmc", self.pmc))
-        if self.doi:
-            result.add(Annotation("doi", self.doi))
-        return result
 
     def __str__(self):
         id_strings = []
@@ -125,7 +211,7 @@ class Author(namedtuple("Author", ["lastname", "firstname", "initials"])):
             return self.lastname
 
 
-class ModelTest(BaseReferenceElement):
+class ModelTest(LinkReference):
 
     def __init__(self, id=None, description="", comment=""):
         super(ModelTest, self).__init__()
@@ -361,35 +447,7 @@ class ModelStats:
         return self.genes_total - len(self.list_unannotated_genes)
 
 
-class EscherMapGenerator:
-
-    def __init__(self, map_string=None, map_path=None):
-        self.map_string = None
-        self.path = None
-        self.set_map_string(map_string)
-        self.set_map_path(map_path)
-
-    def set_map_string(self, map_string):
-        if map_string:
-            self.map_string = map_string
-        else:
-            self.map_string = None
-
-    def set_map_path(self, map_path):
-        if map_path:
-            self.path = map_path
-        else:
-            self.path = None
-
-    def get_escher_map(self):
-        if self.map_string:
-            new_map = escher.Builder(map_json=self.map_string)
-            return new_map
-        else:
-            return None
-
-
-class Compartment(BaseEvidenceElement):
+class Compartment(EvidenceLink):
     def __init__(self, id=None, name=None):
         super(Compartment, self).__init__()
         self.id = id
