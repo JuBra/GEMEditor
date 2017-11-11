@@ -134,11 +134,9 @@ class TestReactionTab:
         tab.dataView.delete_selected_rows = Mock()
         assert tab.confirmDeletion.called is False
         assert patched_remove_reactions.called is False
-        assert tab.dataView.delete_selected_rows.called is False
         tab.deleteItemSlot()
         assert tab.confirmDeletion.called is True
         assert patched_remove_reactions.called is user_response
-        assert tab.dataView.delete_selected_rows.called is user_response
 
     @pytest.mark.parametrize("user_response", [True, False])
     def test_deletion(self, user_response):
@@ -229,6 +227,12 @@ class TestReactionTab:
 class TestMetaboliteTab:
 
     @pytest.fixture()
+    def patched_remove_metabolites(self, monkeypatch):
+        mock = Mock()
+        monkeypatch.setattr("GEMEditor.cobraClasses.Model.gem_remove_metabolites", mock)
+        return mock
+
+    @pytest.fixture()
     def patch_button_slots(self, monkeypatch):
         monkeypatch.setattr("GEMEditor.tabs.MetaboliteTab.addItemSlot", Mock())
         monkeypatch.setattr("GEMEditor.tabs.MetaboliteTab.editItemSlot", Mock())
@@ -280,16 +284,16 @@ class TestMetaboliteTab:
         tab.proxyModel.setFilterFixedString.assert_called_with("Test")
 
     @pytest.mark.parametrize("user_response", [True, False])
-    def test_user_asked_upon_deletion(self, user_response):
+    def test_user_asked_upon_deletion(self, user_response, patched_remove_metabolites):
         tab = MetaboliteTab()
         tab.set_model(Model())
         tab.confirmDeletion = Mock(return_value=user_response)
         tab.dataView.delete_selected_rows = Mock()
         assert tab.confirmDeletion.called is False
-        assert tab.dataView.delete_selected_rows.called is False
+        assert patched_remove_metabolites.called is False
         tab.deleteItemSlot()
         assert tab.confirmDeletion.called is True
-        assert tab.dataView.delete_selected_rows.called is user_response
+        assert patched_remove_metabolites.called is user_response
 
     @pytest.mark.parametrize("user_response", [True, False])
     def test_deletion(self, user_response):
@@ -382,6 +386,12 @@ class TestMetaboliteTab:
 class TestGeneTab:
 
     @pytest.fixture()
+    def patched_remove_genes(self, monkeypatch):
+        mock = Mock()
+        monkeypatch.setattr("GEMEditor.cobraClasses.Model.gem_remove_genes", mock)
+        return mock
+
+    @pytest.fixture()
     def patch_button_slots(self, monkeypatch):
         monkeypatch.setattr("GEMEditor.tabs.GeneTab.addItemSlot", Mock())
         monkeypatch.setattr("GEMEditor.tabs.GeneTab.editItemSlot", Mock())
@@ -433,16 +443,16 @@ class TestGeneTab:
         tab.proxyModel.setFilterFixedString.assert_called_with("Test")
 
     @pytest.mark.parametrize("user_response", [True, False])
-    def test_user_asked_upon_deletion(self, user_response):
+    def test_user_asked_upon_deletion(self, user_response, patched_remove_genes):
         tab = GeneTab()
         tab.set_model(Model())
         tab.confirmDeletion = Mock(return_value=user_response)
         tab.dataView.delete_selected_rows = Mock()
         assert tab.confirmDeletion.called is False
-        assert tab.dataView.delete_selected_rows.called is False
+        assert patched_remove_genes.called is False
         tab.deleteItemSlot()
         assert tab.confirmDeletion.called is True
-        assert tab.dataView.delete_selected_rows.called is user_response
+        assert patched_remove_genes.called is user_response
 
     @pytest.mark.parametrize("user_response", [True, False])
     def test_deletion(self, user_response):
@@ -538,9 +548,52 @@ class TestGeneTab:
         assert True
 
 
+class TestModelTestsTab:
+
+    @pytest.fixture()
+    def patched_remove_tests(self, monkeypatch):
+        mock = Mock()
+        monkeypatch.setattr("GEMEditor.cobraClasses.Model.gem_remove_tests", mock)
+        return mock
+
+    @pytest.fixture(autouse=True)
+    def setup_items(self):
+        self.tab = ModelTestsTab()
+        self.model = Model()
+        self.model.setup_tables()
+        self.test_description = "Test_name"
+        self.test_case = ModelTest(description=self.test_description)
+        self.reaction1 = Reaction(id="r1")
+        self.setting = ReactionSetting(reaction=self.reaction1, upper_bound=1000., lower_bound=0., objective_coefficient=0.)
+        self.reaction2 = Reaction(id="r2")
+        self.outcome = Outcome(reaction=self.reaction2, value=0., operator="greater than")
+        self.test_case.add_outcome(self.outcome)
+        self.test_case.add_setting(self.setting)
+
+        self.tab.set_model(self.model)
+
+        self.mock_return_test_case = MockModelTestDialog(return_value=1)
+
+    def test_setup_items(self):
+        assert self.model.QtTestsTable is not None
+        assert self.model.QtTestsTable.rowCount() == 0
+
+        assert self.tab.model is self.model
+
+    @pytest.mark.parametrize("user_response", [True, False])
+    def test_user_asked_upon_deletion(self, user_response, patched_remove_tests):
+        tab = ModelTestsTab()
+        tab.set_model(Model())
+        tab.confirmDeletion = Mock(return_value=user_response)
+        tab.dataView.delete_selected_rows = Mock()
+        assert tab.confirmDeletion.called is False
+        assert patched_remove_tests.called is False
+        tab.deleteItemSlot()
+        assert tab.confirmDeletion.called is True
+        assert patched_remove_tests.called is user_response
+
+
 # Todo: Clean up tests - Remove mock dialog
-# class TestModelTestsTab:
-#
 #     @pytest.fixture()
 #     def patch_button_slots(self, monkeypatch):
 #         monkeypatch.setattr("GEMEditor.tabs.ModelTestsTab.addItemSlot", Mock())
@@ -590,24 +643,6 @@ class TestGeneTab:
 #         monkeypatch.setattr("GEMEditor.tabs.run_test", Mock(return_value=(False, LegacySolution(f=None,
 #                                                                                           status="optimal"))))
 #
-#     @pytest.fixture(autouse=True)
-#     def setup_items(self):
-#         self.tab = ModelTestsTab()
-#         self.model = Model()
-#         self.model.setup_tables()
-#         self.test_description = "Test_name"
-#         self.test_case = ModelTest(description=self.test_description)
-#         self.reaction1 = Reaction(id="r1")
-#         self.setting = ReactionSetting(reaction=self.reaction1, upper_bound=1000., lower_bound=0., objective_coefficient=0.)
-#         self.reaction2 = Reaction(id="r2")
-#         self.outcome = Outcome(reaction=self.reaction2, value=0., operator="greater than")
-#         self.test_case.add_outcome(self.outcome)
-#         self.test_case.add_setting(self.setting)
-#
-#         self.tab.set_model(self.model)
-#
-#         self.mock_return_test_case = MockModelTestDialog(return_value=1)
-#
 #     @pytest.fixture()
 #     def setup_new_test(self):
 #         self.new_description = "test test"
@@ -616,12 +651,6 @@ class TestGeneTab:
 #         self.new_setting = ReactionSetting(self.reaction2, upper_bound=888., lower_bound=444., objective_coefficient=0.599)
 #         self.new_test_case.add_outcome(self.new_outcome)
 #         self.new_test_case.add_setting(self.new_setting)
-#
-#     def test_setup_items(self):
-#         assert self.model.QtTestsTable is not None
-#         assert self.model.QtTestsTable.rowCount() == 0
-#
-#         assert self.tab.model is self.model
 #
 #     def test_setup(self):
 #         tab = ModelTestsTab()
@@ -691,18 +720,6 @@ class TestGeneTab:
 #         tab = ModelTestsTab()
 #         QtTest.QTest.keyClicks(tab.searchInput, "Test")
 #         tab.proxyModel.setFilterFixedString.assert_called_with("Test")
-#
-#     @pytest.mark.parametrize("user_response", [True, False])
-#     def test_user_asked_upon_deletion(self, user_response):
-#         tab = ModelTestsTab()
-#         tab.set_model(Model())
-#         tab.confirmDeletion = Mock(return_value=user_response)
-#         tab.dataView.delete_selected_rows = Mock()
-#         assert tab.confirmDeletion.called is False
-#         assert tab.dataView.delete_selected_rows.called is False
-#         tab.deleteItemSlot()
-#         assert tab.confirmDeletion.called is True
-#         assert tab.dataView.delete_selected_rows.called is user_response
 #
 #     @pytest.mark.parametrize("user_response", [True, False])
 #     def test_deletion(self, user_response):
@@ -858,6 +875,12 @@ class TestGeneTab:
 class TestReferenceTab:
 
     @pytest.fixture()
+    def patched_remove_references(self, monkeypatch):
+        mock = Mock()
+        monkeypatch.setattr("GEMEditor.cobraClasses.Model.gem_remove_references", mock)
+        return mock
+
+    @pytest.fixture()
     def patch_button_slots(self, monkeypatch):
         monkeypatch.setattr("GEMEditor.tabs.ReferenceTab.addItemSlot", Mock())
         monkeypatch.setattr("GEMEditor.tabs.ReferenceTab.editItemSlot", Mock())
@@ -909,16 +932,16 @@ class TestReferenceTab:
         tab.proxyModel.setFilterFixedString.assert_called_with("Test")
 
     @pytest.mark.parametrize("user_response", [True, False])
-    def test_user_asked_upon_deletion(self, user_response):
+    def test_user_asked_upon_deletion(self, user_response, patched_remove_references):
         tab = ReferenceTab()
         tab.set_model(Model())
         tab.confirmDeletion = Mock(return_value=user_response)
         tab.dataView.delete_selected_rows = Mock()
         assert tab.confirmDeletion.called is False
-        assert tab.dataView.delete_selected_rows.called is False
+        assert patched_remove_references.called is False
         tab.deleteItemSlot()
         assert tab.confirmDeletion.called is True
-        assert tab.dataView.delete_selected_rows.called is user_response
+        assert patched_remove_references.called is user_response
 
     @pytest.mark.parametrize("user_response", [True, False])
     def test_deletion(self, user_response):
