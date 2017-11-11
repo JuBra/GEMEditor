@@ -449,6 +449,7 @@ class Model(QtCore.QObject, EvidenceLink, cobraModel):
     def add_genes(self, genes):
         for gene in genes:
             self.genes.add(gene)
+            gene._model = self
 
     def gem_update_metabolites(self, metabolites, progress=None):
         """ Update the metabolite entries in the QTable
@@ -568,6 +569,7 @@ class Model(QtCore.QObject, EvidenceLink, cobraModel):
         # Remove evidence links
         for r in reactions:
             r.remove_all_evidences()
+            r.prepare_deletion()
 
         # Remove reactions from model
         self.remove_reactions(reactions, remove_orphans=False)
@@ -599,10 +601,12 @@ class Model(QtCore.QObject, EvidenceLink, cobraModel):
         """
         # Remove GEMEditor specific links
         for gene in genes:
+            gene.remove_all_evidences()
             gene.prepare_deletion()
 
             # Remove gene from model
             self.genes.remove(gene)
+            gene._model = None
 
         # Remove reactions from table
         self._gem_remove_items_from_table(self.QtGeneTable, genes)
