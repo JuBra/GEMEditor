@@ -4,14 +4,17 @@ from GEMEditor.ui.AddCompartmentDialog import Ui_AddCompartmentDialog
 from GEMEditor.ui.EditModelDialog import Ui_EditModelDialog
 from six import iteritems
 from GEMEditor.widgets.tables import CompartmentTable
+from GEMEditor.cobraClasses import Compartment
 
 
 class AddCompartmentDialog(QDialog, Ui_AddCompartmentDialog):
+    """ Dialog for adding or modifying model compartments """
+
     existing_msg = "A compartment with the abbreviation '{0}' already exists!"
     wrong_format_msg = "The abbreviation should be only one character!"
 
     def __init__(self, compartment_table):
-        QDialog.__init__(self)
+        super(AddCompartmentDialog, self).__init__()
         self.setupUi(self)
         self.compartment_table = compartment_table
         self.buttonBox.button(QDialogButtonBox.Ok).setEnabled(False)
@@ -20,20 +23,24 @@ class AddCompartmentDialog(QDialog, Ui_AddCompartmentDialog):
         # The abbreviation should be one letter that is not yet part of the compartment list
         abbrev_input = self.abbreviationInput.text()
         if len(abbrev_input) != 1:
-            self.abbreviationInput.setToolTip(self.wrong_format_msg)
-            QToolTip.showText(self.abbreviationInput.mapToGlobal(QtCore.QPoint(0, 0)), self.wrong_format_msg)
-            self.abbreviationInput.setStyleSheet("border: 1px solid red;")
+            self.set_id_tooltip(valid=False, message=self.wrong_format_msg)
             return False
         elif self.compartment_table.findItems(abbrev_input, QtCore.Qt.MatchExactly, 0):
-            msg = self.existing_msg.format(abbrev_input)
-            self.abbreviationInput.setToolTip(msg)
-            QToolTip.showText(self.abbreviationInput.mapToGlobal(QtCore.QPoint(0, 0)), msg)
-            self.abbreviationInput.setStyleSheet("border: 1px solid red;")
+            self.set_id_tooltip(valid=False, message=self.existing_msg.format(abbrev_input))
             return False
-        self.abbreviationInput.setStyleSheet("")
-        self.abbreviationInput.setToolTip("Insert abbreviation")
-        QToolTip.hideText()
-        return True
+        else:
+            self.set_id_tooltip(valid=True, message="")
+            return True
+
+    def set_id_tooltip(self, valid, message):
+        if valid is True:
+            self.abbreviationInput.setStyleSheet("")
+            self.abbreviationInput.setToolTip("Insert abbreviation")
+            QToolTip.hideText()
+        else:
+            self.abbreviationInput.setToolTip(message)
+            QToolTip.showText(self.abbreviationInput.mapToGlobal(QtCore.QPoint(0, 0)), message)
+            self.abbreviationInput.setStyleSheet("border: 1px solid red;")
 
     @QtCore.pyqtSlot()
     def activateButton(self):
@@ -75,7 +82,7 @@ class EditModelDialog(QDialog, Ui_EditModelDialog):
 
     def has_required_input(self):
         """ Check that all required fields are filled """
-        return bool(self.modelIdInput.text() and self.compartmentTable.rowCount())
+        return bool(self.compartmentTable.rowCount())
 
     def input_changed(self):
         """ Check that the input is different than in the beginning """
@@ -96,7 +103,9 @@ class EditModelDialog(QDialog, Ui_EditModelDialog):
         dialog = AddCompartmentDialog(self.compartmentTable)
         status = dialog.exec_()
         if status:
-            self.compartmentTable.update_row_from_item(dialog.get_compartment)
+            abbrev, name = dialog.get_compartment
+            self.compartmentTable.update_row_from_item((abbrev, Compartment(id=abbrev,
+                                                                   name=name)))
 
     @QtCore.pyqtSlot()
     def delete_compartment(self):
