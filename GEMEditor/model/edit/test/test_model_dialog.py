@@ -130,11 +130,11 @@ class TestEditModelSettings:
 
         # Change id
         assert save_button.isEnabled() is False
-        QtTest.QTest.keyClicks(self.dialog.modelIdInput, "M")
+        QtTest.QTest.keyClick(dialog.modelIdInput, "M")
         assert save_button.isEnabled() is True
 
         # Undo change
-        QtTest.QTest.keyClick(self.dialog.modelIdInput, QtCore.Qt.Key_Backspace)
+        QtTest.QTest.keyClick(dialog.modelIdInput, QtCore.Qt.Key_Backspace)
         assert save_button.isEnabled() is False
 
     def test_change_in_name_enables_button(self):
@@ -145,11 +145,11 @@ class TestEditModelSettings:
 
         # Change id
         assert save_button.isEnabled() is False
-        QtTest.QTest.keyClicks(self.dialog.modelNameInput, "M")
+        QtTest.QTest.keyClicks(dialog.modelNameInput, "M")
         assert save_button.isEnabled() is True
 
         # Undo change
-        QtTest.QTest.keyClick(self.dialog.modelNameInput, QtCore.Qt.Key_Backspace)
+        QtTest.QTest.keyClick(dialog.modelNameInput, QtCore.Qt.Key_Backspace)
         assert save_button.isEnabled() is False
 
     def test_add_compartment(self):

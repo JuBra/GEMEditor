@@ -86,9 +86,8 @@ class EditModelDialog(QDialog, Ui_EditModelDialog):
 
     def input_changed(self):
         """ Check that the input is different than in the beginning """
-
         return test_is_different(self.model.id, self.modelIdInput.text()) or \
-               test_is_different(self.model.name, self.modelIdInput.text()) or \
+               test_is_different(self.model.name, self.modelNameInput.text()) or \
                self.model.gem_compartments != dict(self.compartmentTable.get_items())
 
     def populate_table(self):
