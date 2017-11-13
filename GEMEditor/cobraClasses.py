@@ -8,7 +8,7 @@ from PyQt5 import QtCore
 from PyQt5.QtWidgets import QApplication
 from GEMEditor.base.functions import generate_copy_id
 from GEMEditor.base.classes import WindowManager
-from GEMEditor.widgets.tables import ReactionTable, MetaboliteTable, GeneTable, ReferenceTable, ModelTestTable, LinkedItem
+from GEMEditor.widgets.tables import ReactionTable, MetaboliteTable, GeneTable, ReferenceTable, ModelTestTable, LinkedItem, CompartmentTable
 from GEMEditor.data_classes import ReactionSetting, CleaningDict, Compartment
 from GEMEditor.base_classes import EvidenceLink
 from GEMEditor.base.functions import reaction_balance
@@ -322,6 +322,7 @@ class Model(QtCore.QObject, EvidenceLink, cobraModel):
         self.QtGeneTable = GeneTable(self)
         self.QtReferenceTable = ReferenceTable(self)
         self.QtTestsTable = ModelTestTable(self)
+        self.QtCompartmentTable = CompartmentTable(self)
         self.subsystems = CleaningDict()
         self.references = {}
         self.all_evidences = WeakValueDictionary()
@@ -368,12 +369,18 @@ class Model(QtCore.QObject, EvidenceLink, cobraModel):
         self.QtTestsTable.rowsRemoved.connect(self.modelChanged.emit)
         self.QtTestsTable.dataChanged.connect(self.modelChanged.emit)
 
+        # Connect the changes in the compartment table to modelChanged signal
+        self.QtCompartmentTable.rowsInserted.connect(self.modelChanged.emit)
+        self.QtCompartmentTable.rowsRemoved.connect(self.modelChanged.emit)
+        self.QtCompartmentTable.dataChanged.connect(self.modelChanged.emit)
+
     def setup_tables(self):
         self.setup_reaction_table()
         self.setup_metabolite_table()
         self.setup_gene_table()
         self.setup_tests_table()
         self.setup_reference_table()
+        self.setup_compartment_table()
 
     def setup_reaction_table(self):
         self.QtReactionTable.populate_table(self.reactions)
@@ -389,6 +396,9 @@ class Model(QtCore.QObject, EvidenceLink, cobraModel):
 
     def setup_reference_table(self):
         self.QtReferenceTable.populate_table(self.references.values())
+
+    def setup_compartment_table(self):
+        self.QtCompartmentTable.populate_table(self.gem_compartments.values())
 
     def add_reference(self, reference):
         self.references[reference.id] = reference

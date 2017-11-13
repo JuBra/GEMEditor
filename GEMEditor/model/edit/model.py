@@ -1,6 +1,6 @@
 import logging
 from PyQt5 import QtCore
-from PyQt5.QtWidgets import QDialogButtonBox, QDialog, QToolTip, QProgressDialog, QApplication
+from PyQt5.QtWidgets import QDialogButtonBox, QDialog, QToolTip
 from GEMEditor.model.edit.ui import Ui_AddCompartmentDialog, Ui_EditModelDialog
 from six import iteritems
 from GEMEditor.widgets.tables import CompartmentTable
@@ -85,7 +85,7 @@ class EditModelDialog(QDialog, Ui_EditModelDialog):
         self.buttonBox.button(QDialogButtonBox.Save).setEnabled(self.has_required_input() and self.input_changed())
 
     def has_required_input(self):
-        """ Check that all required fields are filled """
+        """ Model should have at least 1 compartment"""
         return bool(self.compartmentTable.rowCount())
 
     def input_changed(self):
@@ -125,31 +125,21 @@ class EditModelDialog(QDialog, Ui_EditModelDialog):
             self.model.name = new_name
 
         # Get changed compartment
-        changed_compartments = self.compartmentTable.get_items()
-        # current_compartments = set(self.model.compartments.values())
-        #
-        # added = changed_compartments - current_compartments
-        # removed = current_compartments - changed_compartments
+        changed_compartments = dict(self.compartmentTable.get_items())
 
         # Deleted compartments
         for x, name in self.model.gem_compartments.items():
             if x not in changed_compartments:
-                # Get all metabolites in compartment x
+                # Remove all metabolites in deleted compartment
                 metabolites = [y for y in self.model.metabolites if y.compartment == x]
+                self.model.gem_remove_metabolites(metabolites)
 
-                if metabolites:
-                    progress = QProgressDialog("Deleting compartment: {1} ({0})".format(x.lower(), name),
-                                                     "Cancel",
-                                                     0, len(metabolites),
-                                                     self)
-                    progress.setWindowModality(QtCore.Qt.WindowModal)
-                    progress.setAutoClose(False)
-                    progress.show()
-                    # Remove metabolites in compartment x
-                    for i, metabolite in enumerate(metabolites):
-                        progress.setValue(i)
-                        QApplication.processEvents()
-                        metabolite.remove_from_model('subtractive')
-                    progress.close()
-        self.model.gem_compartments = changed_compartments
-        self.model.setup_tables()
+                # Delete evidences linked to compartment
+                self.model.gem_compartments[x].delete_all_evidences()
+                del self.model.gem_compartments[x]
+
+        for abbrev, compartment in changed_compartments.items():
+            if abbrev not in self.model.gem_compartments:
+                self.model.gem_compartments[abbrev] = compartment
+
+        # Todo: Update table
