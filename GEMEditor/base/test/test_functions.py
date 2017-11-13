@@ -125,7 +125,6 @@ class Test_unpack:
 
 
 @pytest.mark.parametrize("text_input, state, expectation", [(None, "", False), ("", "", False), (None, "A", True),
-                                                       ("", "A", True), ("A", "A", False), ("A", "B", True)])
+                                                            ("", "A", True), ("A", "A", False), ("A", "B", True)])
 def test_text_is_different(text_input, state, expectation):
-
     assert test_is_different(text_input, state) is expectation
