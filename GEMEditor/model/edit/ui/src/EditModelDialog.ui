@@ -17,24 +17,24 @@
    <item>
     <layout class="QGridLayout" name="gridLayout">
      <item row="0" column="0">
-      <widget class="QLabel" name="IdLabel">
+      <widget class="QLabel" name="label_id">
        <property name="text">
         <string>ID:</string>
        </property>
       </widget>
      </item>
      <item row="0" column="1">
-      <widget class="QLineEdit" name="modelIdInput"/>
+      <widget class="QLineEdit" name="input_id"/>
      </item>
      <item row="1" column="0">
-      <widget class="QLabel" name="NameLabel">
+      <widget class="QLabel" name="label_name">
        <property name="text">
         <string>Name:</string>
        </property>
       </widget>
      </item>
      <item row="1" column="1">
-      <widget class="QLineEdit" name="modelNameInput"/>
+      <widget class="QLineEdit" name="input_name"/>
      </item>
     </layout>
    </item>
@@ -69,14 +69,14 @@
      <item>
       <layout class="QVBoxLayout" name="verticalLayout">
        <item>
-        <widget class="QPushButton" name="addCompartmentButton">
+        <widget class="QPushButton" name="button_add_compartment">
          <property name="text">
           <string>Add</string>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="QPushButton" name="deleteCompartmentButton">
+        <widget class="QPushButton" name="button_del_compartment">
          <property name="text">
           <string>Delete</string>
          </property>
@@ -149,70 +149,6 @@
     <hint type="destinationlabel">
      <x>286</x>
      <y>274</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>modelIdInput</sender>
-   <signal>textChanged(QString)</signal>
-   <receiver>EditModelDialog</receiver>
-   <slot>activateButton()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>202</x>
-     <y>25</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>371</x>
-     <y>65</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>modelNameInput</sender>
-   <signal>textChanged(QString)</signal>
-   <receiver>EditModelDialog</receiver>
-   <slot>activateButton()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>178</x>
-     <y>45</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>385</x>
-     <y>75</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>addCompartmentButton</sender>
-   <signal>clicked()</signal>
-   <receiver>EditModelDialog</receiver>
-   <slot>add_compartment()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>330</x>
-     <y>95</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>380</x>
-     <y>178</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>deleteCompartmentButton</sender>
-   <signal>clicked()</signal>
-   <receiver>EditModelDialog</receiver>
-   <slot>delete_compartment()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>312</x>
-     <y>128</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>378</x>
-     <y>228</y>
     </hint>
    </hints>
   </connection>

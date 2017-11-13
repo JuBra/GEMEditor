@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'AddCompartmentDialog.ui'
+# Form implementation generated from reading ui file '.\src\AddCompartmentDialog.ui'
 #
 # Created by: PyQt5 UI code generator 5.8.2
 #
@@ -19,15 +19,15 @@ class Ui_AddCompartmentDialog(object):
         self.abbreviationLabel = QtWidgets.QLabel(AddCompartmentDialog)
         self.abbreviationLabel.setObjectName("abbreviationLabel")
         self.formLayout.setWidget(0, QtWidgets.QFormLayout.LabelRole, self.abbreviationLabel)
-        self.abbreviationInput = QtWidgets.QLineEdit(AddCompartmentDialog)
-        self.abbreviationInput.setObjectName("abbreviationInput")
-        self.formLayout.setWidget(0, QtWidgets.QFormLayout.FieldRole, self.abbreviationInput)
+        self.input_id = QtWidgets.QLineEdit(AddCompartmentDialog)
+        self.input_id.setObjectName("input_id")
+        self.formLayout.setWidget(0, QtWidgets.QFormLayout.FieldRole, self.input_id)
         self.nameLabel = QtWidgets.QLabel(AddCompartmentDialog)
         self.nameLabel.setObjectName("nameLabel")
         self.formLayout.setWidget(1, QtWidgets.QFormLayout.LabelRole, self.nameLabel)
-        self.nameInput = QtWidgets.QLineEdit(AddCompartmentDialog)
-        self.nameInput.setObjectName("nameInput")
-        self.formLayout.setWidget(1, QtWidgets.QFormLayout.FieldRole, self.nameInput)
+        self.input_name = QtWidgets.QLineEdit(AddCompartmentDialog)
+        self.input_name.setObjectName("input_name")
+        self.formLayout.setWidget(1, QtWidgets.QFormLayout.FieldRole, self.input_name)
         self.verticalLayout.addLayout(self.formLayout)
         self.buttonBox = QtWidgets.QDialogButtonBox(AddCompartmentDialog)
         self.buttonBox.setOrientation(QtCore.Qt.Horizontal)
@@ -38,13 +38,11 @@ class Ui_AddCompartmentDialog(object):
         self.retranslateUi(AddCompartmentDialog)
         self.buttonBox.accepted.connect(AddCompartmentDialog.accept)
         self.buttonBox.rejected.connect(AddCompartmentDialog.reject)
-        self.abbreviationInput.textChanged['QString'].connect(AddCompartmentDialog.activateButton)
-        self.nameInput.textChanged['QString'].connect(AddCompartmentDialog.activateButton)
         QtCore.QMetaObject.connectSlotsByName(AddCompartmentDialog)
 
     def retranslateUi(self, AddCompartmentDialog):
         _translate = QtCore.QCoreApplication.translate
-        AddCompartmentDialog.setWindowTitle(_translate("AddCompartmentDialog", "Dialog"))
+        AddCompartmentDialog.setWindowTitle(_translate("AddCompartmentDialog", "Edit compartment"))
         self.abbreviationLabel.setText(_translate("AddCompartmentDialog", "Abbreviation:"))
         self.nameLabel.setText(_translate("AddCompartmentDialog", "Name:"))
 

@@ -2,7 +2,6 @@ import logging
 from PyQt5 import QtCore
 from PyQt5.QtWidgets import QDialogButtonBox, QDialog, QToolTip
 from GEMEditor.model.edit.ui import Ui_AddCompartmentDialog, Ui_EditModelDialog
-from six import iteritems
 from GEMEditor.widgets.tables import CompartmentTable
 from GEMEditor.cobraClasses import Compartment
 from GEMEditor.base import text_is_different, ProgressDialog
@@ -23,9 +22,13 @@ class AddCompartmentDialog(QDialog, Ui_AddCompartmentDialog):
         self.compartment_table = compartment_table
         self.buttonBox.button(QDialogButtonBox.Ok).setEnabled(False)
 
+        # Connect slots
+        self.input_id.textChanged.connect(self.activate_button)
+        self.input_name.textChanged.connect(self.activate_button)
+
     def check_inputs(self):
         # The abbreviation should be one letter that is not yet part of the compartment list
-        abbrev_input = self.abbreviationInput.text()
+        abbrev_input = self.input_id.text()
         if len(abbrev_input) != 1:
             self.set_id_tooltip(valid=False, message=self.wrong_format_msg)
             return False
@@ -38,22 +41,22 @@ class AddCompartmentDialog(QDialog, Ui_AddCompartmentDialog):
 
     def set_id_tooltip(self, valid, message):
         if valid is True:
-            self.abbreviationInput.setStyleSheet("")
-            self.abbreviationInput.setToolTip("Insert abbreviation")
+            self.input_id.setStyleSheet("")
+            self.input_id.setToolTip("Insert abbreviation")
             QToolTip.hideText()
         else:
-            self.abbreviationInput.setToolTip(message)
-            QToolTip.showText(self.abbreviationInput.mapToGlobal(QtCore.QPoint(0, 0)), message)
-            self.abbreviationInput.setStyleSheet("border: 1px solid red;")
+            self.input_id.setToolTip(message)
+            QToolTip.showText(self.input_id.mapToGlobal(QtCore.QPoint(0, 0)), message)
+            self.input_id.setStyleSheet("border: 1px solid red;")
 
     @QtCore.pyqtSlot()
-    def activateButton(self):
+    def activate_button(self):
         self.buttonBox.button(QDialogButtonBox.Ok).setEnabled(self.check_inputs())
 
     @property
     def get_compartment(self):
-        return (self.abbreviationInput.text(),
-                self.nameInput.text())
+        return Compartment(id=self.input_id.text(),
+                           name=self.input_name.text())
 
 
 class EditModelDialog(QDialog, Ui_EditModelDialog):
@@ -68,78 +71,120 @@ class EditModelDialog(QDialog, Ui_EditModelDialog):
         self.compartmentTableView.setModel(self.compartmentTable)
 
         # Populate display
-        self.modelIdInput.setText(model.id)
-        self.modelNameInput.setText(model.name)
+        self.input_id.setText(model.id)
+        self.input_name.setText(model.name)
         self.populate_table()
 
         # Deactivate okay button
         self.buttonBox.button(QDialogButtonBox.Save).setEnabled(False)
 
+        # Connect slots
+        self.button_add_compartment.clicked.connect(self.add_compartment)
+        self.button_del_compartment.clicked.connect(self.delete_compartment)
+
         # Connect the toggling of the active button
-        self.compartmentTable.rowsInserted.connect(self.activateButton)
-        self.compartmentTable.rowsRemoved.connect(self.activateButton)
-        self.compartmentTable.dataChanged.connect(self.activateButton)
+        self.input_id.textChanged.connect(self.activate_button)
+        self.input_name.textChanged.connect(self.activate_button)
+        self.compartmentTable.rowsInserted.connect(self.activate_button)
+        self.compartmentTable.rowsRemoved.connect(self.activate_button)
+        self.compartmentTable.dataChanged.connect(self.activate_button)
 
     @QtCore.pyqtSlot()
-    def activateButton(self):
+    def activate_button(self):
         self.buttonBox.button(QDialogButtonBox.Save).setEnabled(self.has_required_input() and self.input_changed())
 
     def has_required_input(self):
         """ Model should have at least 1 compartment"""
-        return bool(self.compartmentTable.rowCount())
+        return self.compartmentTable.rowCount()
 
     def input_changed(self):
         """ Check that the input is different than in the beginning """
-        return text_is_different(self.model.id, self.modelIdInput.text()) or \
-               text_is_different(self.model.name, self.modelNameInput.text()) or \
-               self.model.gem_compartments != dict(self.compartmentTable.get_items())
+        return text_is_different(self.model.id, self.input_id.text()) or \
+               text_is_different(self.model.name, self.input_name.text()) or \
+               self.compartments_changed()
 
     def populate_table(self):
         """ Populate the compartment table """
-        self.compartmentTable.populate_table(iteritems(self.model.gem_compartments))
-        self.compartmentTableView.setModel(self.compartmentTable)
+        self.compartmentTable.populate_table(self.model.gem_compartments.values())
 
     @QtCore.pyqtSlot()
     def add_compartment(self):
         dialog = AddCompartmentDialog(self.compartmentTable)
         if dialog.exec_():
-            abbrev, name = dialog.get_compartment
-            self.compartmentTable.update_row_from_item((abbrev, Compartment(id=abbrev, name=name)))
+            compartment = dialog.get_compartment
+            row_data = self.compartmentTable.row_from_item(compartment)
+            # Reset compartment attributes to trigger changed state
+            compartment.id = None
+            compartment.name = None
+            self.compartmentTable.appendRow(row_data)
 
     @QtCore.pyqtSlot()
     def delete_compartment(self):
         self.compartmentTableView.delete_selected_rows()
 
+    def compartments_changed(self):
+        if self.compartmentTable.rowCount() != len(self.model.gem_compartments):
+            return True
+
+        for i in range(self.compartmentTable.rowCount()):
+            compartment = self.compartmentTable.item_from_row(i)
+            current_tuple = (self.compartmentTable.item(i).text(),
+                             self.compartmentTable.item(i, 1).text())
+            if compartment != current_tuple:
+                return True
+        return False
+
     @QtCore.pyqtSlot()
     def save_changes(self):
         # Change model ID
-        new_id = self.modelIdInput.text()
+        new_id = self.input_id.text()
         if text_is_different(self.model.id, new_id):
             LOGGER.debug("Model id changed from '{0!s}' to '{1!s}'".format(self.model.id, new_id))
             self.model.id = new_id
 
         # Change model name
-        new_name = self.modelNameInput.text()
+        new_name = self.input_name.text()
         if text_is_different(self.model.name, new_name):
             LOGGER.debug("Model name changed from '{0!s}' to '{1!s}'".format(self.model.name, new_name))
             self.model.name = new_name
 
-        # Get changed compartment
-        changed_compartments = dict(self.compartmentTable.get_items())
+        old_compartments = set(self.model.gem_compartments.values())
 
-        # Deleted compartments
-        for x, name in self.model.gem_compartments.items():
-            if x not in changed_compartments:
-                # Remove all metabolites in deleted compartment
-                metabolites = [y for y in self.model.metabolites if y.compartment == x]
-                self.model.gem_remove_metabolites(metabolites)
+        # Edit compartments
+        for i in range(self.compartmentTable.rowCount()):
+            comp = self.compartmentTable.item_from_row(i)
+            if comp.id is None:
+                # New compartment
+                comp.id = self.compartmentTable.item(i).text()
+                self.model.gem_compartments[comp.id] = comp
+                LOGGER.debug("Compartment('{0!s}', '{1!s}') added to model".format(comp.id, comp.name))
+            else:
+                # Compartment already present
+                new_comp_id = self.compartmentTable.item(i).text()
+                old_comp_id = comp.id
+                if old_comp_id != new_comp_id:
+                    # Change id
+                    comp.id = new_comp_id
+                    # Rename metabolites
+                    metabolites = [y for y in self.model.metabolites if y.compartment == old_comp_id]
+                    for m in metabolites:
+                        m.compartment = new_comp_id
 
-                # Delete evidences linked to compartment
-                self.model.gem_compartments[x].delete_all_evidences()
-                del self.model.gem_compartments[x]
+                    # Update metabolite table entries
+                    self.model.update_metabolites(metabolites)
 
-        for abbrev, compartment in changed_compartments.items():
-            if abbrev not in self.model.gem_compartments:
-                self.model.gem_compartments[abbrev] = compartment
+                    # Substitue old entry
+                    del self.model.gem_compartments[old_comp_id]
+                    self.model[new_comp_id] = comp
 
-        # Todo: Update table
+            # Set name
+            comp.name = self.compartmentTable.item(i, 1).text()
+
+            # Remove item from old comparrment list
+            old_compartments.discard(comp)
+
+        # Remove compartments that have been removed from the model
+        for compartment in old_compartments:
+            metabolites = [y for y in self.model.metabolites if y.compartment == compartment.id]
+            self.model.gem_remove_metabolites(metabolites)
+            del self.model.gem_compartments[compartment.id]

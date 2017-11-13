@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Dialog</string>
+   <string>Edit compartment</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
@@ -24,7 +24,7 @@
       </widget>
      </item>
      <item row="0" column="1">
-      <widget class="QLineEdit" name="abbreviationInput"/>
+      <widget class="QLineEdit" name="input_id"/>
      </item>
      <item row="1" column="0">
       <widget class="QLabel" name="nameLabel">
@@ -34,7 +34,7 @@
       </widget>
      </item>
      <item row="1" column="1">
-      <widget class="QLineEdit" name="nameInput"/>
+      <widget class="QLineEdit" name="input_name"/>
      </item>
     </layout>
    </item>
@@ -81,38 +81,6 @@
     <hint type="destinationlabel">
      <x>173</x>
      <y>94</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>abbreviationInput</sender>
-   <signal>textChanged(QString)</signal>
-   <receiver>AddCompartmentDialog</receiver>
-   <slot>activateButton()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>127</x>
-     <y>19</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>220</x>
-     <y>37</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>nameInput</sender>
-   <signal>textChanged(QString)</signal>
-   <receiver>AddCompartmentDialog</receiver>
-   <slot>activateButton()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>130</x>
-     <y>48</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>242</x>
-     <y>58</y>
     </hint>
    </hints>
   </connection>
