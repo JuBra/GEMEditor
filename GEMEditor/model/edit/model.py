@@ -4,6 +4,7 @@ from GEMEditor.model.edit.ui import Ui_AddCompartmentDialog, Ui_EditModelDialog
 from six import iteritems
 from GEMEditor.widgets.tables import CompartmentTable
 from GEMEditor.cobraClasses import Compartment
+from GEMEditor.base import test_is_different
 
 
 class AddCompartmentDialog(QDialog, Ui_AddCompartmentDialog):
@@ -85,12 +86,10 @@ class EditModelDialog(QDialog, Ui_EditModelDialog):
 
     def input_changed(self):
         """ Check that the input is different than in the beginning """
-        if (self.model.id != self.modelIdInput.text() or
-            self.model.name != self.modelNameInput.text() or
-                self.model.gem_compartments != dict(self.compartmentTable.get_items())):
-            return True
-        else:
-            return False
+
+        return test_is_different(self.model.id, self.modelIdInput.text()) or \
+               test_is_different(self.model.name, self.modelIdInput.text()) or \
+               self.model.gem_compartments != dict(self.compartmentTable.get_items())
 
     def populate_table(self):
         """ Populate the compartment table """

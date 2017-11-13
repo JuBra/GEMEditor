@@ -122,3 +122,10 @@ class Test_unpack:
         return_value = unpack([1, 2], set)
         assert return_value == set([1, 2])
         assert isinstance(return_value, set)
+
+
+@pytest.mark.parametrize("input, state, expectation", [(None, "", False), ("", "", False), (None, "A", True),
+                                                       ("", "A", True), ("A", "A", False), ("A", "B", True)])
+def test_text_is_different(input, state, expectation):
+
+    assert test_is_different(input, state) is expectation

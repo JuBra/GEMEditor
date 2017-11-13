@@ -260,3 +260,25 @@ def unpack(iterable, cls):
     else:
         return cls(iterable)
 
+
+def test_is_different(input, state):
+    """ Check if the input is different from output
+
+    Test if the input is different to the output
+    while ignoring the difference between None
+    and empty string.
+
+    Parameters
+    ----------
+    input: str or None
+    state: str
+
+    Returns
+    -------
+    bool
+    """
+    if not input and not state:
+        return False
+    else:
+        return input != state
+
