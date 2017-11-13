@@ -102,6 +102,7 @@ class TestEditModelSettings:
         self.model.gem_compartments[self.comp1_id] = self.comp1
         self.metabolite = Metabolite("test", compartment=self.comp1_id)
         self.model.add_metabolites([self.metabolite])
+        self.model.setup_tables()
         self.dialog = EditModelDialog(model=self.model)
 
     @pytest.fixture()
@@ -181,7 +182,8 @@ class TestEditModelSettings:
         assert self.model.name == self.test_name + self.test_name
 
     def test_save_changes_compartment_addition(self):
-        self.dialog.compartmentTable.update_row_from_item((self.new_comp_id, self.new_comp))
+        self.dialog.compartmentTable.update_row_from_item(self.new_comp)
+        self.new_comp.id = None
         assert self.dialog.compartmentTable.rowCount() == 2
         self.dialog.save_changes()
         assert self.model.gem_compartments == {self.comp1_id: self.comp1,
@@ -192,9 +194,7 @@ class TestEditModelSettings:
     def test_save_changes_compartment_deletion(self):
         self.dialog.compartmentTable.setRowCount(0)
         assert self.metabolite in self.model.metabolites
-        assert QApplication.processEvents.called is False
         self.dialog.save_changes()
-        assert QApplication.processEvents.called is True
         assert self.model.gem_compartments == {}
         assert self.metabolite not in self.model.metabolites
 
