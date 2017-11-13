@@ -98,11 +98,9 @@ class EditModelDialog(QDialog, Ui_EditModelDialog):
     @QtCore.pyqtSlot()
     def add_compartment(self):
         dialog = AddCompartmentDialog(self.compartmentTable)
-        status = dialog.exec_()
-        if status:
+        if dialog.exec_():
             abbrev, name = dialog.get_compartment
-            self.compartmentTable.update_row_from_item((abbrev, Compartment(id=abbrev,
-                                                                   name=name)))
+            self.compartmentTable.update_row_from_item((abbrev, Compartment(id=abbrev, name=name)))
 
     @QtCore.pyqtSlot()
     def delete_compartment(self):
