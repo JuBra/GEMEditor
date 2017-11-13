@@ -1,10 +1,14 @@
+import logging
 from PyQt5 import QtCore
 from PyQt5.QtWidgets import QDialogButtonBox, QDialog, QToolTip, QProgressDialog, QApplication
 from GEMEditor.model.edit.ui import Ui_AddCompartmentDialog, Ui_EditModelDialog
 from six import iteritems
 from GEMEditor.widgets.tables import CompartmentTable
 from GEMEditor.cobraClasses import Compartment
-from GEMEditor.base import test_is_different
+from GEMEditor.base import text_is_different, ProgressDialog
+
+
+LOGGER = logging.getLogger(__name__)
 
 
 class AddCompartmentDialog(QDialog, Ui_AddCompartmentDialog):
@@ -86,8 +90,8 @@ class EditModelDialog(QDialog, Ui_EditModelDialog):
 
     def input_changed(self):
         """ Check that the input is different than in the beginning """
-        return test_is_different(self.model.id, self.modelIdInput.text()) or \
-               test_is_different(self.model.name, self.modelNameInput.text()) or \
+        return text_is_different(self.model.id, self.modelIdInput.text()) or \
+               text_is_different(self.model.name, self.modelNameInput.text()) or \
                self.model.gem_compartments != dict(self.compartmentTable.get_items())
 
     def populate_table(self):
@@ -108,10 +112,24 @@ class EditModelDialog(QDialog, Ui_EditModelDialog):
 
     @QtCore.pyqtSlot()
     def save_changes(self):
-        self.model.id = self.modelIdInput.text()
-        self.model.name = self.modelNameInput.text()
+        # Change model ID
+        new_id = self.modelIdInput.text()
+        if text_is_different(self.model.id, new_id):
+            LOGGER.debug("Model id changed from '{0!s}' to '{1!s}'".format(self.model.id, new_id))
+            self.model.id = new_id
 
-        changed_compartments = dict(self.compartmentTable.get_items())
+        # Change model name
+        new_name = self.modelNameInput.text()
+        if text_is_different(self.model.name, new_name):
+            LOGGER.debug("Model name changed from '{0!s}' to '{1!s}'".format(self.model.name, new_name))
+            self.model.name = new_name
+
+        # Get changed compartment
+        changed_compartments = self.compartmentTable.get_items()
+        # current_compartments = set(self.model.compartments.values())
+        #
+        # added = changed_compartments - current_compartments
+        # removed = current_compartments - changed_compartments
 
         # Deleted compartments
         for x, name in self.model.gem_compartments.items():

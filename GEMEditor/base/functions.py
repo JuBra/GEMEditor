@@ -261,7 +261,7 @@ def unpack(iterable, cls):
         return cls(iterable)
 
 
-def test_is_different(input, state):
+def text_is_different(input, state):
     """ Check if the input is different from output
 
     Test if the input is different to the output
