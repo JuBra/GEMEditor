@@ -5,7 +5,7 @@ from GEMEditor.tabs import *
 from GEMEditor.main.about import AboutDialog
 from GEMEditor.main.settings import EditSettingsDialog
 from GEMEditor.main.update import UpdateAvailableDialog
-from GEMEditor.dialogs.model import EditModelDialog
+from GEMEditor.model.edit.model import EditModelDialog
 from GEMEditor.dialogs.reference import PubmedBrowser
 from GEMEditor.dialogs.qualitychecks import factory_duplicate_dialog
 from GEMEditor.map.dialog import MapListDialog

@@ -1,0 +1,2 @@
+from .AddCompartmentDialog import Ui_AddCompartmentDialog
+from .EditModelDialog import Ui_EditModelDialog

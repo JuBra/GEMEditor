@@ -1,7 +1,6 @@
 from PyQt5 import QtCore
 from PyQt5.QtWidgets import QDialogButtonBox, QDialog, QToolTip, QProgressDialog, QApplication
-from GEMEditor.ui.AddCompartmentDialog import Ui_AddCompartmentDialog
-from GEMEditor.ui.EditModelDialog import Ui_EditModelDialog
+from GEMEditor.model.edit.ui import Ui_AddCompartmentDialog, Ui_EditModelDialog
 from six import iteritems
 from GEMEditor.widgets.tables import CompartmentTable
 from GEMEditor.cobraClasses import Compartment
