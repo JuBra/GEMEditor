@@ -191,7 +191,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def createModel(self):
         if self.closeModel():
             model = Model()
-            dialog = EditModelDialog(self, model)
+            dialog = EditModelDialog(model)
             status = dialog.exec_()
             if status:
                 self.set_model(model, None)
@@ -199,7 +199,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     @QtCore.pyqtSlot()
     def editModelsettings(self):
-        dialog = EditModelDialog(self, self.model)
+        dialog = EditModelDialog(self.model)
         status = dialog.exec_()
         if status:
             self.set_model(self.model, self.model_path)

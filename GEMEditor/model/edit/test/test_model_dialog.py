@@ -102,7 +102,7 @@ class TestEditModelSettings:
         self.model.gem_compartments[self.comp1_id] = self.comp1
         self.metabolite = Metabolite("test", compartment=self.comp1_id)
         self.model.add_metabolites([self.metabolite])
-        self.dialog = EditModelDialog(parent=self.parent, model=self.model)
+        self.dialog = EditModelDialog(model=self.model)
 
     @pytest.fixture()
     def patch_progress(self, monkeypatch):
@@ -115,28 +115,48 @@ class TestEditModelSettings:
         assert self.comp1_id in self.model.gem_compartments
         assert self.model.gem_compartments[self.comp1_id] == self.comp1
 
-        assert self.dialog.buttonBox.button(QDialogButtonBox.Ok).isEnabled() is False
+        assert self.dialog.buttonBox.button(QDialogButtonBox.Save).isEnabled() is False
         assert self.dialog.modelNameInput.text() == self.test_name
         assert self.dialog.modelIdInput.text() == self.test_id
         assert self.dialog.compartmentTable.rowCount() == 1
 
         assert self.metabolite in self.model.metabolites
 
-    def test_change_name(self):
-        QtTest.QTest.keyClicks(self.dialog.modelNameInput, "1")
-        assert self.dialog.buttonBox.button(QDialogButtonBox.Ok).isEnabled() is True
-        assert self.dialog.input_changed() is True
+    def test_change_in_id_enables_button(self):
+        model = Model()
+        model.gem_compartments["c"] = Compartment("c", "Cytoplasm")
+        dialog = EditModelDialog(model=model)
+        save_button = dialog.buttonBox.button(QDialogButtonBox.Save)
 
-    def test_change_id(self):
-        QtTest.QTest.keyClicks(self.dialog.modelIdInput, "1")
-        assert self.dialog.buttonBox.button(QDialogButtonBox.Ok).isEnabled() is True
-        assert self.dialog.input_changed() is True
+        # Change id
+        assert save_button.isEnabled() is False
+        QtTest.QTest.keyClicks(self.dialog.modelIdInput, "M")
+        assert save_button.isEnabled() is True
+
+        # Undo change
+        QtTest.QTest.keyClick(self.dialog.modelIdInput, QtCore.Qt.Key_Backspace)
+        assert save_button.isEnabled() is False
+
+    def test_change_in_name_enables_button(self):
+        model = Model()
+        model.gem_compartments["c"] = Compartment("c", "Cytoplasm")
+        dialog = EditModelDialog(model=model)
+        save_button = dialog.buttonBox.button(QDialogButtonBox.Save)
+
+        # Change id
+        assert save_button.isEnabled() is False
+        QtTest.QTest.keyClicks(self.dialog.modelNameInput, "M")
+        assert save_button.isEnabled() is True
+
+        # Undo change
+        QtTest.QTest.keyClick(self.dialog.modelNameInput, QtCore.Qt.Key_Backspace)
+        assert save_button.isEnabled() is False
 
     def test_add_compartment(self):
         row_count = self.dialog.compartmentTable.rowCount()
         self.dialog.compartmentTable.update_row_from_item((self.new_comp_id, self.new_comp))
         assert self.dialog.compartmentTable.rowCount() == row_count + 1
-        assert self.dialog.buttonBox.button(QDialogButtonBox.Ok).isEnabled() is True
+        assert self.dialog.buttonBox.button(QDialogButtonBox.Save).isEnabled() is True
         assert self.dialog.input_changed() is True
 
     def test_compartment_deletion(self):
@@ -146,9 +166,9 @@ class TestEditModelSettings:
         assert self.dialog.compartmentTable.rowCount() == 0
 
     def test_change_compartment_name(self):
-        assert self.dialog.buttonBox.button(QDialogButtonBox.Ok).isEnabled() is False
+        assert self.dialog.buttonBox.button(QDialogButtonBox.Save).isEnabled() is False
         self.dialog.compartmentTable.item(0, 1).setText(self.new_comp_name)
-        assert self.dialog.buttonBox.button(QDialogButtonBox.Ok).isEnabled() is True
+        assert self.dialog.buttonBox.button(QDialogButtonBox.Save).isEnabled() is True
 
     def test_save_changes_id(self):
         QtTest.QTest.keyClicks(self.dialog.modelIdInput, self.test_id)
@@ -180,7 +200,7 @@ class TestEditModelSettings:
 
     def test_save_changed_compartment_name(self):
         self.dialog.compartmentTable.item(0, 1).setText(self.new_comp_name)
-        assert self.dialog.buttonBox.button(QDialogButtonBox.Ok).isEnabled() is True
+        assert self.dialog.buttonBox.button(QDialogButtonBox.Save).isEnabled() is True
         self.dialog.save_changes()
         assert self.model.gem_compartments[self.comp1_id].name == self.new_comp_name
 

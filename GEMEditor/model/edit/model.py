@@ -53,8 +53,8 @@ class AddCompartmentDialog(QDialog, Ui_AddCompartmentDialog):
 
 class EditModelDialog(QDialog, Ui_EditModelDialog):
 
-    def __init__(self, parent, model):
-        super(EditModelDialog, self).__init__(parent)
+    def __init__(self, model):
+        super(EditModelDialog, self).__init__()
         self.setupUi(self)
         self.model = model
 
@@ -68,7 +68,7 @@ class EditModelDialog(QDialog, Ui_EditModelDialog):
         self.populate_table()
 
         # Deactivate okay button
-        self.buttonBox.button(QDialogButtonBox.Ok).setEnabled(False)
+        self.buttonBox.button(QDialogButtonBox.Save).setEnabled(False)
 
         # Connect the toggling of the active button
         self.compartmentTable.rowsInserted.connect(self.activateButton)
@@ -77,7 +77,7 @@ class EditModelDialog(QDialog, Ui_EditModelDialog):
 
     @QtCore.pyqtSlot()
     def activateButton(self):
-        self.buttonBox.button(QDialogButtonBox.Ok).setEnabled(self.has_required_input() and self.input_changed())
+        self.buttonBox.button(QDialogButtonBox.Save).setEnabled(self.has_required_input() and self.input_changed())
 
     def has_required_input(self):
         """ Check that all required fields are filled """

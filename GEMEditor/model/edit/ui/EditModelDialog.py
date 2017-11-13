@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'EditModelDialog.ui'
+# Form implementation generated from reading ui file '.\src\EditModelDialog.ui'
 #
 # Created by: PyQt5 UI code generator 5.8.2
 #
@@ -59,7 +59,7 @@ class Ui_EditModelDialog(object):
         self.verticalLayout_2.addLayout(self.horizontalLayout)
         self.buttonBox = QtWidgets.QDialogButtonBox(EditModelDialog)
         self.buttonBox.setOrientation(QtCore.Qt.Horizontal)
-        self.buttonBox.setStandardButtons(QtWidgets.QDialogButtonBox.Cancel|QtWidgets.QDialogButtonBox.Ok)
+        self.buttonBox.setStandardButtons(QtWidgets.QDialogButtonBox.Cancel|QtWidgets.QDialogButtonBox.Save)
         self.buttonBox.setObjectName("buttonBox")
         self.verticalLayout_2.addWidget(self.buttonBox)
 
