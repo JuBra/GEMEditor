@@ -58,6 +58,7 @@ class ModelDisplayWidget(QWidget, Ui_modelDisaplayWidget):
         self.label_number_metabolites.clear()
         self.label_number_reactions.clear()
         self.label_number_genes.clear()
+        self.tableView.setModel(None)
 
     @QtCore.pyqtSlot()
     def update_information(self):
