@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'EditAnnotationsDialog.ui'
+# Form implementation generated from reading ui file '.\src\EditAnnotationsDialog.ui'
 #
 # Created by: PyQt5 UI code generator 5.8.2
 #
@@ -31,7 +31,6 @@ class Ui_EditAnnotationDialog(object):
         self.statusLabel = QtWidgets.QLabel(EditAnnotationDialog)
         self.statusLabel.setMaximumSize(QtCore.QSize(18, 18))
         self.statusLabel.setText("")
-        self.statusLabel.setPixmap(QtGui.QPixmap(":/status_undefined"))
         self.statusLabel.setScaledContents(True)
         self.statusLabel.setObjectName("statusLabel")
         self.gridLayout.addWidget(self.statusLabel, 1, 2, 1, 1)
@@ -53,4 +52,3 @@ class Ui_EditAnnotationDialog(object):
         self.typeLabel.setText(_translate("EditAnnotationDialog", "Type:"))
         self.annotationLabel.setText(_translate("EditAnnotationDialog", "Annotation:"))
 
-from GEMEditor.icons_rc import *
