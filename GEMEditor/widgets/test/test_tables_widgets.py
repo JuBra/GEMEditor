@@ -31,17 +31,15 @@ class TestCompartmentTable:
         assert self.table.rowCount() == 0
 
     def test_row_from_item(self):
-        input_tuple = ("c", Compartment("c", "cytoplasm"))
-        return_value = self.table.row_from_item(input_tuple)
+        return_value = self.table.row_from_item(Compartment("c", "cytoplasm"))
         assert return_value[0].text() == "c"
         assert return_value[1].text() == "cytoplasm"
 
     def test_item_from_row(self):
-        input_tuple = ("c", Compartment("c", "cytoplasm"))
-        self.table.appendRow(self.table.row_from_item(input_tuple))
+        self.table.appendRow(self.table.row_from_item(Compartment("c", "cytoplasm")))
         assert self.table.rowCount() == 1
-        assert self.table.item_from_row(0) == input_tuple
-        assert self.table.get_items() == [input_tuple]
+        assert self.table.item_from_row(0) == Compartment("c", "cytoplasm")
+        assert self.table.get_items() == [Compartment("c", "cytoplasm")]
 
 
 class TestReactionTable:

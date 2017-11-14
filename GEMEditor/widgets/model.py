@@ -33,12 +33,9 @@ class ModelDisplayWidget(QWidget, Ui_modelDisaplayWidget):
     model_changed = QtCore.pyqtSignal()
 
     def __init__(self, parent):
-        QWidget.__init__(self, parent)
+        super(ModelDisplayWidget, self).__init__(parent)
         self.setupUi(self)
         self.model = None
-        self.compartment_table = QtGui.QStandardItemModel(self)
-        self.tableView.setModel(self.compartment_table)
-        self.compartment_table.setHorizontalHeaderLabels(["ID", "Name"])
         self.tableView.setFixedHeight(125)
         self.tableView.setFixedWidth(200)
 
@@ -61,7 +58,6 @@ class ModelDisplayWidget(QWidget, Ui_modelDisaplayWidget):
         self.label_number_metabolites.clear()
         self.label_number_reactions.clear()
         self.label_number_genes.clear()
-        self.compartment_table.setRowCount(0)
 
     @QtCore.pyqtSlot()
     def update_information(self):
@@ -71,10 +67,7 @@ class ModelDisplayWidget(QWidget, Ui_modelDisaplayWidget):
             self.label_number_metabolites.setText(str(len(self.model.metabolites)))
             self.label_number_reactions.setText(str(len(self.model.reactions)))
             self.label_number_genes.setText(str(len(self.model.genes)))
-
-            self.compartment_table.setRowCount(0)
-            for key, compartment in self.model.gem_compartments.items():
-                self.compartment_table.appendRow([QtGui.QStandardItem(key), QtGui.QStandardItem(compartment.name)])
+            self.tableView.setModel(self.model.QtCompartmentTable)
 
 
 class ModelAnnotationDisplayWidget(QWidget, Ui_AnnotationDisplayWidget):

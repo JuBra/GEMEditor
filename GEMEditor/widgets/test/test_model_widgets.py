@@ -55,7 +55,6 @@ class TestModelDisplayWidget:
         self.model.add_reactions([self.reaction])
         self.model.genes.append(self.gene)
 
-
     def test_setup(self):
         assert len(self.model.metabolites) == 1
         assert len(self.model.reactions) == 1
@@ -74,9 +73,6 @@ class TestModelDisplayWidget:
         assert self.widget.label_number_reactions.text() == str(len(self.model.reactions))
         assert self.widget.label_number_metabolites.text() == str(len(self.model.metabolites))
         assert self.widget.label_model_path.text() == path
-        assert self.widget.compartment_table.rowCount() == 1
-        assert self.widget.compartment_table.item(0, 0).text() == self.comp1_abbrev
-        assert self.widget.compartment_table.item(0, 1).text() == self.comp1_name
 
     def test_clear_information(self):
         path = "Test_path"
@@ -88,7 +84,6 @@ class TestModelDisplayWidget:
         assert self.widget.label_number_reactions.text() == ""
         assert self.widget.label_number_metabolites.text() == ""
         assert self.widget.label_number_genes.text() == ""
-        assert self.widget.compartment_table.rowCount() == 0
         assert self.widget.label_model_path.text() == path
 
     def test_setting_empty_model(self):
@@ -101,7 +96,6 @@ class TestModelDisplayWidget:
         assert self.widget.label_number_reactions.text() == ""
         assert self.widget.label_number_metabolites.text() == ""
         assert self.widget.label_number_genes.text() == ""
-        assert self.widget.compartment_table.rowCount() == 0
         assert self.widget.label_model_path.text() == ""
 
 

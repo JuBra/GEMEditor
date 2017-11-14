@@ -70,12 +70,12 @@ def QMessageBox_No(monkeypatch):
 
 @pytest.fixture()
 def editmodeldialog_true(monkeypatch):
-    monkeypatch.setattr("GEMEditor.dialogs.model.EditModelDialog.exec_", Mock(return_value=True))
+    monkeypatch.setattr("GEMEditor.model.edit.model.EditModelDialog.exec_", Mock(return_value=True))
 
 
 @pytest.fixture()
 def editmodeldialog_false(monkeypatch):
-    monkeypatch.setattr("GEMEditor.dialogs.model.EditModelDialog.exec_", Mock(return_value=False))
+    monkeypatch.setattr("GEMEditor.model.edit.model.EditModelDialog.exec_", Mock(return_value=False))
 
 
 @pytest.fixture()
@@ -171,10 +171,10 @@ class TestModelCreate:
         main_window.set_model = Mock()
         main_window.modelLoaded = Mock()
         main_window.closeModel = Mock(return_value=True)
-        assert GEMEditor.dialogs.model.EditModelDialog.exec_.called is False
+        assert GEMEditor.model.edit.model.EditModelDialog.exec_.called is False
 
         main_window.createModel()
-        assert GEMEditor.dialogs.model.EditModelDialog.exec_.called is True
+        assert GEMEditor.model.edit.model.EditModelDialog.exec_.called is True
         assert main_window.set_model.called is True
         main_window.modelLoaded.assert_called_once_with(True)
 
@@ -183,10 +183,10 @@ class TestModelCreate:
         main_window.set_model = Mock()
         main_window.modelLoaded = Mock()
         main_window.closeModel = Mock(return_value=True)
-        assert GEMEditor.dialogs.model.EditModelDialog.exec_.called is False
+        assert GEMEditor.model.edit.model.EditModelDialog.exec_.called is False
 
         main_window.createModel()
-        assert GEMEditor.dialogs.model.EditModelDialog.exec_.called is True
+        assert GEMEditor.model.edit.model.EditModelDialog.exec_.called is True
         assert main_window.set_model.called is False
         assert main_window.modelLoaded.called is False
 
@@ -195,10 +195,10 @@ class TestModelCreate:
         main_window.set_model = Mock()
         main_window.modelLoaded = Mock()
         main_window.closeModel = Mock(return_value=False)
-        assert GEMEditor.dialogs.model.EditModelDialog.exec_.called is False
+        assert GEMEditor.model.edit.model.EditModelDialog.exec_.called is False
 
         main_window.createModel()
-        assert GEMEditor.dialogs.model.EditModelDialog.exec_.called is False
+        assert GEMEditor.model.edit.model.EditModelDialog.exec_.called is False
         assert main_window.set_model.called is False
         assert main_window.modelLoaded.called is False
 

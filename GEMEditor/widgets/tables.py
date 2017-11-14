@@ -341,24 +341,17 @@ class EvidenceTable(ElementTable):
 
 class CompartmentTable(ElementTable):
 
-    header = ("Abbreviation", "Name")
+    header = ("ID", "Name")
 
     def __init__(self, *args):
         ElementTable.__init__(self, *args)
         self.set_header()
 
     @staticmethod
-    def row_from_item(input_tuple):
-        id_item = QStandardItem(str(input_tuple[0]))
-        id_item.setFlags(Qt.ItemIsEnabled | Qt.ItemIsSelectable)
-        name_item = QStandardItem(str(input_tuple[1].name))
+    def row_from_item(compartment):
+        id_item = LinkedItem(str(compartment.id), compartment)
+        name_item = QStandardItem(str(compartment.name))
         return [id_item, name_item]
-
-    def item_from_row(self, row_idx):
-        """ Return the linked item of a table row"""
-        abbreviation = self.item(row_idx).text()
-        name = self.item(row_idx, 1).text()
-        return abbreviation, Compartment(abbreviation, name)
 
 
 class ReactionSettingsTable(ElementTable):

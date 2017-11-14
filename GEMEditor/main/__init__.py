@@ -5,7 +5,7 @@ from GEMEditor.tabs import *
 from GEMEditor.main.about import AboutDialog
 from GEMEditor.main.settings import EditSettingsDialog
 from GEMEditor.main.update import UpdateAvailableDialog
-from GEMEditor.dialogs.model import EditModelDialog
+from GEMEditor.model.edit.model import EditModelDialog
 from GEMEditor.dialogs.reference import PubmedBrowser
 from GEMEditor.dialogs.qualitychecks import factory_duplicate_dialog
 from GEMEditor.map.dialog import MapListDialog
@@ -191,7 +191,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def createModel(self):
         if self.closeModel():
             model = Model()
-            dialog = EditModelDialog(self, model)
+            dialog = EditModelDialog(model)
             status = dialog.exec_()
             if status:
                 self.set_model(model, None)
@@ -199,7 +199,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     @QtCore.pyqtSlot()
     def editModelsettings(self):
-        dialog = EditModelDialog(self, self.model)
+        dialog = EditModelDialog(self.model)
         status = dialog.exec_()
         if status:
             self.set_model(self.model, self.model_path)
