@@ -1,14 +1,13 @@
+import lxml.etree as ET
 import pytest
+from GEMEditor.model.classes.cobra import Model, Reaction, Gene, Metabolite
+from GEMEditor.model.classes.reference import Reference
+from GEMEditor.model.classes.evidence import Evidence
 from GEMEditor.rw import *
 from GEMEditor.rw.evidences import add_evidences_to_xml, parse_evidences_from_xml, get_item_from_model
-from lxml.etree import Element
-import lxml.etree as ET
-from GEMEditor.data_classes import Reference
-from GEMEditor.evidence_class import Evidence
-from GEMEditor.cobraClasses import Model, Reaction, Gene, Metabolite, GeneGroup
 from GEMEditor.rw.test.ex_evidences import minimal_evidence, full_evidence
 from PyQt5.QtWidgets import QApplication
-
+from lxml.etree import Element
 
 # Make sure to only start an application
 # if there is no active one. Opening multiple

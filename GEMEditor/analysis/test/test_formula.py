@@ -1,6 +1,6 @@
-from PyQt5.QtWidgets import QApplication
-from GEMEditor.cobraClasses import Reaction, Metabolite, Model
 from GEMEditor.analysis.formula import *
+from GEMEditor.model.classes.cobra import Reaction, Metabolite, Model
+from PyQt5.QtWidgets import QApplication
 
 # Make sure to only start an application
 # if there is no active one. Opening multiple

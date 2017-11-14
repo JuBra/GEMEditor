@@ -1,14 +1,14 @@
+import logging
 import os
 import sqlite3
-import logging
+
+from GEMEditor.base.classes import Settings
+from GEMEditor.database import database_path as DB_PATH
+from GEMEditor.database.ui import Ui_MetaboliteEntryDisplayWidget, Ui_ReactionEntryDisplayWidget
+from GEMEditor.model.classes.cobra import Metabolite, Reaction
+from GEMEditor.model.classes.reference import Annotation
 from PyQt5 import QtCore, QtSql
 from PyQt5.QtWidgets import QMessageBox, QWidget, QTableWidgetItem
-from GEMEditor.cobraClasses import Metabolite, Reaction
-from GEMEditor.data_classes import Annotation
-from GEMEditor.database import database_path as DB_PATH
-from GEMEditor.base.classes import Settings
-from GEMEditor.database.ui import Ui_MetaboliteEntryDisplayWidget, Ui_ReactionEntryDisplayWidget
-
 
 LOGGER = logging.getLogger(__name__)
 
@@ -416,7 +416,7 @@ class MetaboliteEntryDisplayWidget(DatabaseEntryWidget, Ui_MetaboliteEntryDispla
 
         Parameters
         ----------
-        metabolite: GEMEditor.cobraClasses.Metabolite
+        metabolite: GEMEditor.model.classes.cobra.Metabolite
         synonyms: list
 
         Returns
@@ -465,7 +465,7 @@ class MetaboliteEntryDisplayWidget(DatabaseEntryWidget, Ui_MetaboliteEntryDispla
 
         Parameters
         ----------
-        metabolite: GEMEditor.cobraClasses.Metabolite
+        metabolite: GEMEditor.model.classes.cobra.Metabolite
 
         Returns
         -------

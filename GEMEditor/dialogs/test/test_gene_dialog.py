@@ -1,5 +1,5 @@
 from GEMEditor.dialogs.gene import GeneEditDialog
-from GEMEditor.cobraClasses import Gene, Model
+from GEMEditor.model.classes.cobra import Gene, Model
 from unittest.mock import Mock
 from PyQt5.QtWidgets import QApplication, QDialogButtonBox
 

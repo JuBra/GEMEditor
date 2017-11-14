@@ -1,20 +1,19 @@
-from PyQt5 import QtCore, QtGui
-from PyQt5.QtWidgets import QErrorMessage, QDialogButtonBox, QMessageBox, QDialog, QInputDialog, QLineEdit, QFileDialog
-from PyQt5.QtCore import QStandardPaths
-from GEMEditor.base.dialogs import CustomStandardDialog
+import lxml.etree as ET
 from GEMEditor.base.classes import Settings
-from GEMEditor.ui.ReferenceEditDialog import Ui_ReferenceEditDialog
-from GEMEditor.ui.AddAuthorName import Ui_AddAuthorName
-
-from GEMEditor.connect.pubmed import RetrievePubmedData
+from GEMEditor.base.dialogs import CustomStandardDialog
 from GEMEditor.connect.pmc import IdConverter
+from GEMEditor.connect.pubmed import RetrievePubmedData
+from GEMEditor.model.classes.reference import Author
+from GEMEditor.ui.AddAuthorName import Ui_AddAuthorName
+from GEMEditor.ui.PubmedWebBrowser import Ui_PubmedBrowser
+from GEMEditor.ui.ReferenceEditDialog import Ui_ReferenceEditDialog
 from GEMEditor.widgets.tables import AuthorTable
+from PyQt5 import QtCore, QtGui
+from PyQt5.QtCore import QStandardPaths
+from PyQt5.QtWidgets import QErrorMessage, QDialogButtonBox, QMessageBox, QDialog, QInputDialog, QLineEdit, QFileDialog
+from six.moves.urllib.error import URLError
 from six.moves.urllib.parse import quote
 from six.moves.urllib.request import urlopen
-from six.moves.urllib.error import URLError
-from GEMEditor.ui.PubmedWebBrowser import Ui_PubmedBrowser
-from GEMEditor.data_classes import Reference, Author
-import lxml.etree as ET
 
 
 class ReferenceEditDialog(CustomStandardDialog, Ui_ReferenceEditDialog):

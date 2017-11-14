@@ -1,11 +1,11 @@
-import pytest
-from GEMEditor.dialogs.evidence import EditEvidenceDialog
-from GEMEditor.cobraClasses import Model, Reaction, Gene
-from GEMEditor.data_classes import Reference
-from GEMEditor.evidence_class import Evidence
-from PyQt5.QtWidgets import QApplication, QWidget, QDialogButtonBox
 from unittest.mock import Mock
 
+import pytest
+from GEMEditor.dialogs.evidence import EditEvidenceDialog
+from GEMEditor.model.classes.cobra import Model, Reaction, Gene
+from GEMEditor.model.classes.reference import Reference
+from GEMEditor.model.classes.evidence import Evidence
+from PyQt5.QtWidgets import QApplication, QWidget
 
 # Make sure to only start an application
 # if there is no active one. Opening multiple

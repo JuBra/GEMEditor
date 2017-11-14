@@ -1,34 +1,34 @@
 import logging
-from PyQt5.QtWidgets import QFileDialog,QMainWindow
-from PyQt5.QtCore import QStandardPaths, Qt
-from GEMEditor.tabs import *
+import os
+
+import GEMEditor.rw.sbml3 as sbml3
+from GEMEditor.analysis import group_duplicate_reactions
+from GEMEditor.analysis.duplicates import get_duplicated_metabolites
+from GEMEditor.analysis.formula import update_formulae_iteratively
+from GEMEditor.analysis.statistics import run_all_statistics, DisplayStatisticsDialog
+from GEMEditor.base.classes import ProgressDialog
+from GEMEditor.base.dialogs import ListDisplayDialog
+from GEMEditor.base.functions import merge_groups_by_overlap
+from GEMEditor.database.base import DatabaseWrapper
+from GEMEditor.database.create import create_database_de_novo, database_exists
+from GEMEditor.database.model import run_auto_annotation, run_check_consistency, update_metabolite_database_mapping, \
+    load_mapping, store_mapping, update_reaction_database_mapping
+from GEMEditor.database.query import DialogDatabaseSelection
+from GEMEditor.dialogs import BatchEvidenceDialog
+from GEMEditor.dialogs.qualitychecks import factory_duplicate_dialog
+from GEMEditor.dialogs.reference import PubmedBrowser
+from GEMEditor.evidence.analysis import DialogEvidenceStatus
 from GEMEditor.main.about import AboutDialog
 from GEMEditor.main.settings import EditSettingsDialog
 from GEMEditor.main.update import UpdateAvailableDialog
-from GEMEditor.model.edit.model import EditModelDialog
-from GEMEditor.dialogs.reference import PubmedBrowser
-from GEMEditor.dialogs.qualitychecks import factory_duplicate_dialog
-from GEMEditor.map.dialog import MapListDialog
-from GEMEditor.dialogs import BatchEvidenceDialog
-import GEMEditor.rw.sbml3 as sbml3
-from GEMEditor.ui.MainWindow import Ui_MainWindow
-from GEMEditor.cobraClasses import Model, prune_gene_tree
-from GEMEditor.analysis import group_duplicate_reactions
-from GEMEditor.analysis.statistics import run_all_statistics, DisplayStatisticsDialog
-from GEMEditor.analysis.formula import update_formulae_iteratively
-from GEMEditor.analysis.duplicates import get_duplicated_metabolites
 from GEMEditor.main.update.worker import UpdateCheck
-from GEMEditor.database.create import create_database_de_novo, database_exists
-from GEMEditor.database.model import run_auto_annotation, run_check_consistency, update_metabolite_database_mapping, load_mapping, store_mapping, update_reaction_database_mapping
-from GEMEditor.database.query import DialogDatabaseSelection
-from GEMEditor.database.base import DatabaseWrapper
-from GEMEditor.base.functions import merge_groups_by_overlap
-from GEMEditor.base.classes import ProgressDialog
-from GEMEditor.base.dialogs import ListDisplayDialog
-from GEMEditor.evidence.analysis import DialogEvidenceStatus
-import os
-import GEMEditor.icons_rc
-
+from GEMEditor.map.dialog import MapListDialog
+from GEMEditor.model.classes.cobra import Model, prune_gene_tree
+from GEMEditor.model.edit.model import EditModelDialog
+from GEMEditor.tabs import *
+from GEMEditor.ui.MainWindow import Ui_MainWindow
+from PyQt5.QtCore import QStandardPaths, Qt
+from PyQt5.QtWidgets import QFileDialog, QMainWindow
 
 LOGGER = logging.getLogger(__name__)
 

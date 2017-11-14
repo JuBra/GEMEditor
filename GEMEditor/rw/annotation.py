@@ -1,7 +1,8 @@
-from lxml.etree import SubElement
-from GEMEditor.rw import *
-from GEMEditor.data_classes import Annotation
 from warnings import warn
+
+from GEMEditor.model.classes.reference import Annotation
+from GEMEditor.rw import *
+from lxml.etree import SubElement
 from six.moves.urllib.parse import urlsplit
 
 

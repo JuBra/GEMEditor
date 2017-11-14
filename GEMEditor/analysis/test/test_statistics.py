@@ -1,10 +1,10 @@
-import pytest
 from unittest.mock import Mock
-from GEMEditor.cobraClasses import Model, Metabolite, Reaction, Gene
-from GEMEditor.data_classes import Annotation
-from GEMEditor.analysis.statistics import reaction_statistics, metabolite_statistics, gene_statistics
-from PyQt5.QtWidgets import QApplication
 
+import pytest
+from GEMEditor.analysis.statistics import reaction_statistics, metabolite_statistics, gene_statistics
+from GEMEditor.model.classes.cobra import Model, Metabolite, Reaction, Gene
+from GEMEditor.model.classes.reference import Annotation
+from PyQt5.QtWidgets import QApplication
 
 # Make sure to only start an application
 # if there is no active one. Opening multiple

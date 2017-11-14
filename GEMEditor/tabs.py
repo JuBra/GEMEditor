@@ -3,8 +3,9 @@ sip.setapi('QVariant', 2)
 sip.setapi('QString', 2)
 import cobra
 from GEMEditor.base.functions import generate_copy_id
-from GEMEditor.data_classes import Reference, ModelTest
-from GEMEditor.cobraClasses import Gene, Reaction, Metabolite, find_duplicate_metabolite
+from GEMEditor.model.classes.modeltest import ModelTest
+from GEMEditor.model.classes.reference import Reference
+from GEMEditor.model.classes.cobra import Gene, Reaction, Metabolite, find_duplicate_metabolite
 from GEMEditor.ui.model_stats_tab import Ui_model_stats_tab
 from GEMEditor.ui.StandardTab import Ui_StandardTab
 from PyQt5 import QtCore, QtGui
@@ -24,9 +25,8 @@ from GEMEditor.analysis.model_test import run_test
 from GEMEditor.widgets.proxymodels import ReactionProxyFilter, MetaboliteProxyFilter, GeneProxyFilter
 from GEMEditor.analysis.model_test import get_original_settings
 from GEMEditor.ui import Ui_AnalysisTab, Ui_SolutionTableWidget
-from GEMEditor.solution import SolutionDialog, status_objective_from_solution, set_objective_to_label,\
-    set_status_to_label
-
+from GEMEditor.solution.display import SolutionDialog
+from GEMEditor.solution.base import status_objective_from_solution, set_objective_to_label, set_status_to_label
 
 class StandardTab(QWidget, Ui_StandardTab):
 

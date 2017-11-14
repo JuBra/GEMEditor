@@ -1,10 +1,11 @@
 import re
+
+from GEMEditor.facts import Metabolite_annotations, Reaction_annotations, Gene_annotations, Resource
+from GEMEditor.model.classes.cobra import Reaction, Metabolite, Gene
+from GEMEditor.model.classes.reference import Annotation
+from GEMEditor.ui.EditAnnotationsDialog import Ui_EditAnnotationDialog
 from PyQt5 import QtGui, QtCore
 from PyQt5.QtWidgets import QDialog, QDialogButtonBox
-from GEMEditor.ui.EditAnnotationsDialog import Ui_EditAnnotationDialog
-from GEMEditor.data_classes import Annotation
-from GEMEditor.facts import Metabolite_annotations, Reaction_annotations, Gene_annotations, Resource
-from GEMEditor.cobraClasses import Reaction, Metabolite, Gene
 
 
 class EditAnnotationDialog(QDialog, Ui_EditAnnotationDialog):

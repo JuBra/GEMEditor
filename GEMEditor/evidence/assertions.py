@@ -1,5 +1,6 @@
 from collections import namedtuple
-from GEMEditor.cobraClasses import Gene, Reaction, Compartment, GeneGroup
+
+from GEMEditor.model.classes.cobra import Gene, Reaction, Compartment, GeneGroup
 
 
 def validity_catalyzing_reaction(evidence):

@@ -1,14 +1,12 @@
-import pytest
-import PyQt5
-from GEMEditor.tabs import *
-from cobra.core.solution import LegacySolution
-from GEMEditor.cobraClasses import Model, Reaction, Metabolite, Gene
-from GEMEditor.data_classes import ModelTest, ReactionSetting, Outcome, Reference
-from GEMEditor.dialogs.mock import MockModelTestDialog
-from PyQt5 import QtCore, QtTest
-from PyQt5.QtWidgets import QApplication, QErrorMessage
 from unittest.mock import Mock
 
+import pytest
+from GEMEditor.dialogs.mock import MockModelTestDialog
+from GEMEditor.model.classes.cobra import Model
+from GEMEditor.model.classes.modeltest import ReactionSetting, Outcome
+from GEMEditor.tabs import *
+from PyQt5 import QtCore, QtTest
+from PyQt5.QtWidgets import QApplication
 
 # Make sure to only start an application
 # if there is no active one. Opening multiple
@@ -78,7 +76,7 @@ class TestReactionTab:
     @pytest.fixture()
     def patched_remove_reactions(self, monkeypatch):
         mock = Mock()
-        monkeypatch.setattr("GEMEditor.cobraClasses.Model.gem_remove_reactions", mock)
+        monkeypatch.setattr("GEMEditor.model.classes.cobra.Model.gem_remove_reactions", mock)
         return mock
 
     @pytest.fixture()
@@ -229,7 +227,7 @@ class TestMetaboliteTab:
     @pytest.fixture()
     def patched_remove_metabolites(self, monkeypatch):
         mock = Mock()
-        monkeypatch.setattr("GEMEditor.cobraClasses.Model.gem_remove_metabolites", mock)
+        monkeypatch.setattr("GEMEditor.model.classes.cobra.Model.gem_remove_metabolites", mock)
         return mock
 
     @pytest.fixture()
@@ -388,7 +386,7 @@ class TestGeneTab:
     @pytest.fixture()
     def patched_remove_genes(self, monkeypatch):
         mock = Mock()
-        monkeypatch.setattr("GEMEditor.cobraClasses.Model.gem_remove_genes", mock)
+        monkeypatch.setattr("GEMEditor.model.classes.cobra.Model.gem_remove_genes", mock)
         return mock
 
     @pytest.fixture()
@@ -553,7 +551,7 @@ class TestModelTestsTab:
     @pytest.fixture()
     def patched_remove_tests(self, monkeypatch):
         mock = Mock()
-        monkeypatch.setattr("GEMEditor.cobraClasses.Model.gem_remove_tests", mock)
+        monkeypatch.setattr("GEMEditor.model.classes.cobra.Model.gem_remove_tests", mock)
         return mock
 
     @pytest.fixture(autouse=True)
@@ -877,7 +875,7 @@ class TestReferenceTab:
     @pytest.fixture()
     def patched_remove_references(self, monkeypatch):
         mock = Mock()
-        monkeypatch.setattr("GEMEditor.cobraClasses.Model.gem_remove_references", mock)
+        monkeypatch.setattr("GEMEditor.model.classes.cobra.Model.gem_remove_references", mock)
         return mock
 
     @pytest.fixture()

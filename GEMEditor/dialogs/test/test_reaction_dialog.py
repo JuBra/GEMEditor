@@ -1,8 +1,8 @@
-from GEMEditor.dialogs.reaction import ReactionInputDialog
-from PyQt5.QtWidgets import QApplication, QDialogButtonBox
-from GEMEditor.cobraClasses import Reaction, Model
 from unittest.mock import Mock
 
+from GEMEditor.dialogs.reaction import ReactionInputDialog
+from GEMEditor.model.classes.cobra import Reaction, Model
+from PyQt5.QtWidgets import QApplication, QDialogButtonBox
 
 # Make sure to only start an application
 # if there is no active one. Opening multiple

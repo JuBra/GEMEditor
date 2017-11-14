@@ -1,10 +1,10 @@
-from collections import OrderedDict
-from unittest.mock import Mock
-
 import pytest
-from GEMEditor.cobraClasses import Reaction, Metabolite, Gene, Compartment
-from GEMEditor.data_classes import *
-from GEMEditor.evidence_class import Evidence
+from unittest.mock import Mock
+from collections import OrderedDict
+from GEMEditor.model.classes.cobra import Reaction, Metabolite, Gene, Compartment
+from GEMEditor.model.classes.evidence import Evidence
+from GEMEditor.model.classes.modeltest import ModelTest
+from GEMEditor.model.classes.reference import Reference, Annotation, Author
 from GEMEditor.widgets.tables import *
 from PyQt5 import QtGui
 from PyQt5.QtWidgets import QApplication

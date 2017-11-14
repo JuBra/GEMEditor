@@ -1,7 +1,7 @@
 import pytest
 from GEMEditor.base.functions import *
-from GEMEditor.cobraClasses import Metabolite
-from GEMEditor.data_classes import Annotation
+from GEMEditor.model.classes.cobra import Metabolite
+from GEMEditor.model.classes.reference import Annotation
 
 
 class Test_invert_mapping:

@@ -1,4 +1,4 @@
-from GEMEditor.data_classes import ReactionSetting
+from GEMEditor.model.classes.modeltest import ReactionSetting
 
 
 def run_test(test_case, model, solver, restore_initial=False):

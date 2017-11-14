@@ -2,9 +2,9 @@ import gc
 from unittest.mock import Mock
 
 import pytest
-from GEMEditor.cobraClasses import Model, Metabolite, Reaction, Gene, GeneGroup, Compartment
-from GEMEditor.data_classes import *
-from GEMEditor.evidence_class import Evidence
+from GEMEditor.model.classes.cobra import Model, Metabolite, Compartment
+from GEMEditor.model.classes.modeltest import ModelTest
+from GEMEditor.model.classes.reference import Reference, Annotation
 from GEMEditor.widgets.model import *
 from GEMEditor.widgets.tables import LinkedItem
 from PyQt5 import QtCore, QtGui, QtTest

@@ -1,103 +1,22 @@
 import logging
-from cobra.core import Reaction as cobraReaction
+import uuid
+from difflib import SequenceMatcher
+from weakref import WeakValueDictionary
+from GEMEditor.base import WindowManager, generate_copy_id, reaction_balance
+from GEMEditor.model.classes.base import BaseTreeElement, EvidenceLink
+from GEMEditor.model.classes.data import CleaningDict
+from GEMEditor.model.classes.modeltest import ReactionSetting
+from GEMEditor.widgets.tables import ReactionTable, MetaboliteTable, GeneTable, ReferenceTable, ModelTestTable, \
+    LinkedItem, CompartmentTable
+from PyQt5 import QtCore
+from PyQt5.QtWidgets import QApplication
 from cobra.core import Gene as cobraGene
 from cobra.core import Metabolite as cobraMetabolite
 from cobra.core import Model as cobraModel
-from weakref import WeakValueDictionary
-from PyQt5 import QtCore
-from PyQt5.QtWidgets import QApplication
-from GEMEditor.base.functions import generate_copy_id
-from GEMEditor.base.classes import WindowManager
-from GEMEditor.widgets.tables import ReactionTable, MetaboliteTable, GeneTable, ReferenceTable, ModelTestTable, LinkedItem, CompartmentTable
-from GEMEditor.data_classes import ReactionSetting, CleaningDict
-from GEMEditor.evidence_class import EvidenceLink
-from GEMEditor.base.functions import reaction_balance
+from cobra.core import Reaction as cobraReaction
 from six import string_types
-from difflib import SequenceMatcher
-import uuid
-
 
 LOGGER = logging.getLogger(__name__)
-
-
-class BaseTreeElement:
-
-    def __init__(self):
-        self._children = []
-        self._parents = []
-        super(BaseTreeElement, self).__init__()
-
-    def _add_child(self, child):
-        self._children.append(child)
-
-    def _remove_child(self, child, all=False):
-        if all:
-            self._children[:] = [x for x in self._children if x is not child]
-        else:
-            self._children.remove(child)
-
-    def _add_parent(self, parent):
-        self._parents.append(parent)
-
-    def _remove_parent(self, parent, all=False):
-        if all:
-            self._parents[:] = [x for x in self._parents if x is not parent]
-        else:
-            self._parents.remove(parent)
-
-    def add_child(self, child):
-        self._add_child(child)
-        child._add_parent(self)
-
-    def remove_child(self, child, all=False):
-        self._remove_child(child, all=all)
-        child._remove_parent(self, all=all)
-
-    def add_parent(self, parent):
-        self._add_parent(parent)
-        parent._add_child(self)
-
-    def remove_parent(self, parent, all=False):
-        self._remove_parent(parent, all=all)
-        parent._remove_child(self, all=all)
-
-    @property
-    def genes(self):
-        gene_set = set()
-        for x in self._children:
-            gene_set.update(x.genes)
-        return gene_set
-
-    @property
-    def reactions(self):
-        reaction_set = set()
-        for x in self._parents:
-            reaction_set.update(x.reactions)
-        return reaction_set
-
-    def delete_children(self, parent=None):
-        for x in self._children:
-            x.delete_children(self)
-        self._children[:] = []
-        if parent is not None:
-            self._parents[:] = [x for x in self._parents if x is not parent]
-
-    def prepare_deletion(self):
-        """ Prepare the deletion of the object from the model.
-
-        Unlink all parents and children"""
-
-        # Delete all parents
-        for parent in set(self._parents):
-            self.remove_parent(parent, all=True)
-
-        # Delete all child elements
-        self.delete_children()
-
-        try:
-            super(BaseTreeElement, self).prepare_deletion()
-        except AttributeError:
-            pass
 
 
 class Reaction(BaseTreeElement, EvidenceLink, cobraReaction):

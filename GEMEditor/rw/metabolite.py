@@ -1,11 +1,12 @@
 import re
-from lxml.etree import SubElement
+
+from GEMEditor import formula_validator
+from GEMEditor.model.classes.cobra import Metabolite
 from GEMEditor.rw import *
 from GEMEditor.rw.annotation import annotate_xml_from_model, annotate_element_from_xml
-from GEMEditor.cobraClasses import Metabolite
-from GEMEditor import formula_validator
-from cobra.io.sbml3 import clip
 from PyQt5.QtWidgets import QApplication
+from cobra.io.sbml3 import clip
+from lxml.etree import SubElement
 
 
 def add_metabolites(model_node, model, use_fbc=True):

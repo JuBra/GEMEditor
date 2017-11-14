@@ -1,10 +1,13 @@
-import pytest
 import gc
-from GEMEditor.cobraClasses import Reaction, GeneGroup, Gene, Model, BaseTreeElement, prune_gene_tree, Metabolite
-from GEMEditor.data_classes import CleaningDict, Reference, ModelTest, ReactionSetting, GeneSetting, Outcome
-from GEMEditor.evidence_class import Evidence
-from PyQt5.QtWidgets import QApplication
 
+import pytest
+from GEMEditor.model.classes.base import BaseTreeElement
+from GEMEditor.model.classes.cobra import Reaction, GeneGroup, Gene, Model, prune_gene_tree, Metabolite
+from GEMEditor.model.classes.data import CleaningDict
+from GEMEditor.model.classes.modeltest import ModelTest, ReactionSetting, GeneSetting, Outcome
+from GEMEditor.model.classes.reference import Reference
+from GEMEditor.model.classes.evidence import Evidence
+from PyQt5.QtWidgets import QApplication
 
 # Make sure to only start an application
 # if there is no active one. Opening multiple

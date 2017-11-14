@@ -1,6 +1,6 @@
 import pytest
-from GEMEditor.evidence_class import Evidence
-from GEMEditor.cobraClasses import Reaction, Gene, Metabolite, Compartment
+from GEMEditor.model.classes.cobra import Reaction, Gene, Metabolite, Compartment
+from GEMEditor.model.classes.evidence import Evidence
 
 
 class TestAssertionCatalyzingReaction:

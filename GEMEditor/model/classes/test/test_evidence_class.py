@@ -1,7 +1,8 @@
 import pytest
-from GEMEditor.evidence_class import *
-from GEMEditor.cobraClasses import Reaction, Gene
-from GEMEditor.data_classes import Reference
+from GEMEditor.model.classes.base import EvidenceLink
+from GEMEditor.model.classes.cobra import Reaction, Gene
+from GEMEditor.model.classes.reference import Reference
+from GEMEditor.model.classes.evidence import *
 
 
 class TestBaseEvidenceElement:

@@ -1,8 +1,8 @@
-from GEMEditor.dialogs.metabolite import MetaboliteEditDialog
-from GEMEditor.cobraClasses import Metabolite, Model
-from PyQt5.QtWidgets import QApplication, QDialogButtonBox
 from unittest.mock import Mock
 
+from GEMEditor.dialogs.metabolite import MetaboliteEditDialog
+from GEMEditor.model.classes.cobra import Metabolite, Model
+from PyQt5.QtWidgets import QApplication, QDialogButtonBox
 
 # Make sure to only start an application
 # if there is no active one. Opening multiple

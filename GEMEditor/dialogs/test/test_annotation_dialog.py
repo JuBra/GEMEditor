@@ -1,10 +1,10 @@
+from unittest.mock import Mock
+
 from GEMEditor.dialogs.annotation import EditAnnotationDialog
-from GEMEditor.cobraClasses import Metabolite, Reaction
-from GEMEditor.data_classes import Annotation
-from unittest.mock import Mock, patch
+from GEMEditor.model.classes.cobra import Metabolite, Reaction
+from GEMEditor.model.classes.reference import Annotation
 from PyQt5 import QtTest
 from PyQt5.QtWidgets import QApplication
-
 
 # Make sure to only start an application
 # if there is no active one. Opening multiple

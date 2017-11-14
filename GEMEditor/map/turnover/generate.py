@@ -151,7 +151,7 @@ def split_metabolites(reaction):
 
     Parameters
     ----------
-    reaction: GEMEditor.cobraClasses.Reaction
+    reaction: GEMEditor.model.classes.cobra.Reaction
 
     Returns
     -------

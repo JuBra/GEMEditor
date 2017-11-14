@@ -1,6 +1,6 @@
-from PyQt5.QtGui import QPixmap, QIcon, QStandardItem, QStandardItemModel, QFont, QBrush
+from GEMEditor.model.classes.modeltest import ReactionSetting, GeneSetting, Outcome
 from PyQt5.QtCore import Qt, QSize
-from GEMEditor.data_classes import ReactionSetting, Outcome, GeneSetting
+from PyQt5.QtGui import QPixmap, QIcon, QStandardItem, QStandardItemModel, QFont, QBrush
 
 
 class LinkedItem(QStandardItem):

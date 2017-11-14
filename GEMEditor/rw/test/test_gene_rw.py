@@ -1,7 +1,7 @@
 import pytest
+from GEMEditor.model.classes.cobra import Gene, Model
 from GEMEditor.rw import *
 from GEMEditor.rw.gene import add_genes, parse_genes
-from GEMEditor.cobraClasses import Gene, Model
 from cobra.io.sbml3 import SBML_DOT
 from lxml.etree import Element
 

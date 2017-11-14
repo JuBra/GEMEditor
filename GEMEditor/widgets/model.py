@@ -1,31 +1,34 @@
 import string
-from PyQt5 import QtCore, QtGui
-from PyQt5.QtWidgets import QWidget, QAction, QMenu, QApplication, QCompleter
-from PyQt5.QtGui import QRegularExpressionValidator
-from PyQt5.QtCore import QRegularExpression
-from GEMEditor.ui.modelDisplayWidget import Ui_modelDisaplayWidget
-from GEMEditor.ui.StoichiometryDisplayWidget import Ui_StoichiometryDisplayWidget
-from GEMEditor.ui.GenesDisplayWidget import Ui_GenesDisplayWidget
-from GEMEditor.ui.ModelAnnotationDisplayWidget import Ui_AnnotationDisplayWidget
-from GEMEditor.widgets.tables import AnnotationTable, LinkedItem, StoichiometryTable, EvidenceTable, ReactionSettingsTable, GeneSettingsTable, OutcomesTable, LinkedReferenceTable
-from GEMEditor.dialogs.standard import MetaboliteSelectionDialog, GeneSelectionDialog, ReactionSelectionDialog, ReferenceSelectionDialog
-from GEMEditor.widgets.delegates import FloatInputDelegate, ComboBoxDelegate
-from GEMEditor.cobraClasses import Gene, GeneGroup, iterate_tree, Reaction
-from GEMEditor.base.functions import reaction_balance
-from GEMEditor.evidence_class import Evidence
-from GEMEditor.data_classes import Outcome, ReactionSetting, GeneSetting
-from GEMEditor.ui.TableDisplayWidgetAddDel import Ui_TableDisplayWidgetAddDel
-from GEMEditor.ui.CommentDisplayWidget import Ui_CommentDisplayWidget
-from GEMEditor.ui.MetaboliteAttributeDisplayWidget import Ui_MetaboliteAttributeDisplayWidget as Ui_MetAttribs
-from GEMEditor.ui.ReactionsDisplayWidget import Ui_ReactionsDisplayWidget
-from GEMEditor.ui.GeneAttributesDisplayWidget import Ui_Form as Ui_GeneAttribs
-from GEMEditor.ui.ReactionAttributeDisplayWidget import Ui_Form as Ui_ReactionAttribs
+
 from GEMEditor import use_progress
+from GEMEditor.base.functions import reaction_balance
 from GEMEditor.dialogs.annotation import EditAnnotationDialog
 from GEMEditor.dialogs.evidence import EditEvidenceDialog
-from GEMEditor.widgets.baseWidgets import TableDisplayWidget
-from GEMEditor.ui.SettingDisplayWiget import Ui_SettingsDisplayWidget
+from GEMEditor.dialogs.standard import MetaboliteSelectionDialog, GeneSelectionDialog, ReactionSelectionDialog, \
+    ReferenceSelectionDialog
+from GEMEditor.model.classes.cobra import Gene, GeneGroup, iterate_tree, Reaction
+from GEMEditor.model.classes.modeltest import ReactionSetting, GeneSetting, Outcome
+from GEMEditor.model.classes.evidence import Evidence
+from GEMEditor.ui.CommentDisplayWidget import Ui_CommentDisplayWidget
+from GEMEditor.ui.GeneAttributesDisplayWidget import Ui_Form as Ui_GeneAttribs
+from GEMEditor.ui.GenesDisplayWidget import Ui_GenesDisplayWidget
+from GEMEditor.ui.MetaboliteAttributeDisplayWidget import Ui_MetaboliteAttributeDisplayWidget as Ui_MetAttribs
 from GEMEditor.ui.MetaboliteDisplayWidget import Ui_Form as Ui_MetDisplayWidget
+from GEMEditor.ui.ModelAnnotationDisplayWidget import Ui_AnnotationDisplayWidget
+from GEMEditor.ui.ReactionAttributeDisplayWidget import Ui_Form as Ui_ReactionAttribs
+from GEMEditor.ui.ReactionsDisplayWidget import Ui_ReactionsDisplayWidget
+from GEMEditor.ui.SettingDisplayWiget import Ui_SettingsDisplayWidget
+from GEMEditor.ui.StoichiometryDisplayWidget import Ui_StoichiometryDisplayWidget
+from GEMEditor.ui.TableDisplayWidgetAddDel import Ui_TableDisplayWidgetAddDel
+from GEMEditor.ui.modelDisplayWidget import Ui_modelDisaplayWidget
+from GEMEditor.widgets.baseWidgets import TableDisplayWidget
+from GEMEditor.widgets.delegates import FloatInputDelegate, ComboBoxDelegate
+from GEMEditor.widgets.tables import AnnotationTable, LinkedItem, StoichiometryTable, EvidenceTable, \
+    ReactionSettingsTable, GeneSettingsTable, OutcomesTable, LinkedReferenceTable
+from PyQt5 import QtCore, QtGui
+from PyQt5.QtCore import QRegularExpression
+from PyQt5.QtGui import QRegularExpressionValidator
+from PyQt5.QtWidgets import QWidget, QAction, QMenu, QApplication, QCompleter
 
 
 class ModelDisplayWidget(QWidget, Ui_modelDisaplayWidget):
@@ -1064,7 +1067,7 @@ class ReactionSettingDisplayWidget(QWidget, Ui_SettingsDisplayWidget):
         Parameters
         ----------
         model_test : GEMEditor.data_classes.ModelTest
-        model : GEMEditor.cobraClasses.Model
+        model : GEMEditor.model.classes.cobra.Model
 
         Returns
         -------
@@ -1157,7 +1160,7 @@ class GeneSettingDisplayWidget(QWidget, Ui_SettingsDisplayWidget):
         Parameters
         ----------
         model_test : GEMEditor.data_classes.ModelTest
-        model : GEMEditor.cobraClasses.Model
+        model : GEMEditor.model.classes.cobra.Model
 
         Returns
         -------
@@ -1240,7 +1243,7 @@ class ReferenceDisplayWidget(QWidget, Ui_SettingsDisplayWidget):
         Parameters
         ----------
         item : GEMEditor.data_classes.ModelTest
-        model : GEMEditor.cobraClasses.Model
+        model : GEMEditor.model.classes.cobra.Model
 
         Returns
         -------
@@ -1330,7 +1333,7 @@ class OutcomeDisplayWidget(QWidget, Ui_SettingsDisplayWidget):
         Parameters
         ----------
         model_test : GEMEditor.data_classes.ModelTest
-        model : GEMEditor.cobraClasses.Model
+        model : GEMEditor.model.classes.cobra.Model
         solution : cobra.Solution.Solution
 
         Returns

@@ -1,6 +1,6 @@
+from GEMEditor.model.classes.cobra import Model
 from GEMEditor.rw import *
-from lxml.etree import Element, SubElement
-from GEMEditor.cobraClasses import Model
+from lxml.etree import SubElement
 
 
 def setup_sbml3_model(sbml_node, model):

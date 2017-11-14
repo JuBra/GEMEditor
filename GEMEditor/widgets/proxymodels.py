@@ -105,7 +105,7 @@ class MetaboliteProxyFilter(CustomSortFilterProxyModel):
 
         Parameters
         ----------
-        metabolite : GEMEditor.cobraClasses.Metabolite
+        metabolite : GEMEditor.model.classes.cobra.Metabolite
 
         Returns
         -------
@@ -142,7 +142,7 @@ class GeneProxyFilter(CustomSortFilterProxyModel):
 
         Parameters
         ----------
-        gene : GEMEditor.cobraClasses.Gene
+        gene : GEMEditor.model.classes.cobra.Gene
 
         Returns
         -------

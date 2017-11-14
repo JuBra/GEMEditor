@@ -1,6 +1,6 @@
-from GEMEditor.analysis.model_statistics import get_reaction_set
-from GEMEditor.cobraClasses import Reaction, Metabolite
 import pytest
+from GEMEditor.analysis.model_statistics import get_reaction_set
+from GEMEditor.model.classes.cobra import Reaction, Metabolite
 
 
 class Testget_reaction_set:

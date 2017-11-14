@@ -1,8 +1,10 @@
-import pytest
 from unittest.mock import Mock, patch, PropertyMock, call
-from GEMEditor.data_classes import Annotation, Reference, Author, ModelTest, Outcome, ReactionSetting, \
-    CleaningDict, ModelStats, GeneSetting
-from GEMEditor.cobraClasses import Reaction, Gene, Compartment
+
+import pytest
+from GEMEditor.model.classes.cobra import Reaction, Gene, Compartment
+from GEMEditor.model.classes.data import CleaningDict, ModelStats
+from GEMEditor.model.classes.modeltest import ModelTest, ReactionSetting, GeneSetting, Outcome
+from GEMEditor.model.classes.reference import Reference, Annotation, Author
 
 
 class TestAnnotation:
@@ -273,7 +275,7 @@ class TestSetting:
         old_ub = 1000.
         old_obj_value = 1.
 
-        with patch('GEMEditor.cobraClasses.Reaction.objective_coefficient', new_callable=PropertyMock) as objective_coefficient:
+        with patch('GEMEditor.model.classes.cobra.Reaction.objective_coefficient', new_callable=PropertyMock) as objective_coefficient:
             objective_coefficient.return_value = old_obj_value
             reaction = Reaction("test_id",
                                 lower_bound=old_lb,

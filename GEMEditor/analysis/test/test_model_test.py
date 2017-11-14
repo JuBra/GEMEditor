@@ -1,11 +1,11 @@
-from GEMEditor.cobraClasses import Reaction, Metabolite, Model
-from GEMEditor.data_classes import ReactionSetting, Outcome, ModelTest
-from cobra.core.solution import LegacySolution
-from GEMEditor.analysis.model_test import get_original_settings, run_test
-import GEMEditor
 from unittest.mock import Mock
 
+import GEMEditor
 import pytest
+from GEMEditor.analysis.model_test import get_original_settings, run_test
+from GEMEditor.model.classes.cobra import Reaction, Metabolite, Model
+from GEMEditor.model.classes.modeltest import ModelTest, ReactionSetting, Outcome
+from cobra.core.solution import LegacySolution
 
 
 class TestGetOriginalSettings:
@@ -161,11 +161,11 @@ class TestRunTest:
 
     @pytest.fixture()
     def mock_optimize(self, monkeypatch, solution):
-        monkeypatch.setattr("GEMEditor.cobraClasses.Model.optimize", Mock(return_value=solution))
+        monkeypatch.setattr("GEMEditor.model.classes.cobra.Model.optimize", Mock(return_value=solution))
 
     @pytest.fixture()
     def mock_optimize_infeasible(self, monkeypatch, infeasible_solution):
-        monkeypatch.setattr("GEMEditor.cobraClasses.Model.optimize", Mock(return_value=infeasible_solution))
+        monkeypatch.setattr("GEMEditor.model.classes.cobra.Model.optimize", Mock(return_value=infeasible_solution))
         return infeasible_solution
 
     @pytest.fixture()

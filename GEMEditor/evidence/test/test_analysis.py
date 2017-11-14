@@ -1,6 +1,6 @@
 from GEMEditor.evidence.analysis import *
-from GEMEditor.evidence_class import Evidence
-from GEMEditor.cobraClasses import Reaction, Gene
+from GEMEditor.model.classes.cobra import Reaction, Gene
+from GEMEditor.model.classes.evidence import Evidence
 
 
 class Test_sort_evidences:

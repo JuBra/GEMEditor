@@ -1,7 +1,8 @@
 import pytest
-from GEMEditor.cobraClasses import Reaction, Metabolite
-from GEMEditor.map.turnover.generate import circular_positions, get_parting_node, filter_dictionary, secondary_position_factor, \
+from GEMEditor.map.turnover.generate import circular_positions, get_parting_node, filter_dictionary, \
+    secondary_position_factor, \
     split_metabolites
+from GEMEditor.model.classes.cobra import Reaction, Metabolite
 
 
 @pytest.mark.parametrize("n", (1, 5, 10, 100))

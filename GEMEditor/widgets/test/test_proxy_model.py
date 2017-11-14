@@ -1,10 +1,9 @@
 import pytest
-from PyQt5.QtWidgets import QApplication
+from GEMEditor.model.classes.cobra import Reaction, Metabolite, Gene
+from GEMEditor.model.classes.reference import Annotation
 from GEMEditor.widgets.proxymodels import ReactionProxyFilter, reversibility
 from GEMEditor.widgets.tables import ReactionTable
-from GEMEditor.cobraClasses import Reaction, Metabolite, Gene
-from GEMEditor.data_classes import Annotation
-
+from PyQt5.QtWidgets import QApplication
 
 # Make sure to only start an application
 # if there is no active one. Opening multiple

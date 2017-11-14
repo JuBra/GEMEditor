@@ -1,9 +1,9 @@
-from GEMEditor.analysis.duplicates import *
-from GEMEditor.cobraClasses import Reaction, Metabolite
-from GEMEditor.data_classes import Annotation
-from GEMEditor.evidence_class import Evidence
 import itertools
-import pytest
+
+from GEMEditor.analysis.duplicates import *
+from GEMEditor.model.classes.cobra import Reaction, Metabolite
+from GEMEditor.model.classes.reference import Annotation
+from GEMEditor.model.classes.evidence import Evidence
 
 
 def test_get_reaction_set_wo_directionality():

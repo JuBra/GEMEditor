@@ -5,7 +5,7 @@ def get_reaction_set(reaction, remove_directionality=False):
 
     Parameters
     ----------
-    reaction: GEMEditor.cobraClasses.Reaction
+    reaction: GEMEditor.model.classes.cobra.Reaction
         Reaction instance for which to generate the frozenset
     remove_directionality: bool
         Specify if the directionality of the reaction should be considered
