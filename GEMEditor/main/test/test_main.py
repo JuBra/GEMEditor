@@ -5,6 +5,7 @@ from unittest.mock import Mock
 from GEMEditor.main import MainWindow
 from GEMEditor.model.classes.cobra import Model
 from PyQt5.QtWidgets import QApplication, QMessageBox, QFileDialog
+from GEMEditor.base.test.fixtures import progress_not_cancelled
 
 # Make sure to only start an application
 # if there is no active one. Opening multiple
