@@ -10,7 +10,7 @@ from GEMEditor.base.functions import generate_copy_id
 from GEMEditor.base.classes import WindowManager
 from GEMEditor.widgets.tables import ReactionTable, MetaboliteTable, GeneTable, ReferenceTable, ModelTestTable, LinkedItem, CompartmentTable
 from GEMEditor.data_classes import ReactionSetting, CleaningDict
-from GEMEditor.base_classes import EvidenceLink
+from GEMEditor.evidence_class import EvidenceLink
 from GEMEditor.base.functions import reaction_balance
 from six import string_types
 from difflib import SequenceMatcher
