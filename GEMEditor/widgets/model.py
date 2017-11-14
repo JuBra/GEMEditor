@@ -405,7 +405,7 @@ class AnnotationDisplayWidget(TableDisplayWidget, Ui_TableDisplayWidgetAddDel):
 
     @QtCore.pyqtSlot()
     def add_item(self):
-        dialog = EditAnnotationDialog(self, None, self.display_item)
+        dialog = EditAnnotationDialog(None, self.display_item)
         if dialog.exec_():
             new_annotation = dialog.get_annotation()
             if new_annotation not in self.get_annotation():
@@ -415,7 +415,7 @@ class AnnotationDisplayWidget(TableDisplayWidget, Ui_TableDisplayWidgetAddDel):
     def edit_item(self):
         row = self.dataView.get_selected_rows(get_first_only=True)[0]
         annotation = self.dataTable.item_from_row(row)
-        dialog = EditAnnotationDialog(self, annotation, self.display_item)
+        dialog = EditAnnotationDialog(annotation, self.display_item)
         if dialog.exec_():
             self.dataTable.update_row_from_item(dialog.get_annotation(), row)
 

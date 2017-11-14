@@ -9,12 +9,15 @@ from GEMEditor.cobraClasses import Reaction, Metabolite, Gene
 
 class EditAnnotationDialog(QDialog, Ui_EditAnnotationDialog):
 
-    def __init__(self, parent=None, annotation=None, item=None):
-        QDialog.__init__(self, parent)
+    def __init__(self, annotation=None, item=None):
+        super(EditAnnotationDialog, self).__init__()
         self.setupUi(self)
         self.annotation = None
         self.item = None
         self.lookup = {}
+
+        # Store status images
+        self.status_unknown = QtGui.QPixmap(":/status_undefined")
         self.status_okay = QtGui.QPixmap(":/status_okay")
         self.status_error = QtGui.QPixmap(":/status_error")
 
@@ -45,6 +48,7 @@ class EditAnnotationDialog(QDialog, Ui_EditAnnotationDialog):
         else:
             index = 0
         self.typeComboBox.setCurrentIndex(index)
+        self.validate_annotation()
 
     def set_options(self, item):
         self.typeComboBox.clear()
@@ -67,8 +71,9 @@ class EditAnnotationDialog(QDialog, Ui_EditAnnotationDialog):
         try:
             pattern = self.lookup[self.typeComboBox.currentText()].validator
         except KeyError:
+            # Unknown status
             self.buttonBox.button(QDialogButtonBox.Ok).setEnabled(False)
-            self.statusLabel.setPixmap(self.status_error)
+            self.statusLabel.setPixmap(self.status_unknown)
         else:
             if text and re.match(pattern, text):
                 self.buttonBox.button(QDialogButtonBox.Ok).setEnabled(True)

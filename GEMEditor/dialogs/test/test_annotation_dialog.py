@@ -1,5 +1,7 @@
 from GEMEditor.dialogs.annotation import EditAnnotationDialog
-from GEMEditor.cobraClasses import Metabolite
+from GEMEditor.cobraClasses import Metabolite, Reaction
+from GEMEditor.data_classes import Annotation
+from unittest.mock import Mock, patch
 from PyQt5 import QtTest
 from PyQt5.QtWidgets import QApplication
 
@@ -35,4 +37,14 @@ class TestEditAnnotationDialog:
         resulting_annotation = dialog.get_annotation()
         assert resulting_annotation.identifier == new_annotation
         assert resulting_annotation.collection == dialog.lookup[dialog.typeComboBox.currentText()].collection
+
+    def test_setting_annotation_updates_label(self):
+        dialog = EditAnnotationDialog()
+        mock = dialog.statusLabel.setPixmap = Mock()
+        reaction = Reaction("r1")
+
+        dialog.set_annotation(Annotation("ec-code", "2.7.1.1"), reaction)
+        mock.assert_called_with(dialog.status_okay)
+        dialog.set_annotation(Annotation("ec-code", "2.7.1.1.-"), reaction)
+        mock.assert_called_with(dialog.status_error)
 
