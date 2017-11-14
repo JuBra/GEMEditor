@@ -107,16 +107,19 @@ class EditModelDialog(QDialog, Ui_EditModelDialog):
         """ Populate the compartment table """
         self.compartmentTable.populate_table(self.model.gem_compartments.values())
 
+    def _add_new_compartment_to_table(self, compartment):
+        row_data = self.compartmentTable.row_from_item(compartment)
+        # Reset compartment attributes to trigger changed state
+        compartment.id = None
+        compartment.name = None
+        self.compartmentTable.appendRow(row_data)
+
     @QtCore.pyqtSlot()
     def add_compartment(self):
         dialog = AddCompartmentDialog(self.compartmentTable)
         if dialog.exec_():
             compartment = dialog.get_compartment
-            row_data = self.compartmentTable.row_from_item(compartment)
-            # Reset compartment attributes to trigger changed state
-            compartment.id = None
-            compartment.name = None
-            self.compartmentTable.appendRow(row_data)
+            self._add_new_compartment_to_table(compartment)
 
     @QtCore.pyqtSlot()
     def delete_compartment(self):
@@ -171,11 +174,11 @@ class EditModelDialog(QDialog, Ui_EditModelDialog):
                         m.compartment = new_comp_id
 
                     # Update metabolite table entries
-                    self.model.update_metabolites(metabolites)
+                    self.model.gem_update_metabolites(metabolites)
 
                     # Substitue old entry
                     del self.model.gem_compartments[old_comp_id]
-                    self.model[new_comp_id] = comp
+                    self.model.gem_compartments[new_comp_id] = comp
 
             # Set name
             comp.name = self.compartmentTable.item(i, 1).text()

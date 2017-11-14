@@ -155,7 +155,7 @@ class TestEditModelSettings:
 
     def test_add_compartment(self):
         row_count = self.dialog.compartmentTable.rowCount()
-        self.dialog.compartmentTable.update_row_from_item(self.new_comp)
+        self.dialog._add_new_compartment_to_table(self.new_comp)
         assert self.dialog.compartmentTable.rowCount() == row_count + 1
         assert self.dialog.buttonBox.button(QDialogButtonBox.Save).isEnabled() is True
         assert self.dialog.input_changed() is True
@@ -182,15 +182,13 @@ class TestEditModelSettings:
         assert self.model.name == self.test_name + self.test_name
 
     def test_save_changes_compartment_addition(self):
-        self.dialog.compartmentTable.update_row_from_item(self.new_comp)
-        self.new_comp.id = None
+        self.dialog._add_new_compartment_to_table(self.new_comp)
         assert self.dialog.compartmentTable.rowCount() == 2
         self.dialog.save_changes()
         assert self.model.gem_compartments == {self.comp1_id: self.comp1,
                                                self.new_comp_id: self.new_comp}
         assert self.metabolite in self.model.metabolites
 
-    @pytest.mark.usefixtures("patch_progress")
     def test_save_changes_compartment_deletion(self):
         self.dialog.compartmentTable.setRowCount(0)
         assert self.metabolite in self.model.metabolites
@@ -203,4 +201,13 @@ class TestEditModelSettings:
         assert self.dialog.buttonBox.button(QDialogButtonBox.Save).isEnabled() is True
         self.dialog.save_changes()
         assert self.model.gem_compartments[self.comp1_id].name == self.new_comp_name
+
+    def test_save_changed_compartment_id(self):
+        new_id = "z"
+        self.dialog.compartmentTable.item(0, 0).setText(new_id)
+        self.dialog.save_changes()
+        assert "z" in self.model.gem_compartments
+        assert self.metabolite.compartment == new_id
+        assert self.model.gem_compartments[new_id] is self.comp1
+        assert self.comp1.name == self.comp1_name
 
