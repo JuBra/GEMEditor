@@ -1,5 +1,6 @@
-from lxml.etree import Element, register_namespace, ElementTree
+import logging
 import lxml.etree as ET
+from lxml.etree import Element, register_namespace, ElementTree
 from GEMEditor.rw import *
 from GEMEditor.rw.model import setup_sbml3_model, parse_sbml3_model
 from GEMEditor.rw.units import add_unit_definitions
@@ -10,10 +11,9 @@ from GEMEditor.rw.gene import add_genes, parse_genes
 from GEMEditor.rw.fluxset import add_tests_to_xml, parse_test_from_xml
 from GEMEditor.rw.reference import add_references, parse_references
 from GEMEditor.rw.evidences import add_evidences_to_xml, parse_evidences_from_xml
-from GEMEditor.data_classes import Compartment
+from GEMEditor.cobraClasses import Compartment
 from PyQt5.QtWidgets import QProgressDialog
 from GEMEditor import use_progress
-import logging
 
 
 LOGGER = logging.getLogger(__name__)

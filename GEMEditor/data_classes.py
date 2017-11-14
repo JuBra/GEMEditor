@@ -1,5 +1,4 @@
 import operator
-from GEMEditor.base_classes import EvidenceLink
 from collections import namedtuple, OrderedDict, defaultdict
 from uuid import uuid4
 
@@ -447,25 +446,3 @@ class ModelStats:
         return self.genes_total - len(self.list_unannotated_genes)
 
 
-class Compartment(EvidenceLink):
-    def __init__(self, id=None, name=None):
-        super(Compartment, self).__init__()
-        self.id = id
-        self.name = name
-
-    def get_values(self):
-        return self.id, self.name
-
-    def __eq__(self, other):
-        if isinstance(other, tuple):
-            return other == self.get_values()
-        elif isinstance(other, Compartment):
-            return other.get_values() == self.get_values()
-        else:
-            return NotImplemented
-
-    def __repr__(self):
-        return str(self.id)
-
-    def __hash__(self):
-        return id(self)

@@ -1,9 +1,6 @@
-import sip
-sip.setapi('QVariant', 2)
-sip.setapi('QString', 2)
 from PyQt5.QtGui import QPixmap, QIcon, QStandardItem, QStandardItemModel, QFont, QBrush
 from PyQt5.QtCore import Qt, QSize
-from GEMEditor.data_classes import ReactionSetting, Outcome, GeneSetting, Compartment
+from GEMEditor.data_classes import ReactionSetting, Outcome, GeneSetting
 
 
 class LinkedItem(QStandardItem):
@@ -368,7 +365,7 @@ class ReactionSettingsTable(ElementTable):
 
         Parameters
         ----------
-        reaction : GEMEditor.cobraClasses.Reaction
+        setting : GEMEditor.data_classes.ReactionSetting
 
         Returns
         -------

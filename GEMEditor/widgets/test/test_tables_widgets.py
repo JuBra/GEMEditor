@@ -1,13 +1,13 @@
-import pytest
-from GEMEditor.widgets.tables import *
-from GEMEditor.cobraClasses import Reaction, Metabolite, Gene
-from GEMEditor.data_classes import *
-from GEMEditor.evidence_class import Evidence
 from collections import OrderedDict
 from unittest.mock import Mock
+
+import pytest
+from GEMEditor.cobraClasses import Reaction, Metabolite, Gene, Compartment
+from GEMEditor.data_classes import *
+from GEMEditor.evidence_class import Evidence
+from GEMEditor.widgets.tables import *
 from PyQt5 import QtGui
 from PyQt5.QtWidgets import QApplication
-
 
 # Make sure to only start an application
 # if there is no active one. Opening multiple

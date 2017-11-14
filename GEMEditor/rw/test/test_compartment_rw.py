@@ -1,7 +1,6 @@
 import pytest
 from GEMEditor.rw import *
 from GEMEditor.cobraClasses import Model, Metabolite, Compartment
-from GEMEditor.data_classes import Compartment
 import lxml.etree as ET
 from lxml.etree import Element
 

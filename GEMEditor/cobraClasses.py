@@ -9,7 +9,7 @@ from PyQt5.QtWidgets import QApplication
 from GEMEditor.base.functions import generate_copy_id
 from GEMEditor.base.classes import WindowManager
 from GEMEditor.widgets.tables import ReactionTable, MetaboliteTable, GeneTable, ReferenceTable, ModelTestTable, LinkedItem, CompartmentTable
-from GEMEditor.data_classes import ReactionSetting, CleaningDict, Compartment
+from GEMEditor.data_classes import ReactionSetting, CleaningDict
 from GEMEditor.base_classes import EvidenceLink
 from GEMEditor.base.functions import reaction_balance
 from six import string_types
@@ -762,3 +762,26 @@ def prune_gene_tree(input_element, parent=None):
         for child in input_element._children:
             prune_gene_tree(child, input_element)
 
+
+class Compartment(EvidenceLink):
+    def __init__(self, id=None, name=None):
+        super(Compartment, self).__init__()
+        self.id = id
+        self.name = name
+
+    def get_values(self):
+        return self.id, self.name
+
+    def __eq__(self, other):
+        if isinstance(other, tuple):
+            return other == self.get_values()
+        elif isinstance(other, Compartment):
+            return other.get_values() == self.get_values()
+        else:
+            return NotImplemented
+
+    def __repr__(self):
+        return str(self.id)
+
+    def __hash__(self):
+        return id(self)

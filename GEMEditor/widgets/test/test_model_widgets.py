@@ -1,13 +1,13 @@
+import gc
+from unittest.mock import Mock
+
+import pytest
+from GEMEditor.cobraClasses import Model, Metabolite, Reaction, Gene, GeneGroup, Compartment
+from GEMEditor.data_classes import *
+from GEMEditor.evidence_class import Evidence
 from GEMEditor.widgets.model import *
 from GEMEditor.widgets.tables import LinkedItem
 from PyQt5 import QtCore, QtGui, QtTest
-from GEMEditor.cobraClasses import Model, Metabolite, Reaction, Gene, GeneGroup
-from GEMEditor.data_classes import *
-from GEMEditor.evidence_class import Evidence
-import gc
-from unittest.mock import Mock
-import pytest
-
 
 # Make sure to only start an application
 # if there is no active one. Opening multiple
