@@ -52,4 +52,3 @@ class Ui_EditAnnotationDialog(object):
         self.typeLabel.setText(_translate("EditAnnotationDialog", "Type:"))
         self.annotationLabel.setText(_translate("EditAnnotationDialog", "Annotation:"))
 
-import icons_rc
