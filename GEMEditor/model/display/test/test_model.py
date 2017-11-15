@@ -1,5 +1,6 @@
 import pytest
-from GEMEditor.model.classes.cobra import Model, Compartment, Metabolite
+from PyQt5.QtWidgets import QWidget
+from GEMEditor.model.classes.cobra import Model, Compartment, Metabolite, Gene, Reaction
 from GEMEditor.model.display.model import ModelDisplayWidget
 
 

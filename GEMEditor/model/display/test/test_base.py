@@ -1,15 +1,16 @@
 import gc
-from unittest.mock import Mock
-
 import pytest
+from unittest.mock import Mock
 from GEMEditor.model.classes.annotation import Annotation
-from GEMEditor.model.classes.cobra import Model
+from GEMEditor.model.classes.cobra import Model, Reaction, Gene
 from GEMEditor.model.classes.modeltest import ModelTest
 from GEMEditor.model.classes.reference import Reference
+from GEMEditor.model.classes.evidence import Evidence
 from GEMEditor.model.display.base import AnnotationDisplayWidget, CommentDisplayWidget, EvidenceDisplayWidget, \
     ReferenceDisplayWidget
-from GEMEditor.widgets.test.test_model_widgets import MockSlot
+from GEMEditor.model.display.test.fixture import MockSlot
 from PyQt5 import QtTest, QtCore
+from PyQt5.QtWidgets import QWidget
 
 
 class TestAnnotationDislayWidget:

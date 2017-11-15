@@ -1,11 +1,12 @@
-from unittest.mock import Mock
-
 import pytest
-from GEMEditor.model.classes.cobra import Metabolite, Model
+from unittest.mock import Mock
+from GEMEditor.base.tables import LinkedItem
+from GEMEditor.model.classes.cobra import Metabolite, Model, Reaction, Gene, GeneGroup
 from GEMEditor.model.display.reaction import StoichiometryDisplayWidget, GenesDisplayWidget, \
     ReactionAttributesDisplayWidget
-from GEMEditor.widgets.test.test_model_widgets import MockSlot
+from GEMEditor.model.display.test.fixture import MockSlot
 from PyQt5 import QtGui, QtCore, QtTest
+from PyQt5.QtWidgets import QWidget
 
 
 class TestStoichiometryDisplayWidget:

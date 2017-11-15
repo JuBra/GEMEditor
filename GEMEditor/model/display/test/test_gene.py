@@ -1,8 +1,7 @@
 from unittest.mock import Mock
-
-from GEMEditor.model.classes.cobra import Model
-from GEMEditor.model.display.gene import GeneAttributesDisplayWidget
 from PyQt5 import QtTest
+from GEMEditor.model.classes.cobra import Model, Gene
+from GEMEditor.model.display.gene import GeneAttributesDisplayWidget
 
 
 class TestGeneAttributesDisplayWidget:
