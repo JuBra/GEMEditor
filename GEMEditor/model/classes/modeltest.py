@@ -1,10 +1,10 @@
 import operator
 from collections import OrderedDict
 from uuid import uuid4
-from GEMEditor.model.classes.base import LinkReference
+from GEMEditor.model.classes.base import ReferenceLink
 
 
-class ModelTest(LinkReference):
+class ModelTest(ReferenceLink):
 
     def __init__(self, id=None, description="", comment=""):
         super(ModelTest, self).__init__()

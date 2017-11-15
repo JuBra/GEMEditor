@@ -6,7 +6,7 @@ from GEMEditor.base.classes import Settings
 from GEMEditor.database import database_path as DB_PATH
 from GEMEditor.database.ui import Ui_MetaboliteEntryDisplayWidget, Ui_ReactionEntryDisplayWidget
 from GEMEditor.model.classes.cobra import Metabolite, Reaction
-from GEMEditor.model.classes.reference import Annotation
+from GEMEditor.model.classes.annotation import Annotation
 from PyQt5 import QtCore, QtSql
 from PyQt5.QtWidgets import QMessageBox, QWidget, QTableWidgetItem
 

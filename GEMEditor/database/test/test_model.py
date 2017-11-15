@@ -2,7 +2,7 @@ import pytest
 from unittest.mock import Mock
 from GEMEditor.database.model import *
 from GEMEditor.model.classes.cobra import Model, Metabolite, Reaction
-from GEMEditor.model.classes.reference import Annotation
+from GEMEditor.model.classes.annotation import Annotation
 from GEMEditor.database.test.fixtures import database
 from PyQt5.QtWidgets import QApplication
 

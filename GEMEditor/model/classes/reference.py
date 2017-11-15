@@ -1,5 +1,6 @@
 from collections import namedtuple
 from uuid import uuid4
+from GEMEditor.model.classes.annotation import Annotation
 
 
 class Reference:
@@ -47,7 +48,7 @@ class Reference:
 
         Parameters
         ----------
-        reference: GEMEditor.model.classes.base.LinkReference
+        reference: GEMEditor.model.classes.base.ReferenceLink
         reciprocal: bool
         """
         self._linked_items.add(item)
@@ -59,7 +60,7 @@ class Reference:
 
         Parameters
         ----------
-        item: GEMEditor.model.classes.base.LinkReference
+        item: GEMEditor.model.classes.base.ReferenceLink
         reciprocal: bool
         """
         self._linked_items.discard(item)
@@ -106,39 +107,6 @@ class Reference:
                                      authors=self.reference_string(),
                                      title=self.title,
                                      id_strings="; ".join(id_strings))
-
-
-class Annotation:
-    def __init__(self, collection=None, identifier=None, type="is"):
-        self._collection = collection
-        self._identifier = identifier
-        self._type = type
-
-    @property
-    def collection(self):
-        return self._collection
-
-    @property
-    def identifier(self):
-        return self._identifier
-
-    @property
-    def type(self):
-        return self._type
-
-    def __eq__(self, other):
-        if isinstance(other, Annotation) and (self.collection == other.collection and
-                                                self.identifier == other.identifier and
-                                                      self.type == other.type):
-            return True
-        else:
-            return False
-
-    def __hash__(self):
-        return hash((self._collection, self._identifier, self._type))
-
-    def __str__(self):
-        return "Annotation({0!s}, {1!s})".format(self._collection, self._identifier)
 
 
 class Author(namedtuple("Author", ["lastname", "firstname", "initials"])):

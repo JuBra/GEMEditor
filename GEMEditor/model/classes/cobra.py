@@ -2,9 +2,9 @@ import logging
 import uuid
 from difflib import SequenceMatcher
 from weakref import WeakValueDictionary
+from collections import defaultdict
 from GEMEditor.base import WindowManager, generate_copy_id, reaction_balance
 from GEMEditor.model.classes.base import BaseTreeElement, EvidenceLink
-from GEMEditor.model.classes.data import CleaningDict
 from GEMEditor.model.classes.modeltest import ReactionSetting
 from GEMEditor.widgets.tables import ReactionTable, MetaboliteTable, GeneTable, ReferenceTable, ModelTestTable, \
     LinkedItem, CompartmentTable
@@ -17,6 +17,17 @@ from cobra.core import Reaction as cobraReaction
 from six import string_types
 
 LOGGER = logging.getLogger(__name__)
+
+
+class CleaningDict(defaultdict):
+
+    def __init__(self):
+        super(CleaningDict, self).__init__(set)
+
+    def remove_reaction(self, key, reaction):
+        self[key].discard(reaction)
+        if not self[key]:
+            del self[key]
 
 
 class Reaction(BaseTreeElement, EvidenceLink, cobraReaction):

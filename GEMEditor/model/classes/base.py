@@ -103,7 +103,7 @@ class EvidenceLink:
         return [e for e in self._evidences if e.assertion == string]
 
 
-class LinkReference:
+class ReferenceLink:
     """ Base class for items
 
     Implements all methods for items that
@@ -112,7 +112,7 @@ class LinkReference:
     See Evidence and ModelTest classes """
 
     def __init__(self, *args, **kwargs):
-        super(LinkReference, self).__init__(*args, **kwargs)
+        super(ReferenceLink, self).__init__(*args, **kwargs)
         self._references = set()
 
     @property

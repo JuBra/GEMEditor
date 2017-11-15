@@ -2,7 +2,7 @@ from unittest.mock import Mock
 
 from GEMEditor.dialogs.annotation import EditAnnotationDialog
 from GEMEditor.model.classes.cobra import Metabolite, Reaction
-from GEMEditor.model.classes.reference import Annotation
+from GEMEditor.model.classes.annotation import Annotation
 from PyQt5 import QtTest
 from PyQt5.QtWidgets import QApplication
 

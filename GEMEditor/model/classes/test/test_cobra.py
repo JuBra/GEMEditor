@@ -1,9 +1,7 @@
 import gc
 
 import pytest
-from GEMEditor.model.classes.base import BaseTreeElement
-from GEMEditor.model.classes.cobra import Reaction, GeneGroup, Gene, Model, prune_gene_tree, Metabolite
-from GEMEditor.model.classes.data import CleaningDict
+from GEMEditor.model.classes.cobra import Reaction, GeneGroup, Gene, Model, prune_gene_tree, Metabolite, CleaningDict, Compartment
 from GEMEditor.model.classes.modeltest import ModelTest, ReactionSetting, GeneSetting, Outcome
 from GEMEditor.model.classes.reference import Reference
 from GEMEditor.model.classes.evidence import Evidence
@@ -707,97 +705,6 @@ class TestModelAddReactions:
         assert True
 
 
-class TestBaseTreeElement:
-
-    def test_add_child(self):
-        parent = BaseTreeElement()
-        child = BaseTreeElement()
-        parent.add_child(child)
-
-        # Check that the items are properly linked
-        assert child in parent._children
-        assert parent in child._parents
-
-        # Check that genes returns empty as there is no child returning itself
-        assert not parent.genes
-        assert not child.reactions
-
-    def test_add_parent(self):
-        parent = BaseTreeElement()
-        child = BaseTreeElement()
-        child.add_parent(parent)
-
-        # Check that the items are properly linked
-        assert child in parent._children
-        assert parent in child._parents
-
-        # Check that genes returns empty as there is no child returning itself
-        assert not parent.genes
-        assert not child.reactions
-
-    def test_removal_parent(self):
-        parent = BaseTreeElement()
-        child = BaseTreeElement()
-        child.add_parent(parent)
-        child.add_parent(parent)
-
-        assert child._parents.count(parent) == 2
-        assert parent._children.count(child) == 2
-
-        # Remove only one entry
-        child.remove_parent(parent)
-
-        assert child._parents.count(parent) == 1
-        assert parent._children.count(child) == 1
-
-        # Readd parent
-        child.add_parent(parent)
-
-        assert child._parents.count(parent) == 2
-        assert parent._children.count(child) == 2
-
-        # Remove all entries for parent1
-        child.remove_parent(parent, all=True)
-
-        assert child._parents.count(parent) == 0
-        assert parent._children.count(child) == 0
-
-    def test_remove_parent2(self):
-        parent = BaseTreeElement()
-        child = BaseTreeElement()
-        child.add_parent(parent)
-
-        child.remove_parent(parent, all=True)
-        assert not child._parents
-
-    def test_removal_child(self):
-        parent = BaseTreeElement()
-        child = BaseTreeElement()
-        parent.add_child(child)
-        parent.add_child(child)
-
-        assert child._parents.count(parent) == 2
-        assert parent._children.count(child) == 2
-
-        # Remove only one entry
-        parent.remove_child(child)
-
-        assert child._parents.count(parent) == 1
-        assert parent._children.count(child) == 1
-
-        # Readd child
-        parent.add_child(child)
-
-        assert child._parents.count(parent) == 2
-        assert parent._children.count(child) == 2
-
-        # Remove all entries for child1
-        parent.remove_child(child, all=True)
-
-        assert child._parents.count(parent) == 0
-        assert parent._children.count(child) == 0
-
-
 class TestGeneTreePruning:
 
     def test_reaction_wo_children(self):
@@ -1432,3 +1339,81 @@ class TestModelDeleteItems:
         # Evidence <-> Gene1/Reaction
         item_in_evidence(self.gene, self.evidence)
         item_in_evidence(self.reaction, self.evidence)
+
+
+class TestCompartment:
+
+    @pytest.fixture(autouse=True)
+    def init_objects(self):
+        self.compartment1 = Compartment("test_abbrev", "name")
+        self.compartment2 = Compartment("test_abbrev", "name")
+        self.empty_compartment = Compartment()
+
+    def test__init_(self):
+        """ Test that compartment is initialized to None """
+        assert self.empty_compartment.id is None
+        assert self.empty_compartment.name is None
+        assert self.compartment1.id == "test_abbrev"
+        assert self.compartment1.name == "name"
+
+    def test_get_values(self):
+        """ Test that get values returns a tuple (abbreviation, name) """
+        assert self.empty_compartment.get_values() == (None, None)
+        assert self.compartment1.get_values() == ("test_abbrev", "name")
+
+    def test__eq__(self):
+        """ Test equality function """
+        assert self.compartment1 == self.compartment2
+        assert self.compartment1 != self.empty_compartment
+        assert self.compartment1 is not self.compartment2
+        assert ("test_abbrev", "name") == self.compartment1
+
+
+class TestCleanupDict:
+
+    @pytest.fixture(autouse=True)
+    def setup_dict(self):
+        self.cleandict = CleaningDict()
+
+    def test_empty_dit(self):
+        assert len(self.cleandict) == 0
+        assert isinstance(self.cleandict["test"], set)
+
+    def test_addition_deletion(self):
+        reaction = Reaction("test")
+        subsystem = "subsystem"
+        assert len(self.cleandict) == 0
+
+        # Add reaction
+        self.cleandict[subsystem].add(reaction)
+
+        # Test addition
+        assert len(self.cleandict) == 1
+        assert reaction in self.cleandict[subsystem]
+
+        # Remove reaction
+        self.cleandict.remove_reaction(subsystem, reaction)
+        assert len(self.cleandict) == 0
+
+    def test_removal_with_mutliple_entries(self):
+        reaction1 = Reaction("test1")
+        reaction2 = Reaction("test2")
+        subsystem = "test subsystem"
+        self.cleandict[subsystem].add(reaction1)
+        self.cleandict[subsystem].add(reaction2)
+
+        # Test addition
+        assert len(self.cleandict) == 1
+        assert len(self.cleandict[subsystem]) == 2
+        assert reaction1 in self.cleandict[subsystem]
+        assert reaction2 in self.cleandict[subsystem]
+
+        # Remove reaction1
+        self.cleandict.remove_reaction(subsystem, reaction1)
+        assert len(self.cleandict) == 1
+        assert len(self.cleandict[subsystem]) == 1
+        assert reaction2 in self.cleandict[subsystem]
+
+        # Remove reaction2
+        self.cleandict.remove_reaction(subsystem, reaction2)
+        assert len(self.cleandict) == 0

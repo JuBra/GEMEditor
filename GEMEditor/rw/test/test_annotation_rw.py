@@ -1,6 +1,6 @@
 import lxml.etree as ET
 import pytest
-from GEMEditor.model.classes.reference import Annotation
+from GEMEditor.model.classes.annotation import Annotation
 from GEMEditor.rw import *
 from GEMEditor.rw.annotation import add_miriam, add_qbiol_bag, add_rdf_annotation, annotate_xml_from_model, \
     parse_miriam_string, annotate_element_from_xml

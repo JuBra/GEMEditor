@@ -2,7 +2,7 @@ import re
 
 from GEMEditor.facts import Metabolite_annotations, Reaction_annotations, Gene_annotations, Resource
 from GEMEditor.model.classes.cobra import Reaction, Metabolite, Gene
-from GEMEditor.model.classes.reference import Annotation
+from GEMEditor.model.classes.annotation import Annotation
 from GEMEditor.ui.EditAnnotationsDialog import Ui_EditAnnotationDialog
 from PyQt5 import QtGui, QtCore
 from PyQt5.QtWidgets import QDialog, QDialogButtonBox

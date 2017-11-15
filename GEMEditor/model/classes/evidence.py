@@ -1,10 +1,10 @@
 from uuid import uuid4
 
-from GEMEditor.model.classes.base import LinkReference
+from GEMEditor.model.classes.base import ReferenceLink
 from GEMEditor.evidence.assertions import ASSERTIONS
 
 
-class Evidence(LinkReference):
+class Evidence(ReferenceLink):
 
     _validity = dict((x.text, x.func_validity) for x in ASSERTIONS)
     _fixes = dict((x.text, x.func_fix) for x in ASSERTIONS)
@@ -258,5 +258,3 @@ class Evidence(LinkReference):
             self.set_linked_item(new_item)
         else:
             raise KeyError("{0!s} not a part of evidence {1!s}".format(old_item, self))
-
-

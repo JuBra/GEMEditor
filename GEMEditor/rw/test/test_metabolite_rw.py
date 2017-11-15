@@ -1,7 +1,7 @@
 import lxml.etree as ET
 import pytest
 from GEMEditor.model.classes.cobra import Metabolite, Model
-from GEMEditor.model.classes.reference import Annotation
+from GEMEditor.model.classes.annotation import Annotation
 from GEMEditor.rw import *
 from GEMEditor.rw.metabolite import add_metabolites, parse_metabolites
 from GEMEditor.rw.test.ex_metabolite import valid_metabolite_with_annotation, valid_metabolite_wo_annotation

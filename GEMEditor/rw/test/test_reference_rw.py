@@ -1,6 +1,7 @@
 import pytest
 from GEMEditor.model.classes.cobra import Model
-from GEMEditor.model.classes.reference import Reference, Annotation, Author
+from GEMEditor.model.classes.reference import Reference, Author
+from GEMEditor.model.classes.annotation import Annotation
 from GEMEditor.rw import *
 from GEMEditor.rw.annotation import annotate_element_from_xml
 from GEMEditor.rw.reference import add_references, parse_references
