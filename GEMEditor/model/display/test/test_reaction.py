@@ -169,7 +169,7 @@ class TestGeneDisplayWidget:
     @pytest.fixture()
     def patch_iterate_tree(self, monkeypatch):
         mock = Mock()
-        monkeypatch.setattr("GEMEditor.widgets.model.iterate_tree", mock)
+        monkeypatch.setattr("GEMEditor.model.class.cobra.iterate_tree", mock)
         return mock
 
     def test_setup(self):
