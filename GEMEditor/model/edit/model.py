@@ -1,11 +1,11 @@
 import logging
-from PyQt5 import QtCore
-from PyQt5.QtWidgets import QDialogButtonBox, QDialog, QToolTip
+
 from GEMEditor.base import text_is_different
 from GEMEditor.model.classes.cobra import Compartment
+from GEMEditor.model.display.tables import CompartmentTable
 from GEMEditor.model.edit.ui import Ui_AddCompartmentDialog, Ui_EditModelDialog
-from GEMEditor.widgets.tables import CompartmentTable
-
+from PyQt5 import QtCore
+from PyQt5.QtWidgets import QDialogButtonBox, QDialog, QToolTip
 
 LOGGER = logging.getLogger(__name__)
 

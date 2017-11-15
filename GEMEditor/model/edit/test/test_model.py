@@ -2,8 +2,8 @@ from unittest.mock import Mock, MagicMock
 
 import pytest
 from GEMEditor.model.classes.cobra import Model, Metabolite, Compartment
+from GEMEditor.model.display.tables import CompartmentTable
 from GEMEditor.model.edit.model import AddCompartmentDialog, EditModelDialog
-from GEMEditor.widgets.tables import CompartmentTable
 from PyQt5 import QtTest, QtCore
 from PyQt5.QtWidgets import QApplication, QDialogButtonBox, QToolTip, QWidget
 

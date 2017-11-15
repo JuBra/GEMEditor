@@ -74,4 +74,5 @@ class Ui_ManualMatchDialog(object):
         self.button_select.setText(_translate("ManualMatchDialog", "select"))
         self.button_next_entry.setText(_translate("ManualMatchDialog", "next"))
 
-from GEMEditor.widgets.model import MetaboliteDisplayWidget
+
+from GEMEditor.model.display.reaction import MetaboliteDisplayWidget

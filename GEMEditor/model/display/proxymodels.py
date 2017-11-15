@@ -1,5 +1,4 @@
-from PyQt5 import QtCore, QtGui
-from PyQt5.QtCore import QSortFilterProxyModel
+from GEMEditor.base.proxy import CustomSortFilterProxyModel
 
 
 def reversibility(lower, upper):
@@ -32,33 +31,6 @@ def metabolite_is_dead_end(metabolite):
             if producing and consuming and (producing != consuming or len(producing) > 1):
                 return False
         return True
-
-
-class CustomSortFilterProxyModel(QSortFilterProxyModel):
-
-    def __init__(self, *args, **kwargs):
-        super(CustomSortFilterProxyModel, self).__init__(*args, **kwargs)
-        self.custom_filter = 0
-
-    def filterAcceptsRow(self, p_int, QModelIndex):
-        item = self.sourceModel().item(p_int, 0).link
-        if self.filterRegExp():
-            return (self.passes_custom_filter(item) and
-                    super(CustomSortFilterProxyModel, self).filterAcceptsRow(p_int, QModelIndex))
-        else:
-            return self.passes_custom_filter(item)
-
-    def passes_custom_filter(self, item):
-        raise NotImplementedError
-
-    @QtCore.pyqtSlot(int)
-    def set_custom_filter(self, n):
-        self.custom_filter = n
-        self.invalidateFilter()
-
-    def setSourceModel(self, QAbstractItemModel):
-        super(CustomSortFilterProxyModel, self).setSourceModel(QAbstractItemModel)
-        QAbstractItemModel.dataChanged.connect(self.invalidate)
 
 
 class ReactionProxyFilter(CustomSortFilterProxyModel):
@@ -157,68 +129,3 @@ class GeneProxyFilter(CustomSortFilterProxyModel):
             return len(gene.reactions) == 0
         else:
             raise NotImplementedError
-
-
-class FluxTableProxyFilter(QSortFilterProxyModel):
-
-    options = ("All", "Nonzero flux", "Flux at bound", "All boundary", "Active boundary")
-
-    def __init__(self, *args, **kwargs):
-        super(FluxTableProxyFilter, self).__init__(*args, **kwargs)
-        self.custom_filter = 0
-
-    def filterAcceptsRow(self, p_int, QModelIndex):
-        if self.filterRegExp():
-            return (self.passes_custom_filter(p_int) and
-                    super(FluxTableProxyFilter, self).filterAcceptsRow(p_int, QModelIndex))
-        else:
-            return self.passes_custom_filter(p_int)
-
-    def passes_custom_filter(self, row):
-        if self.custom_filter == 0:
-            # All rows
-            return True
-        elif self.custom_filter == 1:
-            # Flux nonequal to zero
-            return self.sourceModel().item(row, 7).data(2) != 0.
-        elif self.custom_filter == 2:
-            # Flux at boundary
-            flux = self.sourceModel().item(row, 7).data(2)
-            lower_bound = self.sourceModel().item(row, 4).data(2)
-            upper_bound = self.sourceModel().item(row, 5).data(2)
-            return flux == lower_bound or flux == upper_bound
-        elif self.custom_filter == 3:
-            # Boundary reaction
-            reaction = self.sourceModel().item(row, 0).link
-            return reaction.boundary is True
-        elif self.custom_filter == 4:
-            reaction = self.sourceModel().item(row, 0).link
-            flux = self.sourceModel().item(row, 7).data(2)
-            return reaction.boundary and flux != 0.
-        else:
-            raise NotImplementedError
-
-    @QtCore.pyqtSlot(int)
-    def set_custom_filter(self, n):
-        self.custom_filter = n
-        self.invalidateFilter()
-
-
-class RecursiveProxyFilter(QSortFilterProxyModel):
-
-    def __init__(self, *args, **kwargs):
-        super(RecursiveProxyFilter, self).__init__(*args, **kwargs)
-
-    def filterAcceptsRow(self, p_int, QModelIndex):
-        if super(RecursiveProxyFilter, self).filterAcceptsRow(p_int, QModelIndex) is True:
-            return True
-
-        elif self.filterRegExp():
-            index = self.sourceModel().index(p_int, 0, QModelIndex)
-
-            if index.isValid():
-                # Search children
-                for child_row in range(self.sourceModel().rowCount(index)):
-                    if self.filterAcceptsRow(child_row, index):
-                        return True
-        return False

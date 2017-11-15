@@ -185,4 +185,4 @@ class Ui_DatabaseSelectionDialog(object):
         self.label_3.setText(_translate("DatabaseSelectionDialog", "Synonyms:"))
         self.label_5.setText(_translate("DatabaseSelectionDialog", "Identifier:"))
 
-from GEMEditor.widgets.views import ElementTableView
+from GEMEditor.base.views import ElementTableView

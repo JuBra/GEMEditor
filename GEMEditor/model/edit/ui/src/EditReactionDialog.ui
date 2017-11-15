@@ -73,7 +73,7 @@
   <customwidget>
    <class>AnnotationDisplayWidget</class>
    <extends>QWidget</extends>
-   <header>GEMEditor.widgets.model</header>
+   <header>GEMEditor.model.display.base</header>
    <container>1</container>
    <slots>
     <signal>changed()</signal>
@@ -83,7 +83,7 @@
   <customwidget>
    <class>GenesDisplayWidget</class>
    <extends>QWidget</extends>
-   <header>GEMEditor.widgets.model</header>
+   <header>GEMEditor.model.display.reaction</header>
    <container>1</container>
    <slots>
     <signal>changed()</signal>
@@ -93,7 +93,7 @@
   <customwidget>
    <class>StoichiometryDisplayWidget</class>
    <extends>QWidget</extends>
-   <header>GEMEditor.widgets.model</header>
+   <header>GEMEditor.model.display.reaction</header>
    <container>1</container>
    <slots>
     <signal>changed()</signal>
@@ -103,19 +103,19 @@
   <customwidget>
    <class>CommentDisplayWidget</class>
    <extends>QWidget</extends>
-   <header>GEMEditor.widgets.model</header>
+   <header>GEMEditor.model.display.base</header>
    <container>1</container>
   </customwidget>
   <customwidget>
    <class>EvidenceDisplayWidget</class>
    <extends>QWidget</extends>
-   <header>GEMEditor.widgets.model</header>
+   <header>GEMEditor.model.display.base</header>
    <container>1</container>
   </customwidget>
   <customwidget>
    <class>ReactionAttributesDisplayWidget</class>
    <extends>QWidget</extends>
-   <header>GEMEditor.widgets.model</header>
+   <header>GEMEditor.model.display.reaction</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

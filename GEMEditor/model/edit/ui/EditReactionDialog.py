@@ -67,5 +67,8 @@ class Ui_ReactionEditDialog(object):
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.evidenceTab), _translate("ReactionEditDialog", "Evidence"))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.commentTab), _translate("ReactionEditDialog", "Comment"))
 
-from GEMEditor.widgets.model import AnnotationDisplayWidget, CommentDisplayWidget, EvidenceDisplayWidget, GenesDisplayWidget, ReactionAttributesDisplayWidget, StoichiometryDisplayWidget
+
+from GEMEditor.model.display.base import AnnotationDisplayWidget, EvidenceDisplayWidget, CommentDisplayWidget
+from GEMEditor.model.display.reaction import StoichiometryDisplayWidget, ReactionAttributesDisplayWidget, \
+    GenesDisplayWidget
 from GEMEditor.icons_rc import *

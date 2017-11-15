@@ -89,5 +89,4 @@ class Ui_StoichiometryDisplayWidget(object):
         StoichiometryDisplayWidget.setWindowTitle(_translate("StoichiometryDisplayWidget", "Form"))
         self.statusDescriptionLabel.setText(_translate("StoichiometryDisplayWidget", "Status:"))
 
-from GEMEditor.widgets.views import ElementTableView
-from GEMEditor.icons_rc import *
+from GEMEditor.base.views import ElementTableView

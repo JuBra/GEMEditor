@@ -1,12 +1,13 @@
-import pytest
-from unittest.mock import Mock
 from collections import OrderedDict
+from unittest.mock import Mock
+
+import pytest
+from GEMEditor.model.classes.annotation import Annotation
 from GEMEditor.model.classes.cobra import Reaction, Metabolite, Gene, Compartment
 from GEMEditor.model.classes.evidence import Evidence
 from GEMEditor.model.classes.modeltest import ModelTest
 from GEMEditor.model.classes.reference import Reference, Author
-from GEMEditor.model.classes.annotation import Annotation
-from GEMEditor.widgets.tables import *
+from GEMEditor.model.display.tables import *
 from PyQt5 import QtGui
 from PyQt5.QtWidgets import QApplication
 
@@ -934,43 +935,6 @@ class TestLinkedItem:
 
         assert item.link is linked_obj
         assert item.text() == text
-
-
-class TestEvidenceItemsTable:
-
-    @pytest.fixture(autouse=True)
-    def setup_items(self):
-        self.table = EvidenceItemsTable()
-
-    def test_empty_table(self):
-        assert issubclass(EvidenceItemsTable, ElementTable)
-        assert self.table.rowCount() == 0
-
-        for i, text in enumerate(self.table.header):
-            assert self.table.horizontalHeaderItem(i).text() == text
-
-    def test_row_from_item(self):
-
-        reaction_id = "test id"
-        reaction = Reaction(id=reaction_id)
-        return_values = self.table.row_from_item(reaction)
-
-        assert len(return_values) == len(self.table.header)== 2
-        assert isinstance(return_values[0], LinkedItem)
-        assert return_values[0].link is reaction
-        assert return_values[0].text() == "Reaction"
-        assert isinstance(return_values[1], LinkedItem)
-        assert return_values[1].link is reaction
-        assert return_values[1].text() == reaction_id
-
-    def test_item_from_row(self):
-
-        reaction_id = "test id"
-        reaction = Reaction(id=reaction_id)
-        assert self.table.rowCount() == 0
-        self.table.update_row_from_item(reaction)
-        assert self.table.rowCount() == 1
-        assert self.table.item_from_row(0) is reaction
 
 
 class TestEvidenceTable:

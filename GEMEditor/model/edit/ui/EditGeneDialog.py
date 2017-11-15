@@ -52,4 +52,7 @@ class Ui_GeneEditDialog(object):
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_annotations), _translate("GeneEditDialog", "Annotation"))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.evidenceTab), _translate("GeneEditDialog", "Evidence"))
 
-from GEMEditor.widgets.model import AnnotationDisplayWidget, EvidenceDisplayWidget, GeneAttributesDisplayWidget, ReactionsDisplayWidget
+
+from GEMEditor.model.display.metabolite import ReactionsDisplayWidget
+from GEMEditor.model.display.base import AnnotationDisplayWidget, EvidenceDisplayWidget
+from GEMEditor.model.display.gene import GeneAttributesDisplayWidget

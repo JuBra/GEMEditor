@@ -211,7 +211,7 @@
   <customwidget>
    <class>ElementTableView</class>
    <extends>QTableView</extends>
-   <header>GEMEditor.widgets.views</header>
+   <header>GEMEditor.base.views</header>
   </customwidget>
  </customwidgets>
  <tabstops>

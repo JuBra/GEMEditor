@@ -58,4 +58,4 @@ class Ui_DatabaseSearchWidget(object):
         DatabaseSearchWidget.setWindowTitle(_translate("DatabaseSearchWidget", "Form"))
         self.groupBox_search.setTitle(_translate("DatabaseSearchWidget", "Search"))
 
-from GEMEditor.widgets.views import ElementTableView
+from GEMEditor.base.views import ElementTableView

@@ -1,8 +1,8 @@
 import pytest
-from GEMEditor.model.classes.cobra import Reaction, Metabolite, Gene
 from GEMEditor.model.classes.annotation import Annotation
-from GEMEditor.widgets.proxymodels import ReactionProxyFilter, reversibility
-from GEMEditor.widgets.tables import ReactionTable
+from GEMEditor.model.classes.cobra import Reaction, Metabolite, Gene
+from GEMEditor.model.display.proxymodels import ReactionProxyFilter, reversibility
+from GEMEditor.model.display.tables import ReactionTable
 from PyQt5.QtWidgets import QApplication
 
 # Make sure to only start an application

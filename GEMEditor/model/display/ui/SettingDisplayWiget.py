@@ -50,5 +50,4 @@ class Ui_SettingsDisplayWidget(object):
         SettingsDisplayWidget.setWindowTitle(_translate("SettingsDisplayWidget", "Form"))
         self.button_add_current.setText(_translate("SettingsDisplayWidget", "Add current"))
 
-from GEMEditor.widgets.views import ElementTableView
-from GEMEditor.icons_rc import *
+from GEMEditor.base.views import ElementTableView

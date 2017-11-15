@@ -54,4 +54,6 @@ class Ui_MetaboliteEditDialog(object):
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.annotationTab), _translate("MetaboliteEditDialog", "Annotation"))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.evidenceTab), _translate("MetaboliteEditDialog", "Evidence"))
 
-from GEMEditor.widgets.model import AnnotationDisplayWidget, EvidenceDisplayWidget, MetaboliteAttributesDisplayWidget, ReactionsDisplayWidget
+
+from GEMEditor.model.display.base import AnnotationDisplayWidget, EvidenceDisplayWidget
+from GEMEditor.model.display.metabolite import MetaboliteAttributesDisplayWidget, ReactionsDisplayWidget

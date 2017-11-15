@@ -164,5 +164,4 @@ class Ui_ReferenceEditDialog(object):
         self.label_doi.setText(_translate("ReferenceEditDialog", "DOI:"))
         self.label_link.setText(_translate("ReferenceEditDialog", "Link"))
 
-from GEMEditor.widgets.views import ElementTableView
-from GEMEditor.icons_rc import *
+from GEMEditor.base.views import ElementTableView

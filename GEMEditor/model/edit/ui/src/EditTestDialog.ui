@@ -115,31 +115,31 @@
   <customwidget>
    <class>ReactionSettingDisplayWidget</class>
    <extends>QWidget</extends>
-   <header>GEMEditor.widgets.model</header>
+   <header>GEMEditor.model.display.modeltest</header>
    <container>1</container>
   </customwidget>
   <customwidget>
    <class>GeneSettingDisplayWidget</class>
    <extends>QWidget</extends>
-   <header>GEMEditor.widgets.model</header>
+   <header>GEMEditor.model.display.modeltest</header>
    <container>1</container>
   </customwidget>
   <customwidget>
    <class>ReferenceDisplayWidget</class>
    <extends>QWidget</extends>
-   <header>GEMEditor.widgets.model</header>
+   <header>GEMEditor.model.display.base</header>
    <container>1</container>
   </customwidget>
   <customwidget>
    <class>OutcomeDisplayWidget</class>
    <extends>QWidget</extends>
-   <header>GEMEditor.widgets.model</header>
+   <header>GEMEditor.model.display.modeltest</header>
    <container>1</container>
   </customwidget>
   <customwidget>
    <class>CommentDisplayWidget</class>
    <extends>QWidget</extends>
-   <header>GEMEditor.widgets.model</header>
+   <header>GEMEditor.model.display.base</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

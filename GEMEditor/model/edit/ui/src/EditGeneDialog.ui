@@ -57,7 +57,7 @@
   <customwidget>
    <class>AnnotationDisplayWidget</class>
    <extends>QWidget</extends>
-   <header>GEMEditor.widgets.model</header>
+   <header>GEMEditor.model.display.base</header>
    <container>1</container>
    <slots>
     <slot>save_state()</slot>
@@ -66,19 +66,19 @@
   <customwidget>
    <class>ReactionsDisplayWidget</class>
    <extends>QWidget</extends>
-   <header>GEMEditor.widgets.model</header>
+   <header>GEMEditor.model.display.metabolite</header>
    <container>1</container>
   </customwidget>
   <customwidget>
    <class>GeneAttributesDisplayWidget</class>
    <extends>QWidget</extends>
-   <header>GEMEditor.widgets.model</header>
+   <header>GEMEditor.model.display.gene</header>
    <container>1</container>
   </customwidget>
   <customwidget>
    <class>EvidenceDisplayWidget</class>
    <extends>QWidget</extends>
-   <header>GEMEditor.widgets.model</header>
+   <header>GEMEditor.model.display.base</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

@@ -63,5 +63,5 @@ class Ui_SelectionDialog(object):
         SelectionDialog.setWindowTitle(_translate("SelectionDialog", "Dialog"))
         self.searchInput.setPlaceholderText(_translate("SelectionDialog", "Search.."))
 
-from GEMEditor.widgets.views import ProxyElementTableView
+from GEMEditor.base.views import ProxyElementTableView
 

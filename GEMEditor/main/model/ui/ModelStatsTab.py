@@ -6,7 +6,7 @@
 #
 # WARNING! All changes made in this file will be lost!
 
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5 import QtCore, QtWidgets
 
 class Ui_model_stats_tab(object):
     def setupUi(self, model_stats_tab):
@@ -44,4 +44,5 @@ class Ui_model_stats_tab(object):
         model_stats_tab.setWindowTitle(_translate("model_stats_tab", "Form"))
         self.editModelSettingButton.setText(_translate("model_stats_tab", "Edit Model"))
 
-from GEMEditor.widgets.model import ModelAnnotationDisplayWidget, ModelDisplayWidget
+
+from GEMEditor.model.display.model import ModelAnnotationDisplayWidget, ModelDisplayWidget

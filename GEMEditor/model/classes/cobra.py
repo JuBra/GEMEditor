@@ -1,13 +1,15 @@
 import logging
 import uuid
+from collections import defaultdict
 from difflib import SequenceMatcher
 from weakref import WeakValueDictionary
-from collections import defaultdict
+
 from GEMEditor.base import WindowManager, generate_copy_id, reaction_balance
+from GEMEditor.base.tables import LinkedItem
 from GEMEditor.model.classes.base import BaseTreeElement, EvidenceLink
 from GEMEditor.model.classes.modeltest import ReactionSetting
-from GEMEditor.widgets.tables import ReactionTable, MetaboliteTable, GeneTable, ReferenceTable, ModelTestTable, \
-    LinkedItem, CompartmentTable
+from GEMEditor.model.display.tables import ReactionTable, MetaboliteTable, GeneTable, ReferenceTable, ModelTestTable, \
+    CompartmentTable
 from PyQt5 import QtCore
 from PyQt5.QtWidgets import QApplication
 from cobra.core import Gene as cobraGene

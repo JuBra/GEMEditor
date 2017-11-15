@@ -2,12 +2,13 @@ from GEMEditor.base.dialogs import CustomStandardDialog
 from GEMEditor.model.selection import MetaboliteSelectionDialog, ReactionSelectionDialog, GeneSelectionDialog, \
     CompartmentSelectionDialog
 from GEMEditor.evidence.eco_parser import all_ecos, EvidenceCode
-from GEMEditor.model.classes.cobra import Reaction, Metabolite, Gene, LinkedItem
+from GEMEditor.model.classes.cobra import Reaction, Metabolite, Gene
+from GEMEditor.base.tables import LinkedItem
 from GEMEditor.model.classes.evidence import Evidence
 from GEMEditor.model.edit.ui.BatchEvidenceDialog import Ui_BatchEvidenceDialog
 from GEMEditor.model.edit.ui.EcoSelectionDialog import Ui_EcoSelectionDialog as Ui_eco
 from GEMEditor.model.edit.ui.EditEvidenceDialog import Ui_EditEvidenceDialog as Ui_new
-from GEMEditor.widgets.proxymodels import RecursiveProxyFilter
+from GEMEditor.base.proxy import RecursiveProxyFilter
 from PyQt5 import QtCore, QtGui
 from PyQt5.QtWidgets import QMenu, QAction, QDialogButtonBox, QMessageBox, QErrorMessage, QInputDialog
 

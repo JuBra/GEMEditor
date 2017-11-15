@@ -6,7 +6,7 @@
 #
 # WARNING! All changes made in this file will be lost!
 
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5 import QtCore, QtWidgets
 
 class Ui_GenesDisplayWidget(object):
     def setupUi(self, GenesDisplayWidget):
@@ -27,4 +27,4 @@ class Ui_GenesDisplayWidget(object):
         _translate = QtCore.QCoreApplication.translate
         GenesDisplayWidget.setWindowTitle(_translate("GenesDisplayWidget", "Form"))
 
-from GEMEditor.widgets.views import GeneTreeView
+from GEMEditor.base.views import GeneTreeView

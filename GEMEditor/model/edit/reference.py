@@ -4,10 +4,10 @@ from GEMEditor.base.dialogs import CustomStandardDialog
 from GEMEditor.connect.pmc import IdConverter
 from GEMEditor.connect.pubmed import RetrievePubmedData
 from GEMEditor.model.classes.reference import Author
+from GEMEditor.model.display.tables import AuthorTable
 from GEMEditor.model.edit.ui.EditReferenceDialog import Ui_ReferenceEditDialog
 from GEMEditor.ui.AddAuthorName import Ui_AddAuthorName
 from GEMEditor.ui.PubmedWebBrowser import Ui_PubmedBrowser
-from GEMEditor.widgets.tables import AuthorTable
 from PyQt5 import QtCore, QtGui
 from PyQt5.QtCore import QStandardPaths
 from PyQt5.QtWidgets import QErrorMessage, QDialogButtonBox, QMessageBox, QDialog, QInputDialog, QLineEdit, QFileDialog

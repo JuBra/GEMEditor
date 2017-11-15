@@ -1,7 +1,7 @@
+from GEMEditor.base.dialogs import CustomStandardDialog
+from GEMEditor.model.edit.ui.EditTestDialog import Ui_EditTestDialog
 from PyQt5 import QtCore
 from PyQt5.QtWidgets import QDialogButtonBox
-from GEMEditor.ui.EditTestDialog import Ui_EditTestDialog
-from GEMEditor.base.dialogs import CustomStandardDialog
 
 
 class EditModelTestDialog(CustomStandardDialog, Ui_EditTestDialog):

@@ -1,15 +1,15 @@
 from collections import OrderedDict
-from GEMEditor.base.classes import Settings
-from GEMEditor.map.turnover import TurnoverDialog
-from GEMEditor.map.dialog import MapDisplayDialog
-from GEMEditor.solution.base import status_objective_from_solution, set_objective_to_label, set_status_to_label, \
-    fluxes_from_solution, shadow_prices_from_solution
-from GEMEditor.solution.ui import Ui_SearchTab, Ui_SolutionDialog
-from GEMEditor.widgets.proxymodels import FluxTableProxyFilter
-from GEMEditor.widgets.tables import ReactionBaseTable, MetaboliteTable
+from PyQt5 import QtCore
 from PyQt5.QtCore import Qt, QSortFilterProxyModel, pyqtSlot, QPoint
 from PyQt5.QtGui import QStandardItemModel, QStandardItem, QBrush, QKeySequence
 from PyQt5.QtWidgets import QWidget, QDialog, QAction, QMenu, QApplication, QMessageBox
+from GEMEditor.base.classes import Settings
+from GEMEditor.map.dialog import MapDisplayDialog
+from GEMEditor.map.turnover import TurnoverDialog
+from GEMEditor.model.display.tables import ReactionBaseTable, MetaboliteTable
+from GEMEditor.solution.base import status_objective_from_solution, set_objective_to_label, set_status_to_label, \
+    fluxes_from_solution, shadow_prices_from_solution
+from GEMEditor.solution.ui import Ui_SearchTab, Ui_SolutionDialog
 
 
 class BaseSolutionTab(QWidget, Ui_SearchTab):
@@ -297,3 +297,47 @@ class SolutionDialog(QDialog, Ui_SolutionDialog):
         for i in range(self.tabWidget.count()):
             self.tabWidget.widget(i).restore_geometry(string, settings)
 
+
+class FluxTableProxyFilter(QSortFilterProxyModel):
+
+    options = ("All", "Nonzero flux", "Flux at bound", "All boundary", "Active boundary")
+
+    def __init__(self, *args, **kwargs):
+        super(FluxTableProxyFilter, self).__init__(*args, **kwargs)
+        self.custom_filter = 0
+
+    def filterAcceptsRow(self, p_int, QModelIndex):
+        if self.filterRegExp():
+            return (self.passes_custom_filter(p_int) and
+                    super(FluxTableProxyFilter, self).filterAcceptsRow(p_int, QModelIndex))
+        else:
+            return self.passes_custom_filter(p_int)
+
+    def passes_custom_filter(self, row):
+        if self.custom_filter == 0:
+            # All rows
+            return True
+        elif self.custom_filter == 1:
+            # Flux nonequal to zero
+            return self.sourceModel().item(row, 7).data(2) != 0.
+        elif self.custom_filter == 2:
+            # Flux at boundary
+            flux = self.sourceModel().item(row, 7).data(2)
+            lower_bound = self.sourceModel().item(row, 4).data(2)
+            upper_bound = self.sourceModel().item(row, 5).data(2)
+            return flux == lower_bound or flux == upper_bound
+        elif self.custom_filter == 3:
+            # Boundary reaction
+            reaction = self.sourceModel().item(row, 0).link
+            return reaction.boundary is True
+        elif self.custom_filter == 4:
+            reaction = self.sourceModel().item(row, 0).link
+            flux = self.sourceModel().item(row, 7).data(2)
+            return reaction.boundary and flux != 0.
+        else:
+            raise NotImplementedError
+
+    @QtCore.pyqtSlot(int)
+    def set_custom_filter(self, n):
+        self.custom_filter = n
+        self.invalidateFilter()

@@ -8,6 +8,7 @@ from GEMEditor.main.model.ui import Ui_StandardTab, Ui_AnalysisTab, Ui_SolutionT
 from GEMEditor.model.classes.cobra import Gene, Reaction, Metabolite, find_duplicate_metabolite
 from GEMEditor.model.classes.modeltest import ModelTest
 from GEMEditor.model.classes.reference import Reference
+from GEMEditor.model.display.proxymodels import ReactionProxyFilter, MetaboliteProxyFilter, GeneProxyFilter
 from GEMEditor.model.edit.gene import GeneEditDialog
 from GEMEditor.model.edit.metabolite import MetaboliteEditDialog
 from GEMEditor.model.edit.modeltest import EditModelTestDialog
@@ -15,7 +16,6 @@ from GEMEditor.model.edit.reaction import ReactionInputDialog
 from GEMEditor.model.edit.reference import ReferenceEditDialog
 from GEMEditor.solution.base import status_objective_from_solution, set_objective_to_label, set_status_to_label
 from GEMEditor.solution.display import SolutionDialog
-from GEMEditor.widgets.proxymodels import ReactionProxyFilter, MetaboliteProxyFilter, GeneProxyFilter
 from PyQt5 import QtCore, QtGui
 from PyQt5.QtCore import QSortFilterProxyModel, QSize
 from PyQt5.QtWidgets import QWidget, QMessageBox, QApplication, QAction, QMenu, QInputDialog, QProgressDialog, \

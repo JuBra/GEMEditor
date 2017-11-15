@@ -6,7 +6,7 @@
 #
 # WARNING! All changes made in this file will be lost!
 
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5 import QtCore, QtWidgets
 
 class Ui_EditModelDialog(object):
     def setupUi(self, EditModelDialog):
@@ -78,4 +78,4 @@ class Ui_EditModelDialog(object):
         self.button_add_compartment.setText(_translate("EditModelDialog", "Add"))
         self.button_del_compartment.setText(_translate("EditModelDialog", "Delete"))
 
-from GEMEditor.widgets.views import ElementTableView
+from GEMEditor.base.views import ElementTableView

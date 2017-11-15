@@ -46,7 +46,7 @@
   <customwidget>
    <class>GeneTreeView</class>
    <extends>QTreeView</extends>
-   <header>GEMEditor.widgets.views</header>
+   <header>GEMEditor.base.views</header>
   </customwidget>
  </customwidgets>
  <resources/>
