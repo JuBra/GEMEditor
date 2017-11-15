@@ -157,13 +157,13 @@ class TestGeneDisplayWidget:
 
     @pytest.fixture()
     def patch_gene_selection_cancelled(self, monkeypatch):
-        monkeypatch.setattr("GEMEditor.dialogs.standard.GeneSelectionDialog.exec_", Mock(return_value=False))
+        monkeypatch.setattr("GEMEditor.model.selection.gene.GeneSelectionDialog.exec_", Mock(return_value=False))
 
     @pytest.fixture()
     def patch_gene_selection_accepted(self, monkeypatch):
         gene = Gene("test")
-        monkeypatch.setattr("GEMEditor.dialogs.standard.GeneSelectionDialog.exec_", Mock(return_value=True))
-        monkeypatch.setattr("GEMEditor.dialogs.standard.GeneSelectionDialog.selected_items", Mock(return_value=[gene]))
+        monkeypatch.setattr("GEMEditor.model.selection.gene.GeneSelectionDialog.exec_", Mock(return_value=True))
+        monkeypatch.setattr("GEMEditor.model.selection.gene.GeneSelectionDialog.selected_items", Mock(return_value=[gene]))
         return gene
 
     @pytest.fixture()
