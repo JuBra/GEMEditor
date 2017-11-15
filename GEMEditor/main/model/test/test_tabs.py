@@ -80,11 +80,11 @@ class TestReactionTab:
 
     @pytest.fixture()
     def patch_edit_dialog_true(self, monkeypatch):
-        monkeypatch.setattr("GEMEditor.dialogs.reaction.ReactionInputDialog.exec_", Mock(return_value=True))
+        monkeypatch.setattr("GEMEditor.model.edit.reaction.ReactionInputDialog.exec_", Mock(return_value=True))
 
     @pytest.fixture()
     def patch_edit_dialog_false(self, monkeypatch):
-        monkeypatch.setattr("GEMEditor.dialogs.reaction.ReactionInputDialog.exec_", Mock(return_value=False))
+        monkeypatch.setattr("GEMEditor.model.edit.reaction.ReactionInputDialog.exec_", Mock(return_value=False))
 
     def test_setup(self):
         tab = ReactionTab()
@@ -237,11 +237,11 @@ class TestMetaboliteTab:
 
     @pytest.fixture()
     def patch_edit_dialog_true(self, monkeypatch):
-        monkeypatch.setattr("GEMEditor.dialogs.metabolite.MetaboliteEditDialog.exec_", Mock(return_value=True))
+        monkeypatch.setattr("GEMEditor.model.edit.metabolite.MetaboliteEditDialog.exec_", Mock(return_value=True))
 
     @pytest.fixture()
     def patch_edit_dialog_false(self, monkeypatch):
-        monkeypatch.setattr("GEMEditor.dialogs.metabolite.MetaboliteEditDialog.exec_", Mock(return_value=False))
+        monkeypatch.setattr("GEMEditor.model.edit.metabolite.MetaboliteEditDialog.exec_", Mock(return_value=False))
 
     def test_setup(self):
         tab = MetaboliteTab()
@@ -396,11 +396,11 @@ class TestGeneTab:
 
     @pytest.fixture()
     def patch_edit_dialog_true(self, monkeypatch):
-        monkeypatch.setattr("GEMEditor.dialogs.gene.GeneEditDialog.exec_", Mock(return_value=True))
+        monkeypatch.setattr("GEMEditor.model.edit.gene.GeneEditDialog.exec_", Mock(return_value=True))
 
     @pytest.fixture()
     def patch_edit_dialog_false(self, monkeypatch):
-        monkeypatch.setattr("GEMEditor.dialogs.gene.GeneEditDialog.exec_", Mock(return_value=False))
+        monkeypatch.setattr("GEMEditor.model.edit.gene.GeneEditDialog.exec_", Mock(return_value=False))
 
     def test_setup(self):
         tab = GeneTab()
@@ -599,11 +599,11 @@ class TestModelTestsTab:
 #
 #     @pytest.fixture()
 #     def patch_edit_dialog_true(self, monkeypatch):
-#         monkeypatch.setattr("GEMEditor.dialogs.modeltest.EditModelTestDialog.exec_", Mock(return_value=True))
+#         monkeypatch.setattr("GEMEditor.model.edit.modeltest.EditModelTestDialog.exec_", Mock(return_value=True))
 #
 #     @pytest.fixture()
 #     def patch_edit_dialog_false(self, monkeypatch):
-#         monkeypatch.setattr("GEMEditor.dialogs.modeltest.EditModelTestDialog.exec_", Mock(return_value=False))
+#         monkeypatch.setattr("GEMEditor.model.edit.modeltest.EditModelTestDialog.exec_", Mock(return_value=False))
 #
 #     @pytest.fixture()
 #     def patch_solvers_none(self, monkeypatch):
@@ -885,11 +885,11 @@ class TestReferenceTab:
 
     @pytest.fixture()
     def patch_edit_dialog_true(self, monkeypatch):
-        monkeypatch.setattr("GEMEditor.dialogs.reference.ReferenceEditDialog.exec_", Mock(return_value=True))
+        monkeypatch.setattr("GEMEditor.model.edit.reference.ReferenceEditDialog.exec_", Mock(return_value=True))
 
     @pytest.fixture()
     def patch_edit_dialog_false(self, monkeypatch):
-        monkeypatch.setattr("GEMEditor.dialogs.reference.ReferenceEditDialog.exec_", Mock(return_value=False))
+        monkeypatch.setattr("GEMEditor.model.edit.reference.ReferenceEditDialog.exec_", Mock(return_value=False))
 
     def test_setup(self):
         tab = ReferenceTab()
