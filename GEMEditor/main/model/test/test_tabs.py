@@ -24,9 +24,9 @@ class TestStandardTab:
 
     @pytest.fixture()
     def monkeypatch_button_slots(self, monkeypatch):
-        monkeypatch.setattr("GEMEditor.tabs.StandardTab.addItemSlot", Mock())
-        monkeypatch.setattr("GEMEditor.tabs.StandardTab.editItemSlot", Mock())
-        monkeypatch.setattr("GEMEditor.tabs.StandardTab.deleteItemSlot", Mock())
+        monkeypatch.setattr("GEMEditor.main.model.tabs.StandardTab.addItemSlot", Mock())
+        monkeypatch.setattr("GEMEditor.main.model.tabs.StandardTab.editItemSlot", Mock())
+        monkeypatch.setattr("GEMEditor.main.model.tabs.StandardTab.deleteItemSlot", Mock())
 
     @pytest.mark.usefixtures("monkeypatch_proxymodel_setfilterfixedstring")
     def test_typing_search_field_changes_filterstring(self):
@@ -68,9 +68,9 @@ class TestReactionTab:
 
     @pytest.fixture()
     def patch_button_slots(self, monkeypatch):
-        monkeypatch.setattr("GEMEditor.tabs.ReactionTab.addItemSlot", Mock())
-        monkeypatch.setattr("GEMEditor.tabs.ReactionTab.editItemSlot", Mock())
-        monkeypatch.setattr("GEMEditor.tabs.ReactionTab.deleteItemSlot", Mock())
+        monkeypatch.setattr("GEMEditor.main.model.tabs.ReactionTab.addItemSlot", Mock())
+        monkeypatch.setattr("GEMEditor.main.model.tabs.ReactionTab.editItemSlot", Mock())
+        monkeypatch.setattr("GEMEditor.main.model.tabs.ReactionTab.deleteItemSlot", Mock())
 
     @pytest.fixture()
     def patched_remove_reactions(self, monkeypatch):
@@ -231,9 +231,9 @@ class TestMetaboliteTab:
 
     @pytest.fixture()
     def patch_button_slots(self, monkeypatch):
-        monkeypatch.setattr("GEMEditor.tabs.MetaboliteTab.addItemSlot", Mock())
-        monkeypatch.setattr("GEMEditor.tabs.MetaboliteTab.editItemSlot", Mock())
-        monkeypatch.setattr("GEMEditor.tabs.MetaboliteTab.deleteItemSlot", Mock())
+        monkeypatch.setattr("GEMEditor.main.model.tabs.MetaboliteTab.addItemSlot", Mock())
+        monkeypatch.setattr("GEMEditor.main.model.tabs.MetaboliteTab.editItemSlot", Mock())
+        monkeypatch.setattr("GEMEditor.main.model.tabs.MetaboliteTab.deleteItemSlot", Mock())
 
     @pytest.fixture()
     def patch_edit_dialog_true(self, monkeypatch):
@@ -390,9 +390,9 @@ class TestGeneTab:
 
     @pytest.fixture()
     def patch_button_slots(self, monkeypatch):
-        monkeypatch.setattr("GEMEditor.tabs.GeneTab.addItemSlot", Mock())
-        monkeypatch.setattr("GEMEditor.tabs.GeneTab.editItemSlot", Mock())
-        monkeypatch.setattr("GEMEditor.tabs.GeneTab.deleteItemSlot", Mock())
+        monkeypatch.setattr("GEMEditor.main.model.tabs.GeneTab.addItemSlot", Mock())
+        monkeypatch.setattr("GEMEditor.main.model.tabs.GeneTab.editItemSlot", Mock())
+        monkeypatch.setattr("GEMEditor.main.model.tabs.GeneTab.deleteItemSlot", Mock())
 
     @pytest.fixture()
     def patch_edit_dialog_true(self, monkeypatch):
@@ -879,9 +879,9 @@ class TestReferenceTab:
 
     @pytest.fixture()
     def patch_button_slots(self, monkeypatch):
-        monkeypatch.setattr("GEMEditor.tabs.ReferenceTab.addItemSlot", Mock())
-        monkeypatch.setattr("GEMEditor.tabs.ReferenceTab.editItemSlot", Mock())
-        monkeypatch.setattr("GEMEditor.tabs.ReferenceTab.deleteItemSlot", Mock())
+        monkeypatch.setattr("GEMEditor.main.model.tabs.ReferenceTab.addItemSlot", Mock())
+        monkeypatch.setattr("GEMEditor.main.model.tabs.ReferenceTab.editItemSlot", Mock())
+        monkeypatch.setattr("GEMEditor.main.model.tabs.ReferenceTab.deleteItemSlot", Mock())
 
     @pytest.fixture()
     def patch_edit_dialog_true(self, monkeypatch):
