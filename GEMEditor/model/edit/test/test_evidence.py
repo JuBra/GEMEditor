@@ -1,10 +1,10 @@
 from unittest.mock import Mock
 
 import pytest
-from GEMEditor.dialogs.evidence import EditEvidenceDialog
 from GEMEditor.model.classes.cobra import Model, Reaction, Gene
-from GEMEditor.model.classes.reference import Reference
 from GEMEditor.model.classes.evidence import Evidence
+from GEMEditor.model.classes.reference import Reference
+from GEMEditor.model.edit.evidence import EditEvidenceDialog
 from PyQt5.QtWidgets import QApplication, QWidget
 
 # Make sure to only start an application

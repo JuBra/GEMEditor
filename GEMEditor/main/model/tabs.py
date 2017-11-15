@@ -1,27 +1,27 @@
 import cobra
-from cobra.core.solution import LegacySolution, Solution
-from cobra.flux_analysis import pfba
-from PyQt5 import QtCore, QtGui
-from PyQt5.QtWidgets import QWidget, QMessageBox, QApplication, QAction, QMenu, QInputDialog, QProgressDialog, \
-    QStatusBar, QErrorMessage, QListWidgetItem
-from PyQt5.QtCore import QSortFilterProxyModel, QSize
+from GEMEditor.analysis.model_test import get_original_settings
+from GEMEditor.analysis.model_test import run_test
+from GEMEditor.base.classes import Settings
 from GEMEditor.base.functions import generate_copy_id
+from GEMEditor.dialogs.input import SetFluxValueDialog
+from GEMEditor.main.model.ui import Ui_StandardTab, Ui_AnalysisTab, Ui_SolutionTableWidget, Ui_model_stats_tab
+from GEMEditor.model.classes.cobra import Gene, Reaction, Metabolite, find_duplicate_metabolite
 from GEMEditor.model.classes.modeltest import ModelTest
 from GEMEditor.model.classes.reference import Reference
-from GEMEditor.model.classes.cobra import Gene, Reaction, Metabolite, find_duplicate_metabolite
-from GEMEditor.base.classes import Settings
-from GEMEditor.dialogs.reaction import ReactionInputDialog
-from GEMEditor.dialogs.metabolite import MetaboliteEditDialog
-from GEMEditor.dialogs.gene import GeneEditDialog
-from GEMEditor.dialogs.reference import ReferenceEditDialog
-from GEMEditor.dialogs.input import SetFluxValueDialog
-from GEMEditor.dialogs.modeltest import EditModelTestDialog
-from GEMEditor.analysis.model_test import run_test
-from GEMEditor.widgets.proxymodels import ReactionProxyFilter, MetaboliteProxyFilter, GeneProxyFilter
-from GEMEditor.analysis.model_test import get_original_settings
-from GEMEditor.main.model.ui import Ui_StandardTab, Ui_AnalysisTab, Ui_SolutionTableWidget, Ui_model_stats_tab
-from GEMEditor.solution.display import SolutionDialog
+from GEMEditor.model.edit.gene import GeneEditDialog
+from GEMEditor.model.edit.metabolite import MetaboliteEditDialog
+from GEMEditor.model.edit.modeltest import EditModelTestDialog
+from GEMEditor.model.edit.reaction import ReactionInputDialog
+from GEMEditor.model.edit.reference import ReferenceEditDialog
 from GEMEditor.solution.base import status_objective_from_solution, set_objective_to_label, set_status_to_label
+from GEMEditor.solution.display import SolutionDialog
+from GEMEditor.widgets.proxymodels import ReactionProxyFilter, MetaboliteProxyFilter, GeneProxyFilter
+from PyQt5 import QtCore, QtGui
+from PyQt5.QtCore import QSortFilterProxyModel, QSize
+from PyQt5.QtWidgets import QWidget, QMessageBox, QApplication, QAction, QMenu, QInputDialog, QProgressDialog, \
+    QStatusBar, QErrorMessage, QListWidgetItem
+from cobra.core.solution import LegacySolution, Solution
+from cobra.flux_analysis import pfba
 
 
 class StandardTab(QWidget, Ui_StandardTab):

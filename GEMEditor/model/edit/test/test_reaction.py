@@ -1,8 +1,8 @@
-from GEMEditor.dialogs.gene import GeneEditDialog
-from GEMEditor.model.classes.cobra import Gene, Model
 from unittest.mock import Mock
-from PyQt5.QtWidgets import QApplication, QDialogButtonBox
 
+from GEMEditor.model.classes.cobra import Reaction, Model
+from GEMEditor.model.edit.reaction import ReactionInputDialog
+from PyQt5.QtWidgets import QApplication, QDialogButtonBox
 
 # Make sure to only start an application
 # if there is no active one. Opening multiple
@@ -12,15 +12,15 @@ if app is None:
     app = QApplication([])
 
 
-class TestGeneEditDialog:
+class TestReactionInputDialog:
 
     def test_button_disabled_upon_init(self):
-        dialog = GeneEditDialog()
+        dialog = ReactionInputDialog()
         assert dialog.buttonBox.button(QDialogButtonBox.Ok).isEnabled() is False
 
     def test_set_item_passed_to_all_children(self):
-        dialog = GeneEditDialog()
-        metabolite = Gene()
+        dialog = ReactionInputDialog()
+        metabolite = Reaction()
         model = Model()
 
         dialog.attributeWidget.set_item = Mock()
@@ -40,7 +40,7 @@ class TestGeneEditDialog:
             dialog.tabWidget.widget(i).set_item.assert_called_once_with(metabolite, model)
 
     def test_save_state_passed_to_all_children(self):
-        dialog = GeneEditDialog()
+        dialog = ReactionInputDialog()
 
         dialog.attributeWidget.save_state = Mock()
         for i in range(dialog.tabWidget.count()):

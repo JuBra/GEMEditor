@@ -16,7 +16,6 @@ from GEMEditor.database.model import run_auto_annotation, run_check_consistency,
 from GEMEditor.database.query import DialogDatabaseSelection
 from GEMEditor.dialogs import BatchEvidenceDialog
 from GEMEditor.dialogs.qualitychecks import factory_duplicate_dialog
-from GEMEditor.dialogs.reference import PubmedBrowser
 from GEMEditor.evidence.analysis import DialogEvidenceStatus
 from GEMEditor.main.about import AboutDialog
 from GEMEditor.main.model.tabs import *
@@ -26,6 +25,7 @@ from GEMEditor.main.update.worker import UpdateCheck
 from GEMEditor.map.dialog import MapListDialog
 from GEMEditor.model.classes.cobra import Model, prune_gene_tree
 from GEMEditor.model.edit.model import EditModelDialog
+from GEMEditor.model.edit.reference import PubmedBrowser
 from GEMEditor.ui.MainWindow import Ui_MainWindow
 from PyQt5.QtCore import QStandardPaths, Qt
 from PyQt5.QtWidgets import QFileDialog, QMainWindow

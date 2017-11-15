@@ -2,13 +2,13 @@ import string
 
 from GEMEditor import use_progress
 from GEMEditor.base.functions import reaction_balance
-from GEMEditor.dialogs.annotation import EditAnnotationDialog
-from GEMEditor.dialogs.evidence import EditEvidenceDialog
 from GEMEditor.dialogs.standard import MetaboliteSelectionDialog, GeneSelectionDialog, ReactionSelectionDialog, \
     ReferenceSelectionDialog
 from GEMEditor.model.classes.cobra import Gene, GeneGroup, iterate_tree, Reaction
-from GEMEditor.model.classes.modeltest import ReactionSetting, GeneSetting, Outcome
 from GEMEditor.model.classes.evidence import Evidence
+from GEMEditor.model.classes.modeltest import ReactionSetting, GeneSetting, Outcome
+from GEMEditor.model.edit.annotation import EditAnnotationDialog
+from GEMEditor.model.edit.evidence import EditEvidenceDialog
 from GEMEditor.ui.CommentDisplayWidget import Ui_CommentDisplayWidget
 from GEMEditor.ui.GeneAttributesDisplayWidget import Ui_Form as Ui_GeneAttribs
 from GEMEditor.ui.GenesDisplayWidget import Ui_GenesDisplayWidget

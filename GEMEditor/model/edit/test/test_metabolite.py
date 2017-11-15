@@ -1,7 +1,7 @@
 from unittest.mock import Mock
 
-from GEMEditor.dialogs.metabolite import MetaboliteEditDialog
 from GEMEditor.model.classes.cobra import Metabolite, Model
+from GEMEditor.model.edit.metabolite import MetaboliteEditDialog
 from PyQt5.QtWidgets import QApplication, QDialogButtonBox
 
 # Make sure to only start an application

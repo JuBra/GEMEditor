@@ -3,9 +3,9 @@ from unittest.mock import Mock
 import pytest
 from GEMEditor.base.dialogs import CustomStandardDialog
 from GEMEditor.dialogs.mock import MockSelectionDialog
-from GEMEditor.dialogs.modeltest import EditModelTestDialog
 from GEMEditor.model.classes.cobra import Reaction, Model
 from GEMEditor.model.classes.modeltest import ModelTest, ReactionSetting, Outcome
+from GEMEditor.model.edit.modeltest import EditModelTestDialog
 from PyQt5 import QtTest
 from PyQt5.QtWidgets import QApplication, QWidget, QDialogButtonBox
 
