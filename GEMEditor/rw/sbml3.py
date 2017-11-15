@@ -1,20 +1,20 @@
-from lxml.etree import Element, register_namespace, ElementTree
-import lxml.etree as ET
-from GEMEditor.rw import *
-from GEMEditor.rw.model import setup_sbml3_model, parse_sbml3_model
-from GEMEditor.rw.units import add_unit_definitions
-from GEMEditor.rw.compartment import add_compartments, parse_compartments
-from GEMEditor.rw.metabolite import add_metabolites, parse_metabolites
-from GEMEditor.rw.reaction import add_reactions, parse_reaction
-from GEMEditor.rw.gene import add_genes, parse_genes
-from GEMEditor.rw.fluxset import add_tests_to_xml, parse_test_from_xml
-from GEMEditor.rw.reference import add_references, parse_references
-from GEMEditor.rw.evidences import add_evidences_to_xml, parse_evidences_from_xml
-from GEMEditor.data_classes import Compartment
-from PyQt5.QtWidgets import QProgressDialog
-from GEMEditor import use_progress
 import logging
 
+import lxml.etree as ET
+from GEMEditor import use_progress
+from GEMEditor.model.classes.cobra import Compartment
+from GEMEditor.rw import *
+from GEMEditor.rw.compartment import add_compartments, parse_compartments
+from GEMEditor.rw.evidences import add_evidences_to_xml, parse_evidences_from_xml
+from GEMEditor.rw.fluxset import add_tests_to_xml, parse_test_from_xml
+from GEMEditor.rw.gene import add_genes, parse_genes
+from GEMEditor.rw.metabolite import add_metabolites, parse_metabolites
+from GEMEditor.rw.model import setup_sbml3_model, parse_sbml3_model
+from GEMEditor.rw.reaction import add_reactions, parse_reaction
+from GEMEditor.rw.reference import add_references, parse_references
+from GEMEditor.rw.units import add_unit_definitions
+from PyQt5.QtWidgets import QProgressDialog
+from lxml.etree import Element, register_namespace, ElementTree
 
 LOGGER = logging.getLogger(__name__)
 
@@ -34,7 +34,7 @@ def write_sbml3_model(path, model, progress=None):
     Parameters
     ----------
     path: str
-    model: GEMEditor.cobraClasses.Model
+    model: GEMEditor.model.classes.cobra.Model
     progress: QProgressDialog
 
     Returns

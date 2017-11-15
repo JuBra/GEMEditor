@@ -1,14 +1,14 @@
 import logging
-from lxml.etree import SubElement
-from GEMEditor.cobraClasses import Gene, GeneGroup, Reaction
-from GEMEditor.rw.annotation import annotate_xml_from_model, annotate_element_from_xml
-from GEMEditor.rw import *
-from cobra.io.sbml3 import strnum, SBML_DOT, clip
-from six import iteritems
 from collections import defaultdict
 from warnings import warn
-from PyQt5.QtWidgets import QApplication
 
+from GEMEditor.model.classes.cobra import Gene, GeneGroup, Reaction
+from GEMEditor.rw import *
+from GEMEditor.rw.annotation import annotate_xml_from_model, annotate_element_from_xml
+from PyQt5.QtWidgets import QApplication
+from cobra.io.sbml3 import strnum, SBML_DOT, clip
+from lxml.etree import SubElement
+from six import iteritems
 
 LOGGER = logging.getLogger(__name__)
 

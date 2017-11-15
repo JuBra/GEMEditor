@@ -1,10 +1,10 @@
 import pytest
-from GEMEditor.database.model import *
-from PyQt5.QtWidgets import QApplication
-from GEMEditor.data_classes import Annotation
-from GEMEditor.cobraClasses import Model, Metabolite, Reaction
 from unittest.mock import Mock
+from GEMEditor.database.model import *
+from GEMEditor.model.classes.cobra import Model, Metabolite, Reaction
+from GEMEditor.model.classes.annotation import Annotation
 from GEMEditor.database.test.fixtures import database
+from PyQt5.QtWidgets import QApplication
 
 # Make sure to only start an application
 # if there is no active one. Opening multiple

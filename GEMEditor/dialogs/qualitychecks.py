@@ -1,11 +1,11 @@
+from GEMEditor.analysis.duplicates import merge_reactions, merge_metabolites
+from GEMEditor.base.classes import Settings
+from GEMEditor.base.dialogs import CustomStandardDialog
+from GEMEditor.dialogs.standard import TableDisplayDialog
+from GEMEditor.model.display.tables import EvidenceTable, ReactionBaseTable, MetaboliteTable
+from GEMEditor.ui.TreeViewDialog import Ui_Duplicates
 from PyQt5 import QtGui, QtCore
 from PyQt5.QtWidgets import QInputDialog, QMessageBox, QMenu, QAction
-from GEMEditor.base.dialogs import CustomStandardDialog
-from GEMEditor.base.classes import Settings
-from GEMEditor.dialogs.standard import TableDisplayDialog
-from GEMEditor.analysis.duplicates import merge_reactions, merge_metabolites
-from GEMEditor.ui.TreeViewDialog import Ui_Duplicates
-from GEMEditor.widgets.tables import EvidenceTable, ReactionBaseTable, MetaboliteTable
 
 
 class DuplicateDialog(CustomStandardDialog, Ui_Duplicates):

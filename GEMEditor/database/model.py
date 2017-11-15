@@ -22,8 +22,8 @@ def map_by_annotation(database, item):
     Parameters
     ----------
     database:   DatabaseWrapper
-    item:       GEMEditor.cobraClasses.Metabolite or
-                GEMEditor.cobraClasses.Reaction
+    item:       GEMEditor.model.classes.cobra.Metabolite or
+                GEMEditor.model.classes.cobra.Reaction
 
     Returns
     -------
@@ -71,7 +71,7 @@ def check_ambiguous_mappings(model, parent):
 
     Parameters
     ----------
-    model: GEMEditor.cobraClasses.Model
+    model: GEMEditor.model.classes.cobra.Model
     parent: QWidget or None
 
     Returns
@@ -101,7 +101,7 @@ def update_metabolite_database_mapping(database, model, progress):
     Parameters
     ----------
     database: DatabaseWrapper
-    model: GEMEditor.cobraClasses.Model
+    model: GEMEditor.model.classes.cobra.Model
     progress: QProgressDialog
 
     Returns
@@ -161,7 +161,7 @@ def update_reaction_database_mapping(database, model, progress):
 
     Parameters
     ----------
-    model: GEMEditor.cobraClasses.Model
+    model: GEMEditor.model.classes.cobra.Model
     progress: QProgressDialog
     parent
 
@@ -253,7 +253,7 @@ def run_auto_annotation(database, model, progress, parent):
 
     Parameters
     ----------
-    model : GEMEditor.cobraClasses.Model
+    model : GEMEditor.model.classes.cobra.Model
     progress: QProgressDialog
     parent : GEMEditor.main.MainWindow
 
@@ -320,7 +320,7 @@ def run_check_consistency(model, parent):
 
     Parameters
     ----------
-    model : GEMEditor.cobraClasses.Model
+    model : GEMEditor.model.classes.cobra.Model
     database : QtSql.QSqlDatabase
     progress : QProgressDialog
 
@@ -410,7 +410,7 @@ def update_reactions_from_database(model, progress):
 
     Parameters
     ----------
-    model: GEMEditor.cobraClasses.Model
+    model: GEMEditor.model.classes.cobra.Model
     progress: QProgressDialog
     update_annotations: bool
     update_names: bool
@@ -458,7 +458,7 @@ def update_metabolites_from_database(model, progress, update_names=False, update
 
     Parameters
     ----------
-    model: GEMEditor.cobraClasses.Model
+    model: GEMEditor.model.classes.cobra.Model
     progress: QProgressDialog
     update_names: bool
     update_formula: bool
@@ -528,7 +528,7 @@ def load_mapping(model, path):
 
     Parameters
     ----------
-    model: GEMEditor.cobraClasses.Model
+    model: GEMEditor.model.classes.cobra.Model
 
     Returns
     -------
@@ -566,7 +566,7 @@ def store_mapping(model, path):
 
     Parameters
     ----------
-    model: GEMEditor.cobraClasses.Model
+    model: GEMEditor.model.classes.cobra.Model
     path: str
 
     Returns

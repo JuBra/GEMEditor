@@ -1,7 +1,7 @@
 import pytest
+from GEMEditor.model.classes.cobra import Reaction, Gene, GeneGroup, Metabolite, Model
 from GEMEditor.rw import *
-from GEMEditor.cobraClasses import Reaction, Gene, GeneGroup, Metabolite, Model
-from GEMEditor.rw.reaction import add_reactions, parse_reaction, _parse_gene_object_tree, _parse_gene_xml_tree, _bound_name
+from GEMEditor.rw.reaction import add_reactions, parse_reaction, _bound_name
 from lxml.etree import Element
 
 

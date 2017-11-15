@@ -1,12 +1,12 @@
-import pytest
-from GEMEditor.rw import *
 import lxml.etree as ET
+import pytest
+from GEMEditor.model.classes.annotation import Annotation
+from GEMEditor.rw import *
+from GEMEditor.rw.annotation import add_miriam, add_qbiol_bag, add_rdf_annotation, annotate_xml_from_model, \
+    parse_miriam_string, annotate_element_from_xml
+from GEMEditor.rw.test.ex_annotation import valid_annotation, valid_annotation_id, valid_annotation_provider, \
+    invalid_annotation1, invalid_annotation2, valid_annotation_xml
 from lxml.etree import Element
-from GEMEditor.data_classes import Annotation
-
-from GEMEditor.rw.annotation import add_miriam, add_qbiol_bag, add_rdf_annotation, annotate_xml_from_model, parse_miriam_string, annotate_element_from_xml
-
-from GEMEditor.rw.test.ex_annotation import valid_annotation, valid_annotation_id, valid_annotation_provider, invalid_annotation1, invalid_annotation2, valid_annotation_xml
 
 
 class MockElement:

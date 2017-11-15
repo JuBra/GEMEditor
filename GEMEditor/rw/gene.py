@@ -1,9 +1,9 @@
-from lxml.etree import SubElement
+from GEMEditor.model.classes.cobra import Gene
 from GEMEditor.rw import *
 from GEMEditor.rw.annotation import annotate_xml_from_model
-from cobra.io.sbml3 import SBML_DOT, clip
-from GEMEditor.cobraClasses import Gene
 from PyQt5.QtWidgets import QApplication
+from cobra.io.sbml3 import SBML_DOT, clip
+from lxml.etree import SubElement
 
 
 def add_genes(model_node, model):

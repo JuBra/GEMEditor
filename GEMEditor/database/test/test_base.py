@@ -1,6 +1,6 @@
 import pytest
 from GEMEditor.database.base import DatabaseWrapper
-from GEMEditor.data_classes import Annotation
+from GEMEditor.model.classes.annotation import Annotation
 from GEMEditor.database.test.fixtures import database
 
 

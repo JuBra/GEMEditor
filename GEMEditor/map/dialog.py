@@ -32,7 +32,7 @@ class MapListDialog(QDialog, Ui_MapListDialog):
         Parameters
         ----------
         parent: QWidget or None
-        model: GEMEditor.cobraClasses.Model
+        model: GEMEditor.model.classes.cobra.Model
         """
 
         super(MapListDialog, self).__init__(parent)

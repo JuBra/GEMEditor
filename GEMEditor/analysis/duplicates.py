@@ -1,6 +1,7 @@
 from collections import defaultdict
-from GEMEditor.cobraClasses import GeneGroup
+
 from GEMEditor.base.functions import invert_mapping, get_annotation_to_item_map
+from GEMEditor.model.classes.cobra import GeneGroup
 
 
 def get_reaction_set(reaction, remove_directionality=True):
@@ -8,7 +9,7 @@ def get_reaction_set(reaction, remove_directionality=True):
 
     Parameters
     ----------
-    reaction : GEMEditor.cobraClasses.Reaction
+    reaction : GEMEditor.model.classes.cobra.Reaction
     remove_directionality: bool
 
     Returns
@@ -54,7 +55,7 @@ def extract_genes_from_reaction(reaction):
 
     Parameters
     ----------
-    reaction: GEMEditor.cobraClasses.Reaction
+    reaction: GEMEditor.model.classes.cobra.Reaction
 
     Returns
     -------
@@ -80,7 +81,7 @@ def merge_reactions(list_of_reactions, base_reaction):
     Parameters
     ----------
     list_of_reactions: list, list of reactions that should be merged
-    base_reaction: GEMEditor.cobraClasses.Reaction, Reaction to keep
+    base_reaction: GEMEditor.model.classes.cobra.Reaction, Reaction to keep
 
     Returns
     -------
@@ -127,7 +128,7 @@ def merge_metabolites(list_of_metabolites, base_metabolite):
     Parameters
     ----------
     list_of_metabolites: list
-    base_metabolite: GEMEditor.cobraClasses.Metabolite
+    base_metabolite: GEMEditor.model.classes.cobra.Metabolite
 
     Returns
     -------

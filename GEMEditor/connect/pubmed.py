@@ -1,14 +1,14 @@
-from six.moves.urllib.error import URLError
-from six.moves.urllib.request import urlopen
-from six.moves.urllib.parse import quote
-from lxml import etree as ET
-from datetime import datetime as DateTime
 from datetime import date as Date
-from GEMEditor.data_classes import Reference
-from PyQt5 import QtCore
-from GEMEditor.connect.ncbi import search_ncbi, month_int_mapping
-from GEMEditor.data_classes import Author
+from datetime import datetime as DateTime
+
 from GEMEditor.base.classes import Settings
+from GEMEditor.connect.ncbi import month_int_mapping
+from GEMEditor.model.classes.reference import Reference, Author
+from PyQt5 import QtCore
+from lxml import etree as ET
+from six.moves.urllib.error import URLError
+from six.moves.urllib.parse import quote
+from six.moves.urllib.request import urlopen
 
 
 class Journal:

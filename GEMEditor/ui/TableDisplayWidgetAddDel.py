@@ -54,5 +54,4 @@ class Ui_TableDisplayWidgetAddDel(object):
         _translate = QtCore.QCoreApplication.translate
         TableDisplayWidgetAddDel.setWindowTitle(_translate("TableDisplayWidgetAddDel", "Form"))
 
-from GEMEditor.widgets.views import ElementTableView
-from GEMEditor.icons_rc import *
+from GEMEditor.base.views import ElementTableView

@@ -1,8 +1,8 @@
+from GEMEditor.model.classes.modeltest import ModelTest, ReactionSetting, GeneSetting, Outcome
 from GEMEditor.rw import *
-from lxml.etree import SubElement
-from GEMEditor.data_classes import ModelTest, ReactionSetting, Outcome, GeneSetting
-from cobra.io.sbml3 import strnum, clip
 from PyQt5.QtWidgets import QApplication
+from cobra.io.sbml3 import strnum, clip
+from lxml.etree import SubElement
 
 
 def add_tests_to_xml(model_node, model):

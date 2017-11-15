@@ -1,7 +1,7 @@
+from GEMEditor.model.classes.cobra import Compartment
+from GEMEditor.rw import *
 from lxml.etree import SubElement
 from six import iteritems
-from GEMEditor.rw import *
-from GEMEditor.data_classes import Compartment
 
 
 def add_compartments(model_node, model):

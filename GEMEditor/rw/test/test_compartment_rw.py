@@ -1,12 +1,9 @@
-import pytest
-from GEMEditor.rw import *
-from GEMEditor.cobraClasses import Model, Metabolite, Compartment
-from GEMEditor.data_classes import Compartment
 import lxml.etree as ET
-from lxml.etree import Element
-
+from GEMEditor.model.classes.cobra import Model, Metabolite, Compartment
+from GEMEditor.rw import *
 from GEMEditor.rw.compartment import add_compartments, parse_compartments
 from GEMEditor.rw.test.ex_compartment import valid_compartment_list
+from lxml.etree import Element
 
 
 def test_parse_compartments():

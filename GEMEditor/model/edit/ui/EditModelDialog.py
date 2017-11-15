@@ -78,4 +78,4 @@ class Ui_EditModelDialog(object):
         self.button_add_compartment.setText(_translate("EditModelDialog", "Add"))
         self.button_del_compartment.setText(_translate("EditModelDialog", "Delete"))
 
-from GEMEditor.widgets.views import ElementTableView
+from GEMEditor.base.views import ElementTableView

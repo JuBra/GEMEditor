@@ -1,8 +1,8 @@
-from lxml.etree import SubElement
+from GEMEditor.model.classes.reference import Reference, Author
 from GEMEditor.rw import *
-from GEMEditor.data_classes import Reference, Author
 from GEMEditor.rw.annotation import annotate_xml_from_model, annotate_element_from_xml
 from PyQt5.QtWidgets import QApplication
+from lxml.etree import SubElement
 
 
 def add_references(model_node, model):

@@ -1,19 +1,19 @@
-import escher
 import logging
 from collections import defaultdict
-from PyQt5.QtWidgets import QDialog
+
+import escher
+from GEMEditor.base.classes import Settings
+from GEMEditor.base.functions import convert_to_bool
+from GEMEditor.map.base import ESCHER_GET_HTML_OPTIONS
+from GEMEditor.map.turnover.generate import setup_turnover_map
+from GEMEditor.map.turnover.ui import Ui_TurnoverDialog
+from GEMEditor.model.display.tables import ReactionBaseTable
+from GEMEditor.solution.analysis import get_turnover
+from GEMEditor.solution.base import fluxes_from_solution
 from PyQt5.QtCore import pyqtSlot, Qt
 from PyQt5.QtGui import QStandardItemModel, QStandardItem
 from PyQt5.QtWebEngineWidgets import QWebEngineSettings, QWebEnginePage
-from GEMEditor.solution.base import fluxes_from_solution
-from GEMEditor.map.turnover.ui import Ui_TurnoverDialog
-from GEMEditor.map.turnover.generate import setup_turnover_map
-from GEMEditor.solution.analysis import get_turnover
-from GEMEditor.base.functions import convert_to_bool
-from GEMEditor.base.classes import Settings
-from GEMEditor.map.base import ESCHER_GET_HTML_OPTIONS
-from GEMEditor.widgets.tables import ReactionBaseTable
-
+from PyQt5.QtWidgets import QDialog
 
 LOGGER = logging.getLogger(__name__)
 

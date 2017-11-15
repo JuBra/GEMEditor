@@ -1,10 +1,9 @@
-from GEMEditor.widgets.tables import LinkedReferenceTable
-from GEMEditor.widgets.baseWidgets import TableDisplayWidget
+from GEMEditor.model.display.tables import LinkedReferenceTable
+from GEMEditor.model.selection.reference import ReferenceSelectionDialog
 from GEMEditor.ui.TableDisplayWidgetAddDel import Ui_TableDisplayWidgetAddDel
-from GEMEditor.ui.EvidenceAttributesDisplayWidget import Ui_Form
-from GEMEditor.dialogs.standard import ReferenceSelectionDialog
+from GEMEditor.base.widgets import TableDisplayWidget
 from PyQt5 import QtCore
-from PyQt5.QtWidgets import QAction, QWidget
+from PyQt5.QtWidgets import QAction
 
 
 class ReferenceDisplayWidget(TableDisplayWidget, Ui_TableDisplayWidgetAddDel):
@@ -58,19 +57,4 @@ class ReferenceDisplayWidget(TableDisplayWidget, Ui_TableDisplayWidgetAddDel):
             delete_action.triggered.connect(self.delete_item)
             menu.addAction(delete_action)
 
-
-class EvidenceAttributeDisplayWidget(QWidget, Ui_Form):
-
-    def __init__(self):
-        super(EvidenceAttributeDisplayWidget, self).__init__()
-        self.evidence = None
-        self.link = None
-        self.eco = None
-        self.target = None
-
-    def setup_links(self):
-        self.comboBox_link.currentIndexChanged.connect(self.stackedWidget.setCurrentIndex)
-
-    def set_item(self, evidence):
-        self.evidence = evidence
 

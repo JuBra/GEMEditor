@@ -1,12 +1,11 @@
+import lxml.etree as ET
 import pytest
+from GEMEditor.model.classes.cobra import Metabolite, Model
+from GEMEditor.model.classes.annotation import Annotation
 from GEMEditor.rw import *
-from GEMEditor.cobraClasses import Metabolite, Model
 from GEMEditor.rw.metabolite import add_metabolites, parse_metabolites
 from GEMEditor.rw.test.ex_metabolite import valid_metabolite_with_annotation, valid_metabolite_wo_annotation
-from GEMEditor.data_classes import Annotation
-from cobra.io.sbml3 import strnum
 from lxml.etree import Element
-import lxml.etree as ET
 
 
 class TestMetaboliteIO:

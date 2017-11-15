@@ -21,7 +21,7 @@ class DialogDatabaseSelection(CustomStandardDialog):
 
         Parameters
         ----------
-        model: GEMEditor.cobraClasses.Model
+        model: GEMEditor.model.classes.cobra.Model
         data_type: str
         parent: QWidget
         """
@@ -451,7 +451,7 @@ def add_metabolite_from_database(model, database_id, compartment=None):
 
     Parameters
     ----------
-    model: GEMEditor.cobraClasses.Model
+    model: GEMEditor.model.classes.cobra.Model
     database_id: int or str
     compartment: str
 
@@ -519,7 +519,7 @@ def add_reaction_from_database(model, database_id):
 
     Parameters
     ----------
-    model: GEMEditor.cobraClasses.Model
+    model: GEMEditor.model.classes.cobra.Model
     database_id: int
 
     Returns

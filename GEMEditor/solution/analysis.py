@@ -6,7 +6,7 @@ def get_turnover(fluxes, metabolite):
     Parameters
     ----------
     fluxes: dict or pandas.Series
-    metabolite: GEMEditor.cobraClasses.Metabolite
+    metabolite: GEMEditor.model.classes.cobra.Metabolite
 
     Returns
     -------

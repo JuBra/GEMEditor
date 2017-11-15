@@ -1,13 +1,14 @@
 import logging
-from PyQt5.QtWidgets import QDialog, QGridLayout, QGroupBox, QLabel, QApplication, QFileDialog, QDialogButtonBox, QPushButton
-from PyQt5 import QtCore
-from math import floor
 from collections import OrderedDict
-from GEMEditor.widgets.proxymodels import metabolite_is_dead_end
-from GEMEditor.cobraClasses import Reaction, Metabolite, Gene
+from math import floor
+
 from GEMEditor.analysis.model_test import run_test, get_original_settings
 from GEMEditor.analysis.ui.BaseStatisticsDialog import Ui_Dialog
-
+from GEMEditor.model.classes.cobra import Reaction, Metabolite, Gene
+from GEMEditor.model.display.proxymodels import metabolite_is_dead_end
+from PyQt5 import QtCore
+from PyQt5.QtWidgets import QDialog, QGridLayout, QGroupBox, QLabel, QApplication, QFileDialog, QDialogButtonBox, \
+    QPushButton
 
 logger = logging.getLogger(__name__)
 

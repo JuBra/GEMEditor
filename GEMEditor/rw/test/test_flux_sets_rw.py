@@ -1,9 +1,10 @@
 import pytest
+from GEMEditor.model.classes.cobra import Model, Reaction
+from GEMEditor.model.classes.modeltest import ModelTest, ReactionSetting, Outcome
+from GEMEditor.model.classes.reference import Reference
 from GEMEditor.rw import *
 from GEMEditor.rw.fluxset import add_tests_to_xml, parse_test_from_xml
 from lxml.etree import Element
-from GEMEditor.data_classes import ModelTest, ReactionSetting, Outcome, Reference
-from GEMEditor.cobraClasses import Model, Reaction
 
 
 class TestTestCases:

@@ -10,7 +10,7 @@ def update_formula_from_neighborhood(metabolite):
 
     Parameters
     ----------
-    metabolite: GEMEditor.cobraClasses.Metabolite
+    metabolite: GEMEditor.model.classes.cobra.Metabolite
 
     Returns
     -------
@@ -62,7 +62,7 @@ def update_formulae_iteratively(model):
 
     Parameters
     ----------
-    model: GEMEditor.cobraClasses.Model
+    model: GEMEditor.model.classes.cobra.Model
 
     Returns
     -------

@@ -1,7 +1,7 @@
-from lxml.etree import SubElement
+from GEMEditor.model.classes.evidence import Evidence
 from GEMEditor.rw import *
 from PyQt5.QtWidgets import QApplication
-from GEMEditor.evidence_class import Evidence
+from lxml.etree import SubElement
 
 
 def add_evidences_to_xml(model_node, model):
@@ -13,7 +13,7 @@ def add_evidences_to_xml(model_node, model):
     Parameters
     ----------
     model_node : lxml.etree.Element
-    model : GEMEditor.cobraClasses.Model
+    model : GEMEditor.model.classes.cobra.Model
 
     Returns
     -------
@@ -122,11 +122,11 @@ def get_item_from_model(item_type, item_id, model):
     ----------
     item_type : str
     item_id : str
-    model : GEMEditor.cobraClasses.Model
+    model : GEMEditor.model.classes.cobra.Model
 
     Returns
     -------
-    item : GEMEditor.cobraClasses.Reaction, GEMEditor.cobraClasses.Metabolite, GEMEditor.cobraClasses.Gene, GEMEditor.cobraClasses.Model
+    item : GEMEditor.model.classes.cobra.Reaction, GEMEditor.model.classes.cobra.Metabolite, GEMEditor.model.classes.cobra.Gene, GEMEditor.model.classes.cobra.Model
 
     Raises
     ------

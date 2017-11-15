@@ -1,7 +1,7 @@
 import pytest
-from GEMEditor.rw.model import parse_sbml3_model, setup_sbml3_model
+from GEMEditor.model.classes.cobra import Model
 from GEMEditor.rw import *
-from GEMEditor.cobraClasses import Model
+from GEMEditor.rw.model import parse_sbml3_model, setup_sbml3_model
 from lxml.etree import Element
 
 

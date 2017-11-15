@@ -1,13 +1,14 @@
 from collections import defaultdict
-from PyQt5.QtWidgets import QDialog, QTreeView, QTableView, QProgressDialog, QAction, QMenu, QMessageBox
-from PyQt5.QtGui import QStandardItem
-from PyQt5.QtCore import QSortFilterProxyModel, pyqtSlot, QPoint, Qt
-from GEMEditor.evidence.assertions import assertion_to_group
-from GEMEditor.widgets.tables import EvidenceTable
-from GEMEditor.widgets.proxymodels import RecursiveProxyFilter
-from GEMEditor.base.widgets import SearchTableWidget
+
 from GEMEditor.base.classes import Settings
+from GEMEditor.base.widgets import SearchTableWidget
+from GEMEditor.evidence.assertions import assertion_to_group
 from GEMEditor.evidence.ui.DialogEvidenceStatus import Ui_DialogEvidenceStatus
+from GEMEditor.model.display.tables import EvidenceTable
+from GEMEditor.base.proxy import RecursiveProxyFilter
+from PyQt5.QtCore import QSortFilterProxyModel, pyqtSlot, QPoint, Qt
+from PyQt5.QtGui import QStandardItem
+from PyQt5.QtWidgets import QDialog, QTreeView, QTableView, QProgressDialog, QAction, QMenu, QMessageBox
 
 
 class DialogEvidenceStatus(QDialog, Ui_DialogEvidenceStatus):

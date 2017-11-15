@@ -22,7 +22,7 @@ def get_yields(solution, model):
     Parameters
     ----------
     solution :
-    model : GEMEditor.cobraClasses.Model
+    model : GEMEditor.model.classes.cobra.Model
 
     Returns
     -------

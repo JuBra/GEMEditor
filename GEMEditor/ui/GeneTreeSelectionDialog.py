@@ -6,7 +6,7 @@
 #
 # WARNING! All changes made in this file will be lost!
 
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5 import QtCore, QtWidgets
 
 class Ui_GeneTreeSelection(object):
     def setupUi(self, GeneTreeSelection):
@@ -36,4 +36,4 @@ class Ui_GeneTreeSelection(object):
         _translate = QtCore.QCoreApplication.translate
         GeneTreeSelection.setWindowTitle(_translate("GeneTreeSelection", "Dialog"))
 
-from GEMEditor.widgets.views import GeneTreeView
+from GEMEditor.base.views import GeneTreeView
