@@ -1,7 +1,7 @@
+from GEMEditor.base.dialogs import CustomStandardDialog
+from GEMEditor.model.edit.ui.EditGeneDialog import Ui_GeneEditDialog
 from PyQt5 import QtCore
 from PyQt5.QtWidgets import QDialogButtonBox
-from GEMEditor.ui.GeneEditDialog import Ui_GeneEditDialog
-from GEMEditor.base.dialogs import CustomStandardDialog
 
 
 class GeneEditDialog(CustomStandardDialog, Ui_GeneEditDialog):

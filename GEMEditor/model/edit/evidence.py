@@ -3,9 +3,9 @@ from GEMEditor.dialogs.standard import GeneSelectionDialog, ReactionSelectionDia
 from GEMEditor.evidence.eco_parser import all_ecos, EvidenceCode
 from GEMEditor.model.classes.cobra import Reaction, Metabolite, Gene, LinkedItem
 from GEMEditor.model.classes.evidence import Evidence
-from GEMEditor.ui.BatchEvidenceDialog import Ui_BatchEvidenceDialog
-from GEMEditor.ui.EcoSelectionDialog import Ui_EcoSelectionDialog as Ui_eco
-from GEMEditor.ui.EditEvidenceDialog import Ui_EditEvidenceDialog as Ui_new
+from GEMEditor.model.edit.ui.BatchEvidenceDialog import Ui_BatchEvidenceDialog
+from GEMEditor.model.edit.ui.EcoSelectionDialog import Ui_EcoSelectionDialog as Ui_eco
+from GEMEditor.model.edit.ui.EditEvidenceDialog import Ui_EditEvidenceDialog as Ui_new
 from GEMEditor.widgets.proxymodels import RecursiveProxyFilter
 from PyQt5 import QtCore, QtGui
 from PyQt5.QtWidgets import QMenu, QAction, QDialogButtonBox, QMessageBox, QErrorMessage, QInputDialog

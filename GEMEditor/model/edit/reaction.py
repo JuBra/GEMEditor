@@ -1,7 +1,7 @@
+from GEMEditor.base.dialogs import CustomStandardDialog
+from GEMEditor.model.edit.ui.EditReactionDialog import Ui_ReactionEditDialog
 from PyQt5 import QtCore
 from PyQt5.QtWidgets import QDialogButtonBox
-from GEMEditor.base.dialogs import CustomStandardDialog
-from GEMEditor.ui.ReactionEditDialog import Ui_ReactionEditDialog
 
 
 class ReactionInputDialog(CustomStandardDialog, Ui_ReactionEditDialog):

@@ -1,7 +1,7 @@
+from GEMEditor.base.dialogs import CustomStandardDialog
+from GEMEditor.model.edit.ui.EditMetaboliteDialog import Ui_MetaboliteEditDialog
 from PyQt5 import QtCore
 from PyQt5.QtWidgets import QDialogButtonBox
-from GEMEditor.ui.MetaboliteEditDialog import Ui_MetaboliteEditDialog
-from GEMEditor.base.dialogs import CustomStandardDialog
 
 
 class MetaboliteEditDialog(CustomStandardDialog, Ui_MetaboliteEditDialog):
