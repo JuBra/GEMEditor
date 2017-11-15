@@ -2,10 +2,7 @@ import string
 
 from GEMEditor import use_progress
 from GEMEditor.base.functions import reaction_balance
-from GEMEditor.model.selection.reference import ReferenceSelectionDialog
-from GEMEditor.model.selection.reaction import ReactionSelectionDialog
-from GEMEditor.model.selection.gene import GeneSelectionDialog
-from GEMEditor.model.selection.metabolite import MetaboliteSelectionDialog
+from GEMEditor.model.selection import MetaboliteSelectionDialog, ReactionSelectionDialog, GeneSelectionDialog, ReferenceSelectionDialog
 from GEMEditor.model.classes.cobra import Gene, GeneGroup, iterate_tree, Reaction
 from GEMEditor.model.classes.evidence import Evidence
 from GEMEditor.model.classes.modeltest import ReactionSetting, GeneSetting, Outcome

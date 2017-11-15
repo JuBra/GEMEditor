@@ -1,7 +1,6 @@
 from GEMEditor.base.dialogs import CustomStandardDialog
-from GEMEditor.model.selection.reaction import ReactionSelectionDialog
-from GEMEditor.model.selection.gene import GeneSelectionDialog
-from GEMEditor.model.selection.metabolite import MetaboliteSelectionDialog
+from GEMEditor.model.selection import MetaboliteSelectionDialog, ReactionSelectionDialog, GeneSelectionDialog, \
+    CompartmentSelectionDialog
 from GEMEditor.evidence.eco_parser import all_ecos, EvidenceCode
 from GEMEditor.model.classes.cobra import Reaction, Metabolite, Gene, LinkedItem
 from GEMEditor.model.classes.evidence import Evidence
@@ -68,7 +67,7 @@ class EditEvidenceDialog(CustomStandardDialog, Ui_new):
         menu.addActions([action1, action2, action3])
         if self.evidence and isinstance(self.evidence.entity, Gene):
             action4 = QAction("Compartment", menu)
-            action4.triggered.connect(self.select_compartment)
+            action4.triggered.connect(lambda x: self.select_target(CompartmentSelectionDialog))
             menu.addAction(action4)
         self.toolButton_select_targe.setMenu(menu)
 
