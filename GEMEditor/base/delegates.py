@@ -1,6 +1,5 @@
-from PyQt5 import QtGui, QtCore
+from PyQt5 import QtCore
 from PyQt5.QtWidgets import QItemDelegate, QDoubleSpinBox, QComboBox
-
 
 
 class FloatInputDelegate(QItemDelegate):

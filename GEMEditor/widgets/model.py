@@ -1,13 +1,15 @@
 import string
 
 from GEMEditor import use_progress
+from GEMEditor.base.delegates import FloatInputDelegate, ComboBoxDelegate
 from GEMEditor.base.functions import reaction_balance
-from GEMEditor.model.selection import MetaboliteSelectionDialog, ReactionSelectionDialog, GeneSelectionDialog, ReferenceSelectionDialog
 from GEMEditor.model.classes.cobra import Gene, GeneGroup, iterate_tree, Reaction
 from GEMEditor.model.classes.evidence import Evidence
 from GEMEditor.model.classes.modeltest import ReactionSetting, GeneSetting, Outcome
 from GEMEditor.model.edit.annotation import EditAnnotationDialog
 from GEMEditor.model.edit.evidence import EditEvidenceDialog
+from GEMEditor.model.selection import MetaboliteSelectionDialog, ReactionSelectionDialog, GeneSelectionDialog, \
+    ReferenceSelectionDialog
 from GEMEditor.ui.CommentDisplayWidget import Ui_CommentDisplayWidget
 from GEMEditor.ui.GeneAttributesDisplayWidget import Ui_Form as Ui_GeneAttribs
 from GEMEditor.ui.GenesDisplayWidget import Ui_GenesDisplayWidget
@@ -21,7 +23,6 @@ from GEMEditor.ui.StoichiometryDisplayWidget import Ui_StoichiometryDisplayWidge
 from GEMEditor.ui.TableDisplayWidgetAddDel import Ui_TableDisplayWidgetAddDel
 from GEMEditor.ui.modelDisplayWidget import Ui_modelDisaplayWidget
 from GEMEditor.widgets.baseWidgets import TableDisplayWidget
-from GEMEditor.widgets.delegates import FloatInputDelegate, ComboBoxDelegate
 from GEMEditor.widgets.tables import AnnotationTable, LinkedItem, StoichiometryTable, EvidenceTable, \
     ReactionSettingsTable, GeneSettingsTable, OutcomesTable, LinkedReferenceTable
 from PyQt5 import QtCore, QtGui
