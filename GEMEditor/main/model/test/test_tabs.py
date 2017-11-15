@@ -1,10 +1,9 @@
-from unittest.mock import Mock
-
 import pytest
+from unittest.mock import Mock
 from GEMEditor.dialogs.mock import MockModelTestDialog
+from GEMEditor.main.model.tabs import *
 from GEMEditor.model.classes.cobra import Model
 from GEMEditor.model.classes.modeltest import ReactionSetting, Outcome
-from GEMEditor.tabs import *
 from PyQt5 import QtCore, QtTest
 from PyQt5.QtWidgets import QApplication
 
