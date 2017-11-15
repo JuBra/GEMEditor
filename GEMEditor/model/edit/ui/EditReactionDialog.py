@@ -69,4 +69,3 @@ class Ui_ReactionEditDialog(object):
 
 from GEMEditor.model.display.base import AnnotationDisplayWidget, CommentDisplayWidget, EvidenceDisplayWidget
 from GEMEditor.model.display.reaction import GenesDisplayWidget, ReactionAttributesDisplayWidget, StoichiometryDisplayWidget
-import icons_rc

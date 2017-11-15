@@ -165,4 +165,3 @@ class Ui_ReferenceEditDialog(object):
         self.label_link.setText(_translate("ReferenceEditDialog", "Link"))
 
 from GEMEditor.base.views import ElementTableView
-import icons_rc

@@ -8,7 +8,7 @@ from GEMEditor.model.selection import ReferenceSelectionDialog
 from GEMEditor.ui.CommentDisplayWidget import Ui_CommentDisplayWidget
 from GEMEditor.ui.TableDisplayWidgetAddDel import Ui_TableDisplayWidgetAddDel
 from PyQt5 import QtCore, QtGui
-from PyQt5.QtWidgets import QMenu, QAction, QWidget
+from PyQt5.QtWidgets import QMenu, QAction, QWidget, QAbstractItemView
 
 
 class AnnotationDisplayWidget(TableDisplayWidget, Ui_TableDisplayWidgetAddDel):
@@ -190,6 +190,7 @@ class ReferenceDisplayWidget(QWidget, Ui_SettingsDisplayWidget):
         self.setupUi(self)
         self.dataTable = LinkedReferenceTable(self)
         self.tableView.setModel(self.dataTable)
+        self.tableView.setEditTriggers(QAbstractItemView.NoEditTriggers)
 
         self.button_add_current.setVisible(False)
 
