@@ -6,7 +6,14 @@ from GEMEditor.model.display.reaction import StoichiometryDisplayWidget, GenesDi
     ReactionAttributesDisplayWidget
 from GEMEditor.model.display.test.fixture import MockSlot
 from PyQt5 import QtGui, QtCore, QtTest
-from PyQt5.QtWidgets import QWidget
+from PyQt5.QtWidgets import QWidget, QApplication
+
+# Make sure to only start an application
+# if there is no active one. Opening multiple
+# applications will lead to a crash.
+app = QApplication.instance()
+if app is None:
+    app = QApplication([])
 
 
 class TestStoichiometryDisplayWidget:
@@ -169,7 +176,7 @@ class TestGeneDisplayWidget:
     @pytest.fixture()
     def patch_iterate_tree(self, monkeypatch):
         mock = Mock()
-        monkeypatch.setattr("GEMEditor.model.classes.cobra", "iterate_tree", mock)
+        monkeypatch.setattr("GEMEditor.model.display.reaction.iterate_tree", mock)
         return mock
 
     def test_setup(self):
