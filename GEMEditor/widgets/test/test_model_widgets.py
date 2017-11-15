@@ -749,7 +749,7 @@ class TestEvidenceDisplayWidget:
 
     @pytest.fixture()
     def patch_dialog_accepted(self, monkeypatch):
-        monkeypatch.setattr("GEMEditor.dialogs.evidence.EditEvidenceDialog.exec_", Mock(return_value=True))
+        monkeypatch.setattr("GEMEditor.model.edit.evidence.EditEvidenceDialog.exec_", Mock(return_value=True))
 
     @pytest.mark.usefixtures("patch_dialog_accepted")
     def test_changed_triggered_addition(self):
