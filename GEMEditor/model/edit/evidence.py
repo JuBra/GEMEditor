@@ -1,5 +1,7 @@
 from GEMEditor.base.dialogs import CustomStandardDialog
-from GEMEditor.dialogs.standard import GeneSelectionDialog, ReactionSelectionDialog, MetaboliteSelectionDialog
+from GEMEditor.model.selection.reaction import ReactionSelectionDialog
+from GEMEditor.model.selection.gene import GeneSelectionDialog
+from GEMEditor.model.selection.metabolite import MetaboliteSelectionDialog
 from GEMEditor.evidence.eco_parser import all_ecos, EvidenceCode
 from GEMEditor.model.classes.cobra import Reaction, Metabolite, Gene, LinkedItem
 from GEMEditor.model.classes.evidence import Evidence
