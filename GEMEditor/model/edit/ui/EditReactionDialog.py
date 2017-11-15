@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'ReactionEditDialog.ui'
+# Form implementation generated from reading ui file '.\src\EditReactionDialog.ui'
 #
 # Created by: PyQt5 UI code generator 5.8.2
 #
@@ -48,7 +48,7 @@ class Ui_ReactionEditDialog(object):
         self.verticalLayout.addWidget(self.tabWidget)
         self.buttonBox = QtWidgets.QDialogButtonBox(ReactionEditDialog)
         self.buttonBox.setOrientation(QtCore.Qt.Horizontal)
-        self.buttonBox.setStandardButtons(QtWidgets.QDialogButtonBox.Cancel|QtWidgets.QDialogButtonBox.Ok)
+        self.buttonBox.setStandardButtons(QtWidgets.QDialogButtonBox.Cancel|QtWidgets.QDialogButtonBox.Save)
         self.buttonBox.setObjectName("buttonBox")
         self.verticalLayout.addWidget(self.buttonBox)
 
@@ -67,8 +67,6 @@ class Ui_ReactionEditDialog(object):
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.evidenceTab), _translate("ReactionEditDialog", "Evidence"))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.commentTab), _translate("ReactionEditDialog", "Comment"))
 
-
-from GEMEditor.model.display.base import AnnotationDisplayWidget, EvidenceDisplayWidget, CommentDisplayWidget
-from GEMEditor.model.display.reaction import StoichiometryDisplayWidget, ReactionAttributesDisplayWidget, \
-    GenesDisplayWidget
-from GEMEditor.icons_rc import *
+from GEMEditor.model.display.base import AnnotationDisplayWidget, CommentDisplayWidget, EvidenceDisplayWidget
+from GEMEditor.model.display.reaction import GenesDisplayWidget, ReactionAttributesDisplayWidget, StoichiometryDisplayWidget
+import icons_rc

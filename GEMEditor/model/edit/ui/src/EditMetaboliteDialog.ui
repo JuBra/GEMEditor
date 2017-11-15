@@ -48,7 +48,7 @@
       <enum>Qt::Horizontal</enum>
      </property>
      <property name="standardButtons">
-      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Save</set>
      </property>
     </widget>
    </item>
@@ -65,15 +65,15 @@
    </slots>
   </customwidget>
   <customwidget>
-   <class>EvidenceDisplayWidget</class>
-   <extends>QWidget</extends>
-   <header>GEMEditor.model.display.base</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
    <class>ReactionsDisplayWidget</class>
    <extends>QWidget</extends>
    <header>GEMEditor.model.display.metabolite</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>EvidenceDisplayWidget</class>
+   <extends>QWidget</extends>
+   <header>GEMEditor.model.display.base</header>
    <container>1</container>
   </customwidget>
   <customwidget>

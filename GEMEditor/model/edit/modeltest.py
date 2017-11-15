@@ -13,7 +13,7 @@ class EditModelTestDialog(CustomStandardDialog, Ui_EditTestDialog):
         self.model = None
 
         # Deactivate Ok button
-        self.buttonBox.button(QDialogButtonBox.Ok).setEnabled(False)
+        self.buttonBox.button(QDialogButtonBox.Save).setEnabled(False)
         self.setup_signals()
         self.restore_dialog_geometry()
 
@@ -47,8 +47,7 @@ class EditModelTestDialog(CustomStandardDialog, Ui_EditTestDialog):
     @QtCore.pyqtSlot()
     def activate_button(self):
         """ Activate the okay button if the input is valid"""
-
-        self.buttonBox.button(QDialogButtonBox.Ok).setEnabled(self.input_valid() and self.content_changed)
+        self.buttonBox.button(QDialogButtonBox.Save).setEnabled(self.input_valid() and self.content_changed)
 
     @property
     def content_changed(self):

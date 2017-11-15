@@ -49,7 +49,7 @@ class ReferenceEditDialog(CustomStandardDialog, Ui_ReferenceEditDialog):
 
         # Setup items, disable Ok button and restore state
         self.populate_inputs()
-        self.buttonBox.button(QDialogButtonBox.Ok).setEnabled(False)
+        self.buttonBox.button(QDialogButtonBox.Save).setEnabled(False)
         self.setup_connections()
         self.restore_dialog_geometry()
 
@@ -108,9 +108,9 @@ class ReferenceEditDialog(CustomStandardDialog, Ui_ReferenceEditDialog):
                                                      self.pmcInput.text(),
                                                      self.doiInput.text(),
                                                      self.linkInput.text()]):
-            self.buttonBox.button(QDialogButtonBox.Ok).setEnabled(True)
+            self.buttonBox.button(QDialogButtonBox.Save).setEnabled(True)
         else:
-            self.buttonBox.button(QDialogButtonBox.Ok).setEnabled(False)
+            self.buttonBox.button(QDialogButtonBox.Save).setEnabled(False)
 
     @QtCore.pyqtSlot()
     def checkPMID(self):

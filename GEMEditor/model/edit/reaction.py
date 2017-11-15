@@ -14,7 +14,7 @@ class ReactionInputDialog(CustomStandardDialog, Ui_ReactionEditDialog):
 
         # Set the reaction and restore dialog geometry
         self.set_item(reaction, model)
-        self.buttonBox.button(QDialogButtonBox.Ok).setEnabled(False)
+        self.buttonBox.button(QDialogButtonBox.Save).setEnabled(False)
         self.setup_links()
         self.restore_dialog_geometry()
 
@@ -46,9 +46,9 @@ class ReactionInputDialog(CustomStandardDialog, Ui_ReactionEditDialog):
         """ Activate the okay button if:
             1) The information of the reaction has been changed
             2) All inputs are valid """
-        self.buttonBox.button(QDialogButtonBox.Ok).setEnabled(self.attributeWidget.valid_inputs() and
-                                                                    self.metaboliteTab.valid_inputs() and
-                                                                    self.content_changed())
+        self.buttonBox.button(QDialogButtonBox.Save).setEnabled(self.attributeWidget.valid_inputs() and
+                                                                self.metaboliteTab.valid_inputs() and
+                                                                self.content_changed())
 
     @QtCore.pyqtSlot()
     def save_state(self):

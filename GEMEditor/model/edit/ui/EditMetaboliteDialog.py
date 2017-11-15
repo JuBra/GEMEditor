@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'MetaboliteEditDialog.ui'
+# Form implementation generated from reading ui file '.\src\EditMetaboliteDialog.ui'
 #
 # Created by: PyQt5 UI code generator 5.8.2
 #
@@ -37,7 +37,7 @@ class Ui_MetaboliteEditDialog(object):
         self.verticalLayout.addWidget(self.tabWidget)
         self.buttonBox = QtWidgets.QDialogButtonBox(MetaboliteEditDialog)
         self.buttonBox.setOrientation(QtCore.Qt.Horizontal)
-        self.buttonBox.setStandardButtons(QtWidgets.QDialogButtonBox.Cancel|QtWidgets.QDialogButtonBox.Ok)
+        self.buttonBox.setStandardButtons(QtWidgets.QDialogButtonBox.Cancel|QtWidgets.QDialogButtonBox.Save)
         self.buttonBox.setObjectName("buttonBox")
         self.verticalLayout.addWidget(self.buttonBox)
 
@@ -53,7 +53,6 @@ class Ui_MetaboliteEditDialog(object):
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.reactionsTab), _translate("MetaboliteEditDialog", "Reactions"))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.annotationTab), _translate("MetaboliteEditDialog", "Annotation"))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.evidenceTab), _translate("MetaboliteEditDialog", "Evidence"))
-
 
 from GEMEditor.model.display.base import AnnotationDisplayWidget, EvidenceDisplayWidget
 from GEMEditor.model.display.metabolite import MetaboliteAttributesDisplayWidget, ReactionsDisplayWidget

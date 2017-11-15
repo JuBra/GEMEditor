@@ -10,7 +10,7 @@ class MetaboliteEditDialog(CustomStandardDialog, Ui_MetaboliteEditDialog):
         CustomStandardDialog.__init__(self, parent)
         self.setupUi(self)
 
-        self.ok_button = self.buttonBox.button(QDialogButtonBox.Ok)
+        self.ok_button = self.buttonBox.button(QDialogButtonBox.Save)
         self.ok_button.setEnabled(False)
 
         self.set_item(metabolite, model)

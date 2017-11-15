@@ -14,7 +14,7 @@ class GeneEditDialog(CustomStandardDialog, Ui_GeneEditDialog):
 
         self.set_item(gene, model)
 
-        self.buttonBox.button(QDialogButtonBox.Ok).setEnabled(False)
+        self.buttonBox.button(QDialogButtonBox.Save).setEnabled(False)
 
         self.setup_links()
         self.restore_dialog_geometry()
@@ -46,7 +46,7 @@ class GeneEditDialog(CustomStandardDialog, Ui_GeneEditDialog):
     def activate_button(self):
         """ Activate the OK button if all requirements i.e. all inputs are valid and there
         has been at least one change in an input item are satisfied """
-        self.buttonBox.button(QDialogButtonBox.Ok).setEnabled(self.attributeWidget.valid_inputs() and self.content_changed())
+        self.buttonBox.button(QDialogButtonBox.Save).setEnabled(self.attributeWidget.valid_inputs() and self.content_changed())
 
     @QtCore.pyqtSlot()
     def save_state(self):

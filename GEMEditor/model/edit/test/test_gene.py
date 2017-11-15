@@ -16,7 +16,7 @@ class TestGeneEditDialog:
 
     def test_button_disabled_upon_init(self):
         dialog = GeneEditDialog()
-        assert dialog.buttonBox.button(QDialogButtonBox.Ok).isEnabled() is False
+        assert dialog.buttonBox.button(QDialogButtonBox.Save).isEnabled() is False
 
     def test_set_item_passed_to_all_children(self):
         dialog = GeneEditDialog()

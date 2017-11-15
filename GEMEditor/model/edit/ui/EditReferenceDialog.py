@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'ReferenceEditDialog.ui'
+# Form implementation generated from reading ui file '.\src\EditReferenceDialog.ui'
 #
 # Created by: PyQt5 UI code generator 5.8.2
 #
@@ -116,7 +116,7 @@ class Ui_ReferenceEditDialog(object):
         self.verticalLayout_2.addLayout(self.gridLayout)
         self.buttonBox = QtWidgets.QDialogButtonBox(ReferenceEditDialog)
         self.buttonBox.setOrientation(QtCore.Qt.Horizontal)
-        self.buttonBox.setStandardButtons(QtWidgets.QDialogButtonBox.Cancel|QtWidgets.QDialogButtonBox.Ok)
+        self.buttonBox.setStandardButtons(QtWidgets.QDialogButtonBox.Cancel|QtWidgets.QDialogButtonBox.Save)
         self.buttonBox.setObjectName("buttonBox")
         self.verticalLayout_2.addWidget(self.buttonBox)
 
@@ -165,3 +165,4 @@ class Ui_ReferenceEditDialog(object):
         self.label_link.setText(_translate("ReferenceEditDialog", "Link"))
 
 from GEMEditor.base.views import ElementTableView
+import icons_rc

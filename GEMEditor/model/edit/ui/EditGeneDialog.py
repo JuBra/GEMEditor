@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'GeneEditDialog.ui'
+# Form implementation generated from reading ui file '.\src\EditGeneDialog.ui'
 #
 # Created by: PyQt5 UI code generator 5.8.2
 #
@@ -35,7 +35,7 @@ class Ui_GeneEditDialog(object):
         self.verticalLayout.addWidget(self.tabWidget)
         self.buttonBox = QtWidgets.QDialogButtonBox(GeneEditDialog)
         self.buttonBox.setOrientation(QtCore.Qt.Horizontal)
-        self.buttonBox.setStandardButtons(QtWidgets.QDialogButtonBox.Cancel|QtWidgets.QDialogButtonBox.Ok)
+        self.buttonBox.setStandardButtons(QtWidgets.QDialogButtonBox.Cancel|QtWidgets.QDialogButtonBox.Save)
         self.buttonBox.setObjectName("buttonBox")
         self.verticalLayout.addWidget(self.buttonBox)
 
@@ -52,7 +52,6 @@ class Ui_GeneEditDialog(object):
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_annotations), _translate("GeneEditDialog", "Annotation"))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.evidenceTab), _translate("GeneEditDialog", "Evidence"))
 
-
-from GEMEditor.model.display.metabolite import ReactionsDisplayWidget
 from GEMEditor.model.display.base import AnnotationDisplayWidget, EvidenceDisplayWidget
 from GEMEditor.model.display.gene import GeneAttributesDisplayWidget
+from GEMEditor.model.display.metabolite import ReactionsDisplayWidget

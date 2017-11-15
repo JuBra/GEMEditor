@@ -63,7 +63,7 @@
       <enum>Qt::Horizontal</enum>
      </property>
      <property name="standardButtons">
-      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Save</set>
      </property>
     </widget>
    </item>
@@ -79,6 +79,12 @@
     <signal>changed()</signal>
     <slot>save_state()</slot>
    </slots>
+  </customwidget>
+  <customwidget>
+   <class>EvidenceDisplayWidget</class>
+   <extends>QWidget</extends>
+   <header>GEMEditor.model.display.base</header>
+   <container>1</container>
   </customwidget>
   <customwidget>
    <class>GenesDisplayWidget</class>
@@ -107,12 +113,6 @@
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>EvidenceDisplayWidget</class>
-   <extends>QWidget</extends>
-   <header>GEMEditor.model.display.base</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
    <class>ReactionAttributesDisplayWidget</class>
    <extends>QWidget</extends>
    <header>GEMEditor.model.display.reaction</header>
@@ -120,7 +120,7 @@
   </customwidget>
  </customwidgets>
  <resources>
-  <include location="../../icons/icons.qrc"/>
+  <include location="../../../../icons/icons.qrc"/>
  </resources>
  <connections>
   <connection>

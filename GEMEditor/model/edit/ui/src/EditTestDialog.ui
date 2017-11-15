@@ -105,13 +105,25 @@
       <enum>Qt::Horizontal</enum>
      </property>
      <property name="standardButtons">
-      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Save</set>
      </property>
     </widget>
    </item>
   </layout>
  </widget>
  <customwidgets>
+  <customwidget>
+   <class>ReferenceDisplayWidget</class>
+   <extends>QWidget</extends>
+   <header>GEMEditor.model.display.base</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>CommentDisplayWidget</class>
+   <extends>QWidget</extends>
+   <header>GEMEditor.model.display.base</header>
+   <container>1</container>
+  </customwidget>
   <customwidget>
    <class>ReactionSettingDisplayWidget</class>
    <extends>QWidget</extends>
@@ -125,26 +137,14 @@
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>ReferenceDisplayWidget</class>
-   <extends>QWidget</extends>
-   <header>GEMEditor.model.display.base</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
    <class>OutcomeDisplayWidget</class>
    <extends>QWidget</extends>
    <header>GEMEditor.model.display.modeltest</header>
    <container>1</container>
   </customwidget>
-  <customwidget>
-   <class>CommentDisplayWidget</class>
-   <extends>QWidget</extends>
-   <header>GEMEditor.model.display.base</header>
-   <container>1</container>
-  </customwidget>
  </customwidgets>
  <resources>
-  <include location="../../icons/icons.qrc"/>
+  <include location="../../../../icons/icons.qrc"/>
  </resources>
  <connections>
   <connection>

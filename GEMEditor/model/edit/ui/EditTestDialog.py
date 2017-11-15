@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'EditTestDialog.ui'
+# Form implementation generated from reading ui file '.\src\EditTestDialog.ui'
 #
 # Created by: PyQt5 UI code generator 5.8.2
 #
@@ -65,7 +65,7 @@ class Ui_EditTestDialog(object):
         self.buttonBox = QtWidgets.QDialogButtonBox(EditTestDialog)
         self.buttonBox.setStyleSheet("")
         self.buttonBox.setOrientation(QtCore.Qt.Horizontal)
-        self.buttonBox.setStandardButtons(QtWidgets.QDialogButtonBox.Cancel|QtWidgets.QDialogButtonBox.Ok)
+        self.buttonBox.setStandardButtons(QtWidgets.QDialogButtonBox.Cancel|QtWidgets.QDialogButtonBox.Save)
         self.buttonBox.setObjectName("buttonBox")
         self.verticalLayout_7.addWidget(self.buttonBox)
 
@@ -88,8 +88,6 @@ class Ui_EditTestDialog(object):
         self.tabWidget2.setTabText(self.tabWidget2.indexOf(self.referenceTab), _translate("EditTestDialog", "References"))
         self.groupBox_3.setTitle(_translate("EditTestDialog", "Comment"))
 
-
 from GEMEditor.model.display.base import CommentDisplayWidget, ReferenceDisplayWidget
-from GEMEditor.model.display.modeltest import ReactionSettingDisplayWidget, GeneSettingDisplayWidget, \
-    OutcomeDisplayWidget
-from GEMEditor.icons_rc import *
+from GEMEditor.model.display.modeltest import GeneSettingDisplayWidget, OutcomeDisplayWidget, ReactionSettingDisplayWidget
+import icons_rc
