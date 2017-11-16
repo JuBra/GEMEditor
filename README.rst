@@ -1,5 +1,7 @@
+|Build Status| |Coverage Status|
+
 ==========
-GEMEditor |Build Status| |Coverage Status|
+GEMEditor
 ==========
 
 GEMEditor as graphical user interface intended at the easy editing of
