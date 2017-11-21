@@ -84,12 +84,13 @@ def main(args):
     # Note: Pass in None to avoid error object deletion error when closing
     mainwindow = MainWindow(None)
     mainwindow.showMaximized()
-    logging.debug("Mainwindow setup successful.")
+    logger.debug("Mainwindow setup successful.")
     #splash.finish(mainwindow)
 
     # Execute
-    logging.debug("Executing application..")
+    logger.debug("Executing application..")
     app.exec_()
+    logger.debug("Appliation closed. Goodbye!")
 
 if __name__ == "__main__":
     main(sys.argv)
