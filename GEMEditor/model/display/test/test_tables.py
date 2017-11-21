@@ -969,7 +969,7 @@ class TestEvidenceTable:
         assert return_values[4].text() == evidence.comment
         assert return_values[5].text() == ""
 
-    def get_items(self):
+    def test_get_items(self):
         evidence1 = Evidence()
         evidence2 = Evidence()
         self.table.update_row_from_item(evidence1)
