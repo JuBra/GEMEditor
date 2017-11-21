@@ -94,6 +94,7 @@ def merge_reactions(list_of_reactions, base_reaction):
     if base_reaction_children is not None:
         temp_children.append(base_reaction_children)
 
+    merged_reactions = []
     for reaction in list_of_reactions:
         if reaction is not base_reaction:
             # Add annotations
@@ -106,10 +107,13 @@ def merge_reactions(list_of_reactions, base_reaction):
             for evidence in tuple(reaction.evidences):
                 evidence.substitute_item(reaction, base_reaction)
 
-            try:
-                reaction.remove_from_model()
-            except Exception:
-                pass
+            # Mark reaction for deletion
+            merged_reactions.append(reaction)
+
+    # Remove reactions
+    model = base_reaction.model
+    if model:
+        model.gem_remove_reactions(merged_reactions)
 
     # Add new genes to base reaction
     if len(temp_children) > 1:
