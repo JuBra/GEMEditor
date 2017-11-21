@@ -141,21 +141,6 @@
     <addaction name="separator"/>
     <addaction name="actionStatistics"/>
    </widget>
-   <widget class="QMenu" name="menuSimulation">
-    <property name="title">
-     <string>Simulation</string>
-    </property>
-    <widget class="QMenu" name="menuRun">
-     <property name="title">
-      <string>Run</string>
-     </property>
-     <addaction name="actionFBA"/>
-     <addaction name="actionPFBA"/>
-    </widget>
-    <addaction name="menuRun"/>
-    <addaction name="separator"/>
-    <addaction name="actionHistory"/>
-   </widget>
    <widget class="QMenu" name="menuMetaNetX">
     <property name="title">
      <string>MetaNetX</string>
@@ -183,7 +168,6 @@
    <addaction name="menuEdit"/>
    <addaction name="menuModel"/>
    <addaction name="menuMetaNetX"/>
-   <addaction name="menuSimulation"/>
    <addaction name="menuHelp"/>
   </widget>
   <action name="actionNewModel">

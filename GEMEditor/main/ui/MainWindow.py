@@ -59,10 +59,6 @@ class Ui_MainWindow(object):
         self.menuEvidences.setObjectName("menuEvidences")
         self.menuReferences = QtWidgets.QMenu(self.menuModel)
         self.menuReferences.setObjectName("menuReferences")
-        self.menuSimulation = QtWidgets.QMenu(self.menubar)
-        self.menuSimulation.setObjectName("menuSimulation")
-        self.menuRun = QtWidgets.QMenu(self.menuSimulation)
-        self.menuRun.setObjectName("menuRun")
         self.menuMetaNetX = QtWidgets.QMenu(self.menubar)
         self.menuMetaNetX.setObjectName("menuMetaNetX")
         self.menuMapping = QtWidgets.QMenu(self.menuMetaNetX)
@@ -197,11 +193,6 @@ class Ui_MainWindow(object):
         self.menuModel.addAction(self.menuReferences.menuAction())
         self.menuModel.addSeparator()
         self.menuModel.addAction(self.actionStatistics)
-        self.menuRun.addAction(self.actionFBA)
-        self.menuRun.addAction(self.actionPFBA)
-        self.menuSimulation.addAction(self.menuRun.menuAction())
-        self.menuSimulation.addSeparator()
-        self.menuSimulation.addAction(self.actionHistory)
         self.menuMapping.addAction(self.action_mapping_load)
         self.menuMapping.addAction(self.action_mapping_save)
         self.menuMapping.addSeparator()
@@ -219,7 +210,6 @@ class Ui_MainWindow(object):
         self.menubar.addAction(self.menuEdit.menuAction())
         self.menubar.addAction(self.menuModel.menuAction())
         self.menubar.addAction(self.menuMetaNetX.menuAction())
-        self.menubar.addAction(self.menuSimulation.menuAction())
         self.menubar.addAction(self.menuHelp.menuAction())
 
         self.retranslateUi(MainWindow)
@@ -243,8 +233,6 @@ class Ui_MainWindow(object):
         self.menuQuality_Control.setTitle(_translate("MainWindow", "Quality Control"))
         self.menuEvidences.setTitle(_translate("MainWindow", "Evidences"))
         self.menuReferences.setTitle(_translate("MainWindow", "References"))
-        self.menuSimulation.setTitle(_translate("MainWindow", "Simulation"))
-        self.menuRun.setTitle(_translate("MainWindow", "Run"))
         self.menuMetaNetX.setTitle(_translate("MainWindow", "MetaNetX"))
         self.menuMapping.setTitle(_translate("MainWindow", "Mapping"))
         self.actionNewModel.setText(_translate("MainWindow", "New model"))
@@ -286,4 +274,5 @@ class Ui_MainWindow(object):
         self.action_mapping_load.setText(_translate("MainWindow", "Load from file"))
         self.action_mapping_save.setText(_translate("MainWindow", "Save to file"))
 
-from GEMEditor.main.model.tabs import AnalysesTab, GeneTab, MetaboliteTab, ModelInfoTab, ModelTestsTab, ReactionTab, ReferenceTab
+from GEMEditor.tabs import AnalysesTab, GeneTab, MetaboliteTab, ModelInfoTab, ModelTestsTab, ReactionTab, ReferenceTab
+import icons_rc
