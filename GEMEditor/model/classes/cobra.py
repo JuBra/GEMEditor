@@ -129,15 +129,6 @@ class Reaction(BaseTreeElement, EvidenceLink, cobraReaction):
     def update_balancing_status(self):
         self.charge_balanced, self.elements_balanced, self.balanced = reaction_balance(self.metabolites)
 
-    def remove_from_model(self):
-        if self._model:
-            items = self._model.QtReactionTable.findItems(self.id)
-            for x in items:
-                if x.link is self:
-                    index = self._model.QtReactionTable.indexFromItem(x)
-                    self._model.QtReactionTable.removeRow(index.row())
-            super(Reaction, self).remove_from_model()
-
     def add_metabolites(self, *args, **kwargs):
         super(Reaction, self).add_metabolites(*args, **kwargs)
         self.update_balancing_status()

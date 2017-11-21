@@ -432,7 +432,7 @@ class TestGeneDisplayWidget:
         # Check that add gene has not been called
         assert self.widget.add_gene.called is False
 
-    def test_add_item_cancelled(self, patch_gene_selection_accepted):
+    def test_add_item_accepted(self, patch_gene_selection_accepted):
         # Setup
         self.widget.add_gene = Mock()
         self.widget.set_item(self.reaction, self.model)

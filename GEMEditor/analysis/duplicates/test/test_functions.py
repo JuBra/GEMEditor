@@ -1,8 +1,14 @@
 import itertools
+from PyQt5.QtWidgets import QApplication
 from GEMEditor.analysis.duplicates.functions import *
-from GEMEditor.model.classes.annotation import Annotation
-from GEMEditor.model.classes.cobra import Reaction, Metabolite
-from GEMEditor.model.classes.evidence import Evidence
+from GEMEditor.model.classes import Annotation, Reaction, Metabolite, Evidence, Model, Gene
+
+# Make sure to only start an application
+# if there is no active one. Opening multiple
+# applications will lead to a crash.
+app = QApplication.instance()
+if app is None:
+    app = QApplication([])
 
 
 def test_get_reaction_set_wo_directionality():
@@ -173,3 +179,72 @@ class Test_merge_metabolites:
 
         assert merged == [met3]
         assert react.metabolites == {met2: -1, met4: 1}
+
+
+class Test_merge_reactions:
+
+    def test_merging_reaction(self):
+        model = Model("m1")
+
+        react1 = Reaction("r1")
+        anno1 = Annotation(collection="ec-code", identifier="2.1.7.0")
+        react1.add_annotation(anno1)
+        evidence1 = Evidence(entity=react1)
+        gene1 = Gene("g1")
+        react1.add_child(gene1)
+        model.add_evidence(evidence1)
+
+        react2 = Reaction("r2")
+        anno2 = Annotation(collection="ec-code", identifier="2.1.7.1")
+        react2.add_annotation(anno2)
+        evidence2 = Evidence(entity=react2)
+        gene2 = Gene("g2")
+        react2.add_child(gene2)
+        model.add_evidence(evidence2)
+
+        react3 = Reaction("r3")
+        anno3 = Annotation(collection="ec-code", identifier="2.1.7.1")
+        react3.add_annotation(anno3)
+        evidence3 = Evidence(entity=react3)
+        gene3 = Gene("g3")
+        react3.add_child(gene3)
+        model.add_evidence(evidence3)
+
+        model.add_genes((gene1, gene2, gene3))
+        model.add_reactions((react1, react2, react3))
+        model.setup_reaction_table()
+
+        # Action
+        merge_reactions([react1, react2, react3], react1)
+
+        # Check annotation added
+        assert anno1 in react1.annotation
+        assert anno2 in react1.annotation
+        assert anno3 in react3.annotation
+
+        # Check evidences transferred during merge
+        assert evidence2 not in react2.evidences
+        assert evidence2 in react1.evidences
+        assert react1 is evidence2.entity
+
+        assert evidence3 not in react3.evidences
+        assert evidence3 in react1.evidences
+        assert react1 is evidence3.entity
+
+        # Check merged reactions removed
+        assert react2 not in model.reactions
+        assert react3 not in model.reactions
+
+        # Check genes transferred during merge
+        assert react2 not in gene2.reactions
+        assert react1 in gene2.reactions
+
+        assert react3 not in gene3.reactions
+        assert react1 in gene3.reactions
+
+        # Check new genegroup is formed
+        group = list(react1._children)[0]
+        assert gene1 in group._children
+        assert gene2 in group._children
+        assert gene3 in group._children
+        assert group.type == "or"

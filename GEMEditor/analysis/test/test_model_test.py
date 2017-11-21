@@ -92,12 +92,9 @@ class TestGetOriginalSettings:
         assert setting.upper_bound == expectations[1]
         assert setting.objective_coefficient == expectations[2]
 
-    @pytest.mark.parametrize("params, expectations", [((-200, 200, 0.), (-200, 200, 0.)),
-                                                      ((0, 200, 0.), (0., 200, 0.)),
-                                                      ((-200, 0, 0.), (-200, 0, 0.)),
-                                                      ((-200, -50, 0.), (-200, -50, 0.)),
-                                                      ((100, 200, 0.), (100, 200, 0.))])
-    def test_setting_for_optimized_reactions(self, params, expectations):
+    @pytest.mark.parametrize("params", [(-200, 200, 0.), (0, 200, 0.), (-200, 0, 0.),
+                                        (-200, -50, 0.), (100, 200, 0.)])
+    def test_no_setting_for_nonoptimized_reactions(self, params):
         self.r1.add_metabolites({self.m1: -1,
                                  self.m2: 1})
 

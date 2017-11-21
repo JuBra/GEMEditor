@@ -969,9 +969,9 @@ class TestEvidenceTable:
         assert return_values[4].text() == evidence.comment
         assert return_values[5].text() == ""
 
-    def get_items(self):
-        evidence1 = Evidence()
-        evidence2 = Evidence()
+    def test_get_items(self):
+        evidence1 = Evidence(entity=Gene("g1"))
+        evidence2 = Evidence(entity=Gene("g2"))
         self.table.update_row_from_item(evidence1)
         self.table.update_row_from_item(evidence2)
 
