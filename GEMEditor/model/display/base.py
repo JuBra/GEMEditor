@@ -1,3 +1,4 @@
+from GEMEditor.base.ui.TableDisplayWidgetAddDel import Ui_TableDisplayWidgetAddDel
 from GEMEditor.base.widgets import TableDisplayWidget
 from GEMEditor.model.classes.evidence import Evidence
 from GEMEditor.model.display.tables import AnnotationTable, EvidenceTable, LinkedReferenceTable
@@ -6,7 +7,6 @@ from GEMEditor.model.display.ui.SettingDisplayWiget import Ui_SettingsDisplayWid
 from GEMEditor.model.edit.annotation import EditAnnotationDialog
 from GEMEditor.model.edit.evidence import EditEvidenceDialog
 from GEMEditor.model.selection import ReferenceSelectionDialog
-from GEMEditor.ui.TableDisplayWidgetAddDel import Ui_TableDisplayWidgetAddDel
 from PyQt5 import QtCore, QtGui
 from PyQt5.QtWidgets import QMenu, QAction, QWidget, QAbstractItemView
 
