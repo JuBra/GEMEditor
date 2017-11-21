@@ -40,7 +40,7 @@ app.setApplicationName(app_name)
 @pytest.fixture()
 def no_update_check(monkeypatch):
     # Prevent main window of checking if a new version is available
-    monkeypatch.setattr("GEMEditor.main.MainWindow.check_updates", Mock())
+    monkeypatch.setattr("GEMEditor.main.MainWindow._check_updates", Mock())
 
 
 @pytest.fixture()
@@ -120,43 +120,43 @@ class TestOpenModel:
 
     @pytest.mark.usefixtures("read_sbml3_none", "openfilename_empty")
     def test_model_not_read_if_user_aborts_file_selection(self, main_window, mock_settings):
-        main_window.closeModel = Mock(return_value=True)
+        main_window.close_model = Mock(return_value=True)
         main_window.set_model = Mock()
-        main_window.modelLoaded = Mock()
-        main_window.openModel()
+        main_window._set_model_loaded = Mock()
+        main_window.open_model()
         assert GEMEditor.rw.sbml3.read_sbml3_model.called is False
         assert main_window.set_model.called is False
-        assert main_window.modelLoaded.called is False
+        assert main_window._set_model_loaded.called is False
         assert mock_settings.setValue.called is False
 
     @pytest.mark.usefixtures("read_sbml3_none")
     def test_open_model_close_accepted_xml_path(self, main_window, openfilename_xml, mock_settings):
-        main_window.closeModel = Mock(return_value=True)
+        main_window.close_model = Mock(return_value=True)
         main_window.set_model = Mock()
-        main_window.modelLoaded = Mock()
-        main_window.openModel()
+        main_window._set_model_loaded = Mock()
+        main_window.open_model()
         assert GEMEditor.rw.sbml3.read_sbml3_model.called is True
         mock_settings.setValue.assert_called_with("LastPath", os.path.dirname(openfilename_xml))
         assert main_window.set_model.called is False
-        assert main_window.modelLoaded.called is False
+        assert main_window._set_model_loaded.called is False
 
     @pytest.mark.usefixtures("read_sbml3_model")
     def test_open_model_close_accepted_xml_path2(self, main_window, openfilename_xml, mock_settings):
-        main_window.closeModel = Mock(return_value=True)
+        main_window.close_model = Mock(return_value=True)
         main_window.set_model = Mock()
-        main_window.modelLoaded = Mock()
-        main_window.openModel()
+        main_window._set_model_loaded = Mock()
+        main_window.open_model()
         mock_settings.setValue.assert_called_with("LastPath", os.path.dirname(openfilename_xml))
         assert QFileDialog.getOpenFileName.called is True
         assert GEMEditor.rw.sbml3.read_sbml3_model.called is True
         assert main_window.set_model.called is True
-        assert main_window.modelLoaded.called is True
+        assert main_window._set_model_loaded.called is True
 
     @pytest.mark.usefixtures("read_sbml3_none")
     def test_open_model_close_cancelled(self, main_window, mock_settings):
-        main_window.closeModel = Mock(return_value=False)
-        main_window.openModel()
-        assert main_window.closeModel.called is True
+        main_window.close_model = Mock(return_value=False)
+        main_window.open_model()
+        assert main_window.close_model.called is True
         assert GEMEditor.rw.sbml3.read_sbml3_model.called is False
         assert mock_settings.setValue.called is False
 
@@ -166,38 +166,38 @@ class TestModelCreate:
     @pytest.mark.usefixtures("editmodeldialog_true")
     def test_createmodel_accept_editmodel_dialog(self, main_window):
         main_window.set_model = Mock()
-        main_window.modelLoaded = Mock()
-        main_window.closeModel = Mock(return_value=True)
+        main_window._set_model_loaded = Mock()
+        main_window.close_model = Mock(return_value=True)
         assert GEMEditor.model.edit.model.EditModelDialog.exec_.called is False
 
-        main_window.createModel()
+        main_window.new_model()
         assert GEMEditor.model.edit.model.EditModelDialog.exec_.called is True
         assert main_window.set_model.called is True
-        main_window.modelLoaded.assert_called_once_with(True)
+        main_window._set_model_loaded.assert_called_once_with(True)
 
     @pytest.mark.usefixtures("editmodeldialog_false")
     def test_createmodel_cancel_editmodel_dialog(self, main_window):
         main_window.set_model = Mock()
-        main_window.modelLoaded = Mock()
-        main_window.closeModel = Mock(return_value=True)
+        main_window._set_model_loaded = Mock()
+        main_window.close_model = Mock(return_value=True)
         assert GEMEditor.model.edit.model.EditModelDialog.exec_.called is False
 
-        main_window.createModel()
+        main_window.new_model()
         assert GEMEditor.model.edit.model.EditModelDialog.exec_.called is True
         assert main_window.set_model.called is False
-        assert main_window.modelLoaded.called is False
+        assert main_window._set_model_loaded.called is False
 
     @pytest.mark.usefixtures("editmodeldialog_false")
     def test_createmodel_cancel_editmodel_dialog(self, main_window):
         main_window.set_model = Mock()
-        main_window.modelLoaded = Mock()
-        main_window.closeModel = Mock(return_value=False)
+        main_window._set_model_loaded = Mock()
+        main_window.close_model = Mock(return_value=False)
         assert GEMEditor.model.edit.model.EditModelDialog.exec_.called is False
 
-        main_window.createModel()
+        main_window.new_model()
         assert GEMEditor.model.edit.model.EditModelDialog.exec_.called is False
         assert main_window.set_model.called is False
-        assert main_window.modelLoaded.called is False
+        assert main_window._set_model_loaded.called is False
 
 
 class TestSetModel:
@@ -221,7 +221,7 @@ class TestModelSave:
 
     @pytest.mark.usefixtures("mock_write_sbml3", "getsavefilename_empty")
     def test_saving_file_user_cancelled(self, main_window, mock_settings):
-        main_window.saveModel()
+        main_window.save_model()
         mock_settings.value.assert_called_with("LastPath")
         assert QFileDialog.getSaveFileName.called is True
         assert GEMEditor.rw.sbml3.write_sbml3_model.called is False
@@ -231,7 +231,7 @@ class TestModelSave:
     def test_saving_file_user_accepted(self, main_window, getsavefilename_xml, mock_settings):
         model = Model()
         main_window.model = model
-        main_window.saveModel()
+        main_window.save_model()
         GEMEditor.rw.sbml3.write_sbml3_model.assert_called_with(getsavefilename_xml, model)
         mock_settings.setValue.assert_called_with("LastPath", os.path.dirname(getsavefilename_xml))
 
@@ -241,26 +241,26 @@ class TestModelEdit:
     @pytest.mark.usefixtures("editmodeldialog_true")
     def test_editmodelsettings_cancelled(self, main_window):
         main_window.set_model = Mock()
-        main_window.set_window_title = Mock()
+        main_window.update_window_title = Mock()
         main_window.model = Model("test_id")
         assert main_window.set_model.called is False
-        assert main_window.set_window_title.called is False
+        assert main_window.update_window_title.called is False
 
-        main_window.editModelsettings()
+        main_window.edit_model()
         assert main_window.set_model.called is True
-        assert main_window.set_window_title.called is True
+        assert main_window.update_window_title.called is True
 
     @pytest.mark.usefixtures("editmodeldialog_false")
     def test_editmodelsettings_cancelled(self, main_window):
         main_window.set_model = Mock()
-        main_window.set_window_title = Mock()
+        main_window.update_window_title = Mock()
         main_window.model = Model("test_id")
         assert main_window.set_model.called is False
-        assert main_window.set_window_title.called is False
+        assert main_window.update_window_title.called is False
 
-        main_window.editModelsettings()
+        main_window.edit_model()
         assert main_window.set_model.called is False
-        assert main_window.set_window_title.called is False
+        assert main_window.update_window_title.called is False
 
 
 class TestModelLoaded:
@@ -295,7 +295,7 @@ class TestModelLoaded:
         # -> MetaNetX
         assert not main_window.menuSimulation.isEnabled()
 
-        main_window.modelLoaded(True)
+        main_window._set_model_loaded(True)
 
         # Check active actions/menus
         # -> File
@@ -321,7 +321,7 @@ class TestModelClosing:
     @pytest.fixture()
     def mock_close_model(self, main_window):
         main_window.save_table_headers = Mock()
-        main_window.modelLoaded = Mock()
+        main_window._set_model_loaded = Mock()
         main_window.set_model = Mock()
         return main_window
 
@@ -338,27 +338,27 @@ class TestModelClosing:
     def test_close_model_none(self, mock_close_model):
         main_window = mock_close_model
         assert main_window.model is None
-        assert main_window.closeModel() is True
+        assert main_window.close_model() is True
         assert main_window.save_table_headers.called is False
-        assert main_window.modelLoaded.called is False
+        assert main_window._set_model_loaded.called is False
         assert main_window.set_model.called is False
 
     @pytest.mark.usefixtures("QMessageBox_Yes")
     def test_close_model_model_accept(self, mock_close_model):
         main_window = mock_close_model
         main_window.model = Model()
-        assert main_window.closeModel() is True
+        assert main_window.close_model() is True
         assert main_window.save_table_headers.call_count == 1
-        main_window.modelLoaded.assert_called_once_with(False)
+        main_window._set_model_loaded.assert_called_once_with(False)
         main_window.set_model.assert_called_once_with(None, None)
 
     @pytest.mark.usefixtures("QMessageBox_No")
     def test_close_model_model_cancel(self, mock_close_model):
         main_window = mock_close_model
         main_window.model = Model()
-        assert main_window.closeModel() is False
+        assert main_window.close_model() is False
         assert main_window.save_table_headers.called is False
-        assert main_window.modelLoaded.called is False
+        assert main_window._set_model_loaded.called is False
         assert main_window.set_model.called is False
 
 
