@@ -5,10 +5,10 @@ from GEMEditor.base.widgets import TableDisplayWidget
 from GEMEditor.model.classes.cobra import iterate_tree, Reaction, Gene, GeneGroup
 from GEMEditor.model.display.tables import StoichiometryTable
 from GEMEditor.model.display.ui.GenesDisplayWidget import Ui_GenesDisplayWidget
+from GEMEditor.model.display.ui.MetaboliteDisplayWidget import Ui_Form as Ui_MetDisplayWidget
 from GEMEditor.model.display.ui.ReactionAttributeDisplayWidget import Ui_Form as Ui_ReactionAttribs
 from GEMEditor.model.display.ui.StoichiometryDisplayWidget import Ui_StoichiometryDisplayWidget
 from GEMEditor.model.selection import MetaboliteSelectionDialog, GeneSelectionDialog
-from GEMEditor.ui.MetaboliteDisplayWidget import Ui_Form as Ui_MetDisplayWidget
 from PyQt5 import QtCore, QtGui
 from PyQt5.QtCore import QRegularExpression
 from PyQt5.QtGui import QRegularExpressionValidator

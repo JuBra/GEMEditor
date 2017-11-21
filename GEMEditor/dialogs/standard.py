@@ -1,7 +1,7 @@
 from GEMEditor.base.classes import Settings
 from GEMEditor.base.dialogs import CustomStandardDialog
+from GEMEditor.model.selection.ui import Ui_SelectionDialog
 from GEMEditor.ui.GeneTreeSelectionDialog import Ui_GeneTreeSelection
-from GEMEditor.ui.SelectionDialog import Ui_SelectionDialog
 from PyQt5 import QtGui, QtCore
 from PyQt5.QtCore import QSortFilterProxyModel
 from PyQt5.QtWidgets import QDialogButtonBox

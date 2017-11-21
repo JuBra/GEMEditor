@@ -1,13 +1,13 @@
 import string
 
-from GEMEditor.ui.ReactionsDisplayWidget import Ui_ReactionsDisplayWidget
+from GEMEditor import use_progress
+from GEMEditor.model.display.ui.MetaboliteAttributeDisplayWidget import \
+    Ui_MetaboliteAttributeDisplayWidget as Ui_MetAttribs
+from GEMEditor.model.display.ui.ReactionsDisplayWidget import Ui_ReactionsDisplayWidget
 from PyQt5 import QtCore, QtGui
 from PyQt5.QtCore import QRegularExpression
 from PyQt5.QtGui import QRegularExpressionValidator
 from PyQt5.QtWidgets import QWidget, QApplication
-from GEMEditor import use_progress
-from GEMEditor.model.display.ui.MetaboliteAttributeDisplayWidget import \
-    Ui_MetaboliteAttributeDisplayWidget as Ui_MetAttribs
 
 
 class MetaboliteAttributesDisplayWidget(QWidget, Ui_MetAttribs):

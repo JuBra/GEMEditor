@@ -1,11 +1,11 @@
 from GEMEditor.base.widgets import TableDisplayWidget
 from GEMEditor.model.classes.evidence import Evidence
 from GEMEditor.model.display.tables import AnnotationTable, EvidenceTable, LinkedReferenceTable
+from GEMEditor.model.display.ui.CommentDisplayWidget import Ui_CommentDisplayWidget
 from GEMEditor.model.display.ui.SettingDisplayWiget import Ui_SettingsDisplayWidget
 from GEMEditor.model.edit.annotation import EditAnnotationDialog
 from GEMEditor.model.edit.evidence import EditEvidenceDialog
 from GEMEditor.model.selection import ReferenceSelectionDialog
-from GEMEditor.ui.CommentDisplayWidget import Ui_CommentDisplayWidget
 from GEMEditor.ui.TableDisplayWidgetAddDel import Ui_TableDisplayWidgetAddDel
 from PyQt5 import QtCore, QtGui
 from PyQt5.QtWidgets import QMenu, QAction, QWidget, QAbstractItemView
