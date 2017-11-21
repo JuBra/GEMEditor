@@ -292,8 +292,8 @@ class TestModelLoaded:
         assert not main_window.actionCloseModel.isEnabled()
         # -> Model
         assert not main_window.menuModel.isEnabled()
-        # -> MetaNetX
-        assert not main_window.menuSimulation.isEnabled()
+        # -> Metanetx
+        assert not main_window.menuMetaNetX.isEnabled()
 
         main_window._set_model_loaded(True)
 
@@ -309,7 +309,7 @@ class TestModelLoaded:
         # -> Model
         assert main_window.menuModel.isEnabled()
         # -> MetaNetX
-        assert main_window.menuSimulation.isEnabled()
+        assert main_window.menuMetaNetX.isEnabled()
         # -> Help
         assert main_window.menuHelp.isEnabled()
         for action in main_window.menuHelp.actions():

@@ -137,7 +137,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.actionSaveModel.setEnabled(bool)
         self.menuMetaNetX.setEnabled(bool)
         self.menuModel.setEnabled(bool)
-        self.menuSimulation.setEnabled(bool)
         self.modelTab.editModelSettingButton.setEnabled(bool)
         for i in range(1, self.tabWidget.count()):
             self.tabWidget.setTabEnabled(i, bool)
