@@ -1,7 +1,8 @@
 from GEMEditor.base.dialogs import CustomStandardDialog
 from GEMEditor.model.edit.ui.EditReactionDialog import Ui_ReactionEditDialog
+from GEMEditor.model.edit.ui.SetFluxvalueDialog import Ui_SetFluxValueDialog
 from PyQt5 import QtCore
-from PyQt5.QtWidgets import QDialogButtonBox
+from PyQt5.QtWidgets import QDialogButtonBox, QDialog
 
 
 class ReactionInputDialog(CustomStandardDialog, Ui_ReactionEditDialog):
@@ -59,3 +60,15 @@ class ReactionInputDialog(CustomStandardDialog, Ui_ReactionEditDialog):
             self.tabWidget.widget(i).save_state()
 
 
+class SetFluxValueDialog(QDialog, Ui_SetFluxValueDialog):
+
+    def __init__(self, *args, **kwargs):
+        QDialog.__init__(self, *args, **kwargs)
+        self.setupUi(self)
+
+    @property
+    def user_input(self):
+        if self.checkBox.isChecked():
+            return self.fluxValueDoubleSpinBox.value(), self.deviationInput.value()
+        else:
+            return self.fluxValueDoubleSpinBox.value(), 0.

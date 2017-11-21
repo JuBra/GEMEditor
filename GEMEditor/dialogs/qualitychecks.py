@@ -1,11 +1,10 @@
 from GEMEditor.analysis.duplicates import merge_reactions, merge_metabolites
 from GEMEditor.base.classes import Settings
 from GEMEditor.base.dialogs import CustomStandardDialog
-from GEMEditor.dialogs.standard import TableDisplayDialog
-from GEMEditor.model.display.tables import EvidenceTable, ReactionBaseTable, MetaboliteTable
+from GEMEditor.model.display.tables import ReactionBaseTable, MetaboliteTable
 from GEMEditor.ui.TreeViewDialog import Ui_Duplicates
 from PyQt5 import QtGui, QtCore
-from PyQt5.QtWidgets import QInputDialog, QMessageBox, QMenu, QAction
+from PyQt5.QtWidgets import QInputDialog, QMenu, QAction
 
 
 class DuplicateDialog(CustomStandardDialog, Ui_Duplicates):
@@ -140,42 +139,3 @@ def factory_duplicate_dialog(input_type, duplicates):
         return dialog
     else:
         raise NotImplementedError
-
-
-class FailingEvidencesDialog(TableDisplayDialog):
-
-    def __init__(self, items_dict, model):
-        TableDisplayDialog.__init__(self, items_dict, model, EvidenceTable)
-        self.dataTable.setHorizontalHeaderItem(self.dataTable.columnCount()-1, QtGui.QStandardItem("Reason"))
-        self.setWindowFlags(QtCore.Qt.Window)
-        self.setWindowTitle("Failed evidences")
-        self.dataView.customContextMenuRequested.connect(self.showContextMenu)
-        self.restore_dialog_geometry()
-
-    def populate_table(self):
-        for evidence, reason in self.items.items():
-            self.dataTable.appendRow(self.dataTable.row_from_item(evidence)+[QtGui.QStandardItem(reason)])
-
-    @QtCore.pyqtSlot()
-    def fix_selection(self):
-        selected_rows = sorted(self.dataView.get_selected_rows(), reverse=True)
-        unfixed = 0
-        for row in sorted(selected_rows, reverse=True):
-            evidence = self.dataTable.item_from_row(row)
-            status, error = evidence.fix()
-            if status is True:
-                self.dataTable.removeRow(row)
-            else:
-                self.dataTable.item(row, self.dataTable.columnCount()-1).setText(error)
-                unfixed+=1
-
-        if unfixed:
-            QMessageBox().information(self, "Unfixed evidences", "Could not fix {} evidences.".format(str(unfixed)))
-
-    @QtCore.pyqtSlot(QtCore.QPoint)
-    def showContextMenu(self, pos):
-        menu = QMenu()
-        fix_evidences_action = QAction(self.tr("Fix evidences"), menu)
-        fix_evidences_action.triggered.connect(self.fix_selection)
-        menu.addAction(fix_evidences_action)
-        menu.exec_(self.dataView.viewport().mapToGlobal(pos))
