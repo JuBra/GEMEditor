@@ -1,6 +1,5 @@
 import pytest
 from unittest.mock import Mock
-from GEMEditor.dialogs.mock import MockModelTestDialog
 from GEMEditor.main.model.tabs import *
 from GEMEditor.model.classes.cobra import Model
 from GEMEditor.model.classes.modeltest import ReactionSetting, Outcome
@@ -568,8 +567,6 @@ class TestModelTestsTab:
         self.test_case.add_setting(self.setting)
 
         self.tab.set_model(self.model)
-
-        self.mock_return_test_case = MockModelTestDialog(return_value=1)
 
     def test_setup_items(self):
         assert self.model.QtTestsTable is not None

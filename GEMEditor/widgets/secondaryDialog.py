@@ -1,7 +1,7 @@
+from GEMEditor.base.ui.TableDisplayWidgetAddDel import Ui_TableDisplayWidgetAddDel
+from GEMEditor.base.widgets import TableDisplayWidget
 from GEMEditor.model.display.tables import LinkedReferenceTable
 from GEMEditor.model.selection.reference import ReferenceSelectionDialog
-from GEMEditor.ui.TableDisplayWidgetAddDel import Ui_TableDisplayWidgetAddDel
-from GEMEditor.base.widgets import TableDisplayWidget
 from PyQt5 import QtCore
 from PyQt5.QtWidgets import QAction
 

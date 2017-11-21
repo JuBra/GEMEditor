@@ -3,7 +3,6 @@ from GEMEditor.analysis.model_test import get_original_settings
 from GEMEditor.analysis.model_test import run_test
 from GEMEditor.base.classes import Settings
 from GEMEditor.base.functions import generate_copy_id
-from GEMEditor.dialogs.input import SetFluxValueDialog
 from GEMEditor.main.model.ui import Ui_StandardTab, Ui_AnalysisTab, Ui_SolutionTableWidget, Ui_model_stats_tab
 from GEMEditor.model.classes.cobra import Gene, Reaction, Metabolite, find_duplicate_metabolite
 from GEMEditor.model.classes.modeltest import ModelTest
@@ -12,7 +11,7 @@ from GEMEditor.model.display.proxymodels import ReactionProxyFilter, MetaboliteP
 from GEMEditor.model.edit.gene import GeneEditDialog
 from GEMEditor.model.edit.metabolite import MetaboliteEditDialog
 from GEMEditor.model.edit.modeltest import EditModelTestDialog
-from GEMEditor.model.edit.reaction import ReactionInputDialog
+from GEMEditor.model.edit.reaction import ReactionInputDialog, SetFluxValueDialog
 from GEMEditor.model.edit.reference import ReferenceEditDialog
 from GEMEditor.solution.base import status_objective_from_solution, set_objective_to_label, set_status_to_label
 from GEMEditor.solution.display import SolutionDialog
