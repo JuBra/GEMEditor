@@ -1,8 +1,8 @@
-from GEMEditor.analysis.duplicates import merge_reactions, merge_metabolites
+from GEMEditor.analysis.duplicates.functions import merge_reactions, merge_metabolites
+from GEMEditor.analysis.duplicates.ui.TreeViewDialog import Ui_Duplicates
 from GEMEditor.base.classes import Settings
 from GEMEditor.base.dialogs import CustomStandardDialog
 from GEMEditor.model.display.tables import ReactionBaseTable, MetaboliteTable
-from GEMEditor.ui.TreeViewDialog import Ui_Duplicates
 from PyQt5 import QtGui, QtCore
 from PyQt5.QtWidgets import QInputDialog, QMenu, QAction
 

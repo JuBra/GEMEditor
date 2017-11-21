@@ -1,5 +1,4 @@
 from collections import defaultdict
-
 from GEMEditor.base.functions import invert_mapping, get_annotation_to_item_map
 from GEMEditor.model.classes.cobra import GeneGroup
 

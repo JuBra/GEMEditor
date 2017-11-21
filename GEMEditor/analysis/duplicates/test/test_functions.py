@@ -1,8 +1,7 @@
 import itertools
-
-from GEMEditor.analysis.duplicates import *
-from GEMEditor.model.classes.cobra import Reaction, Metabolite
+from GEMEditor.analysis.duplicates.functions import *
 from GEMEditor.model.classes.annotation import Annotation
+from GEMEditor.model.classes.cobra import Reaction, Metabolite
 from GEMEditor.model.classes.evidence import Evidence
 
 
