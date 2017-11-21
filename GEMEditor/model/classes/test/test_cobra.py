@@ -96,30 +96,6 @@ def test_direct_retrieval_of_genes_reaction():
     assert reaction in gene1.reactions
 
 
-@pytest.fixture()
-def ex_reaction():
-    test_reaction = Reaction(id="test", name="test")
-
-    gene1 = Gene("Gene1")
-    gene2 = Gene("Gene2")
-    gene3 = Gene("Gene3")
-
-    gene_group1 = GeneGroup()
-    gene_group1.add_child(gene1)
-
-    gene_group2 = GeneGroup()
-    gene_group2.add_child(gene2)
-    gene_group2.add_child(gene3)
-
-
-    gene_group1.add_child(gene_group2)
-
-    test_reaction.add_child(gene3)
-    test_reaction.add_child(gene_group1)
-
-    return test_reaction
-
-
 class TestReaction:
 
     @pytest.fixture()
