@@ -67,7 +67,7 @@ class TestGetYields:
                           "O": {met3: 7/16, met4: 9/16},
                           "P": {met3: 0.5, met4: 0.5}}
 
-    def get_yield_not_working_if_input_formula_missing(self):
+    def test_get_yield_not_working_if_input_formula_missing(self):
         model = Model("test")
         met1 = Metabolite(id="S7P")
         met2 = Metabolite(id="T3P1", formula="C3H7O6P")
