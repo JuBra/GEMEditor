@@ -29,6 +29,7 @@ from GEMEditor.model.edit.evidence import BatchEvidenceDialog
 from GEMEditor.ui.MainWindow import Ui_MainWindow
 from PyQt5.QtCore import QStandardPaths, Qt
 from PyQt5.QtWidgets import QFileDialog, QMainWindow
+from PyQt5.QtGui import QKeySequence
 
 LOGGER = logging.getLogger(__name__)
 
@@ -60,14 +61,20 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # File menu
         self.actionNewModel.triggered.connect(self.createModel)
+        self.actionNewModel.setShortcut(QKeySequence.New)
         self.actionOpenModel.triggered.connect(self.openModel)
+        self.actionOpenModel.setShortcut(QKeySequence.Open)
         self.actionLoadTestModel.triggered.connect(self.loadTestModel)
         self.actionSaveModel.triggered.connect(self.saveModel)
+        self.actionSaveModel.setShortcut(QKeySequence.Save)
         self.actionCloseModel.triggered.connect(self.closeModel)
+        self.actionCloseModel.setShortcut(QKeySequence.Close)
         self.actionCloseEditor.triggered.connect(self.close)
+        self.actionCloseEditor.setShortcut(QKeySequence.Quit)
 
         # Edit menu
         self.actionEditSettings.triggered.connect(self.editSettings)
+        self.actionEditSettings.setShortcut(QKeySequence.Preferences)
 
         # Model menu
         self.actionMaps.triggered.connect(self.show_map_list)
@@ -96,6 +103,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # About menu
         self.actionAbout.triggered.connect(self.showAbout)
+        self.actionAbout.setShortcut(QKeySequence.HelpContents)
 
         # Debugging class
         LOGGER.debug("MainWindow menu signals connected.")
@@ -111,7 +119,16 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     @QtCore.pyqtSlot()
     def loadTestModel(self):
-        pass
+        try:
+            from cobra.test import data_dir
+        except ImportError:
+            LOGGER.debug("Cobra path to test model not found.")
+            QMessageBox().warning(None, "Error", "Path to test model not found!")
+            return
+        else:
+            full_path = os.path.join(data_dir, "iJO1366.xml")
+            LOGGER.debug("Opening Testmodel at '{}'".format(full_path))
+            self.openModel(full_path)
 
     @QtCore.pyqtSlot()
     def showAbout(self):
