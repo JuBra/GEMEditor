@@ -223,7 +223,7 @@
   </action>
   <action name="actionAbout">
    <property name="icon">
-    <iconset resource="../../icons/icons.qrc">
+    <iconset resource="../../../icons/icons.qrc">
      <normaloff>:/information_icon</normaloff>:/information_icon</iconset>
    </property>
    <property name="text">
@@ -235,7 +235,7 @@
   </action>
   <action name="actionStatistics">
    <property name="icon">
-    <iconset resource="../../icons/icons.qrc">
+    <iconset resource="../../../icons/icons.qrc">
      <normaloff>:/statistics_icon</normaloff>:/statistics_icon</iconset>
    </property>
    <property name="text">
@@ -244,7 +244,7 @@
   </action>
   <action name="actionAuto_annotate">
    <property name="icon">
-    <iconset resource="../../icons/icons.qrc">
+    <iconset resource="../../../icons/icons.qrc">
      <normaloff>:/add_from_database</normaloff>:/add_from_database</iconset>
    </property>
    <property name="text">
@@ -253,7 +253,7 @@
   </action>
   <action name="actionCheck_consistency">
    <property name="icon">
-    <iconset resource="../../icons/icons.qrc">
+    <iconset resource="../../../icons/icons.qrc">
      <normaloff>:/check_consistency_icon</normaloff>:/check_consistency_icon</iconset>
    </property>
    <property name="text">
@@ -311,7 +311,7 @@
   </action>
   <action name="actionCheck_evidences">
    <property name="icon">
-    <iconset resource="../../icons/icons.qrc">
+    <iconset resource="../../../icons/icons.qrc">
      <normaloff>:/check_evidence</normaloff>:/check_evidence</iconset>
    </property>
    <property name="text">
@@ -330,7 +330,7 @@
   </action>
   <action name="actionAdd_batch">
    <property name="icon">
-    <iconset resource="../../icons/icons.qrc">
+    <iconset resource="../../../icons/icons.qrc">
      <normaloff>:/batch_evidence</normaloff>:/batch_evidence</iconset>
    </property>
    <property name="text">
@@ -349,7 +349,7 @@
   </action>
   <action name="actionUpdate_database">
    <property name="icon">
-    <iconset resource="../../icons/icons.qrc">
+    <iconset resource="../../../icons/icons.qrc">
      <normaloff>:/update_database</normaloff>:/update_database</iconset>
    </property>
    <property name="text">
@@ -406,48 +406,48 @@
   <customwidget>
    <class>ReactionTab</class>
    <extends>QWidget</extends>
-   <header>GEMEditor.tabs</header>
+   <header>GEMEditor.main.model.tabs</header>
    <container>1</container>
   </customwidget>
   <customwidget>
    <class>GeneTab</class>
    <extends>QWidget</extends>
-   <header>GEMEditor.tabs</header>
+   <header>GEMEditor.main.model.tabs</header>
    <container>1</container>
   </customwidget>
   <customwidget>
    <class>ReferenceTab</class>
    <extends>QWidget</extends>
-   <header>GEMEditor.tabs</header>
+   <header>GEMEditor.main.model.tabs</header>
    <container>1</container>
   </customwidget>
   <customwidget>
    <class>AnalysesTab</class>
    <extends>QWidget</extends>
-   <header>GEMEditor.tabs</header>
+   <header>GEMEditor.main.model.tabs</header>
    <container>1</container>
   </customwidget>
   <customwidget>
    <class>ModelInfoTab</class>
    <extends>QWidget</extends>
-   <header>GEMEditor.tabs</header>
+   <header>GEMEditor.main.model.tabs</header>
    <container>1</container>
   </customwidget>
   <customwidget>
    <class>MetaboliteTab</class>
    <extends>QWidget</extends>
-   <header>GEMEditor.tabs</header>
+   <header>GEMEditor.main.model.tabs</header>
    <container>1</container>
   </customwidget>
   <customwidget>
    <class>ModelTestsTab</class>
    <extends>QWidget</extends>
-   <header>GEMEditor.tabs</header>
+   <header>GEMEditor.main.model.tabs</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
  <resources>
-  <include location="../../icons/icons.qrc"/>
+  <include location="../../../icons/icons.qrc"/>
  </resources>
  <connections/>
 </ui>

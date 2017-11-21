@@ -274,5 +274,4 @@ class Ui_MainWindow(object):
         self.action_mapping_load.setText(_translate("MainWindow", "Load from file"))
         self.action_mapping_save.setText(_translate("MainWindow", "Save to file"))
 
-from GEMEditor.tabs import AnalysesTab, GeneTab, MetaboliteTab, ModelInfoTab, ModelTestsTab, ReactionTab, ReferenceTab
-import icons_rc
+from GEMEditor.main.model.tabs import AnalysesTab, GeneTab, MetaboliteTab, ModelInfoTab, ModelTestsTab, ReactionTab, ReferenceTab
