@@ -1,68 +1,12 @@
 import logging
 from collections import OrderedDict
-from math import floor
-
-from GEMEditor.analysis.model_test import run_test, get_original_settings
-from GEMEditor.analysis.ui.BaseStatisticsDialog import Ui_Dialog
-from GEMEditor.model.classes.cobra import Reaction, Metabolite, Gene
+from GEMEditor.analysis.model_test import get_original_settings, run_test
+from GEMEditor.model.classes import Reaction, Metabolite, Gene
 from GEMEditor.model.display.proxymodels import metabolite_is_dead_end
-from PyQt5 import QtCore
-from PyQt5.QtWidgets import QDialog, QGridLayout, QGroupBox, QLabel, QApplication, QFileDialog, QDialogButtonBox, \
-    QPushButton
-
-logger = logging.getLogger(__name__)
+from PyQt5.QtWidgets import QApplication
 
 
-class DisplayStatisticsDialog(QDialog, Ui_Dialog):
-
-    def __init__(self, statistics):
-        super(DisplayStatisticsDialog, self).__init__()
-        self.setupUi(self)
-        self.statistics = statistics
-        self.setWindowTitle("Statistics")
-        self.save_button = QPushButton("Save")
-        self.buttonBox.addButton(self.save_button, QDialogButtonBox.ActionRole)
-        self.save_button.clicked.connect(self.save_statistics)
-        self.update_statistics()
-
-    def update_statistics(self):
-
-        # Delete existing child widgets
-        for i in reversed(range(self.mainLayout.count())):
-            current_widget = self.mainLayout.itemAt(i).widget()
-            self.mainLayout.removeWidget(current_widget)
-            current_widget.setParent(None)
-
-        # Populate layout with new widgets
-        for i, item in enumerate(self.statistics.items()):
-            key, value = item
-            # Generate group box per item
-            group_widget = QGroupBox()
-            group_widget.setTitle(key)
-
-            # Set group layout
-            group_layout = QGridLayout()
-            group_widget.setLayout(group_layout)
-
-            # Add groupbox to main layout (3 columns)
-            self.mainLayout.addWidget(group_widget, floor(i/3), i % 3)
-
-            # Add items to groupbox
-            for n, item in enumerate(value.items()):
-                # Add description
-                group_layout.addWidget(QLabel(item[0]), n, 0, QtCore.Qt.AlignTop)
-                # Add count
-                group_layout.addWidget(QLabel(str(item[1])), n, 1, QtCore.Qt.AlignTop | QtCore.Qt.AlignRight)
-
-            # Stretch last row to make rows align at top
-            group_layout.setRowStretch(n, 1)
-
-    @QtCore.pyqtSlot()
-    def save_statistics(self):
-        filename, filter = QFileDialog.getSaveFileName(self, self.tr("Save statistics"), None,
-                                                       self.tr("Text file (*.txt)"))
-        if filename:
-            write_stats_to_file(filename, self.statistics)
+LOGGER = logging.getLogger(__name__)
 
 
 def reaction_statistics(model):
@@ -143,7 +87,8 @@ def gene_statistics(model):
 
 
 def reference_statistics(model):
-    return {"Total": len(model.references)}
+    return OrderedDict([("Total", len(model.references)),
+                        ("Unassigned", sum(not r.linked_items for r in model.references.values()))])
 
 
 def evidence_statistics(model):
@@ -199,7 +144,7 @@ def modeltest_statistics(model, progress):
     for i, case in enumerate(model.tests):
         # Return if user cancelled
         if progress.wasCanceled():
-            logger.info("Test simulation aborted by user")
+            LOGGER.debug("Test simulation aborted by user")
             break
         else:
             progress.setValue(i)
@@ -234,21 +179,3 @@ def run_all_statistics(model, progress):
                         ("Evidences", evidence_stats),
                         ("Tests", test_stats),
                         ("References", reference_stats)])
-
-
-def write_stats_to_file(path, model_stats):
-    """ Write the statistics of the model to file
-
-    Parameters
-    ----------
-    path: str
-    model_stats: OrderedDict
-
-    Returns
-    -------
-
-    """
-    with open(path, "w") as open_file:
-        for category, statistics in model_stats.items():
-            for description, count in statistics.items():
-                open_file.write("\t".join((category, description, str(count)))+"\n")

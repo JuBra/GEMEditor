@@ -18,8 +18,7 @@ from GEMEditor.main.about import AboutDialog
 from GEMEditor.main.model.tabs import *
 from GEMEditor.main.settings import EditSettingsDialog
 from GEMEditor.main.ui.MainWindow import Ui_MainWindow
-from GEMEditor.main.update import UpdateAvailableDialog
-from GEMEditor.main.update.worker import UpdateCheck
+from GEMEditor.main.update import UpdateAvailableDialog, UpdateCheck
 from GEMEditor.map.dialog import MapListDialog
 from GEMEditor.model.classes.cobra import Model, prune_gene_tree
 from GEMEditor.model.edit.evidence import BatchEvidenceDialog

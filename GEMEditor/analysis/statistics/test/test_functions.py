@@ -1,9 +1,8 @@
 from unittest.mock import Mock
 
 import pytest
-from GEMEditor.analysis.statistics import reaction_statistics, metabolite_statistics, gene_statistics
-from GEMEditor.model.classes.cobra import Model, Metabolite, Reaction, Gene
-from GEMEditor.model.classes.annotation import Annotation
+from GEMEditor.analysis.statistics.functions import reaction_statistics, metabolite_statistics, gene_statistics, reference_statistics
+from GEMEditor.model.classes import Model, Metabolite, Reaction, Gene, Reference, Evidence, Annotation, ModelTest
 from PyQt5.QtWidgets import QApplication
 
 # Make sure to only start an application
@@ -190,3 +189,25 @@ class TestGetGeneStatistics:
         # Todo: Implement test
         assert True
 
+
+class TestReferenceStatistics:
+
+    def test_reference_statistics(self):
+        model = Model("m1")
+        ref1 = Reference()
+        modeltest = ModelTest()
+        modeltest.add_reference(ref1)
+        ref2 = Reference()
+        evidence = Evidence()
+        evidence.add_reference(ref2)
+        ref3 = Reference()
+
+        model.add_reference(ref1)
+        model.add_reference(ref2)
+        model.add_reference(ref3)
+
+        model.setup_tables()
+
+        result = reference_statistics(model)
+        assert result["Total"] == 3
+        assert result["Unassigned"] == 1

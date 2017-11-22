@@ -129,3 +129,32 @@ class GeneProxyFilter(CustomSortFilterProxyModel):
             return len(gene.reactions) == 0
         else:
             raise NotImplementedError
+
+
+class ReferenceProxyFilter(CustomSortFilterProxyModel):
+
+    options = ("All", "Unassigned")
+
+    def __init__(self, *args, **kwargs):
+        super(ReferenceProxyFilter, self).__init__(*args, **kwargs)
+
+    def passes_custom_filter(self, reference):
+        """ Check that the gene passes the selected filter
+
+        Parameters
+        ----------
+        gene : GEMEditor.model.classes.cobra.Gene
+
+        Returns
+        -------
+        bool : True if row passes the filter, False otherwise.
+        """
+
+        if self.custom_filter == 0:
+            # All references - Always true
+            return True
+        elif self.custom_filter == 1:
+            # Return true if the reaction is not assigned
+            return len(reference.linked_items) == 0
+        else:
+            raise NotImplementedError

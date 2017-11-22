@@ -1,7 +1,6 @@
 import pytest
-from GEMEditor.model.classes.annotation import Annotation
-from GEMEditor.model.classes.cobra import Reaction, Metabolite, Gene
-from GEMEditor.model.display.proxymodels import ReactionProxyFilter, reversibility
+from GEMEditor.model.classes import Reaction, Metabolite, Gene, Annotation, Reference, Evidence, ModelTest
+from GEMEditor.model.display.proxymodels import ReactionProxyFilter, reversibility, GeneProxyFilter, ReferenceProxyFilter
 from GEMEditor.model.display.tables import ReactionTable
 from PyQt5.QtWidgets import QApplication
 
@@ -167,6 +166,7 @@ class TestReactionProxyFilter:
         with pytest.raises(NotImplementedError):
             self.proxyModel.passes_custom_filter(Reaction())
 
+
 class TestMetaboliteProxyFilter:
 
     def test_filtering(self):
@@ -183,3 +183,100 @@ class TestMetaboliteProxyFilter:
     (2, 5, False)])
 def test_reversibility(lower, upper, expected):
     assert reversibility(lower, upper) is expected
+
+
+class TestGeneProxyFilter:
+
+    def test_unassigned_gene(self):
+        custom_proxy = GeneProxyFilter()
+        gene = Gene()
+
+        # Test all genes
+        custom_proxy.custom_filter = 0
+        assert custom_proxy.passes_custom_filter(gene) is True
+
+        # Test unassigned
+        custom_proxy.custom_filter = 1
+        assert custom_proxy.passes_custom_filter(gene) is True
+
+        # Test all filters checked
+        custom_proxy.custom_filter = 2
+        with pytest.raises(NotImplementedError):
+            assert custom_proxy.passes_custom_filter(gene)
+
+    def test_assigned_gene(self):
+        custom_proxy = GeneProxyFilter()
+        gene = Gene()
+        reaction = Reaction()
+        reaction.add_child(gene)
+
+        # Test all genes
+        custom_proxy.custom_filter = 0
+        assert custom_proxy.passes_custom_filter(gene) is True
+
+        # Test unassigned
+        custom_proxy.custom_filter = 1
+        assert custom_proxy.passes_custom_filter(gene) is False
+
+        # Test all filters checked
+        custom_proxy.custom_filter = 2
+        with pytest.raises(NotImplementedError):
+            assert custom_proxy.passes_custom_filter(gene)
+
+
+class TestReferenceProxyFilter:
+
+    def test_unassigned_references(self):
+        custom_proxy = ReferenceProxyFilter()
+        reference = Reference()
+
+        # Test all genes
+        custom_proxy.custom_filter = 0
+        assert custom_proxy.passes_custom_filter(reference) is True
+
+        # Test unassigned
+        custom_proxy.custom_filter = 1
+        assert custom_proxy.passes_custom_filter(reference) is True
+
+        # Test all filters checked
+        custom_proxy.custom_filter = 2
+        with pytest.raises(NotImplementedError):
+            assert custom_proxy.passes_custom_filter(reference)
+
+    def test_reference_assigned_to_evidence(self):
+        custom_proxy = ReferenceProxyFilter()
+        reference = Reference()
+        evidence = Evidence()
+        evidence.add_reference(reference)
+
+        # Test all genes
+        custom_proxy.custom_filter = 0
+        assert custom_proxy.passes_custom_filter(reference) is True
+
+        # Test unassigned
+        custom_proxy.custom_filter = 1
+        assert custom_proxy.passes_custom_filter(reference) is False
+
+        # Test all filters checked
+        custom_proxy.custom_filter = 2
+        with pytest.raises(NotImplementedError):
+            assert custom_proxy.passes_custom_filter(reference)
+
+    def test_reference_assigned_to_modeltest(self):
+        custom_proxy = ReferenceProxyFilter()
+        reference = Reference()
+        modeltest = ModelTest()
+        modeltest.add_reference(reference)
+
+        # Test all genes
+        custom_proxy.custom_filter = 0
+        assert custom_proxy.passes_custom_filter(reference) is True
+
+        # Test unassigned
+        custom_proxy.custom_filter = 1
+        assert custom_proxy.passes_custom_filter(reference) is False
+
+        # Test all filters checked
+        custom_proxy.custom_filter = 2
+        with pytest.raises(NotImplementedError):
+            assert custom_proxy.passes_custom_filter(reference)
