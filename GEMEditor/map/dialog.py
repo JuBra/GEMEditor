@@ -7,7 +7,8 @@ from GEMEditor.solution.base import fluxes_from_solution
 from GEMEditor.base.classes import Settings
 from PyQt5 import QtCore
 from PyQt5.QtWebEngineWidgets import QWebEngineSettings, QWebEnginePage, QWebEngineView
-from PyQt5.QtWidgets import QDialog, QFileDialog, QListWidgetItem, QMessageBox, QWidget, QVBoxLayout, QTabWidget
+from PyQt5.QtWidgets import QDialog, QFileDialog, QListWidgetItem, QMessageBox, QWidget, QVBoxLayout, QTabWidget,\
+    QDialogButtonBox
 
 LOGGER = logging.getLogger(__name__)
 
@@ -180,6 +181,12 @@ class MapDisplayDialog(QDialog):
                 widget = MapDisplayWidget(builder)
                 tabwidget.addTab(widget, builder.display_path)
                 self.widgets.append(widget)
+
+        # Add a button box
+        buttonbox = QDialogButtonBox(QDialogButtonBox.Close)
+        buttonbox.rejected.connect(self.reject)
+        layout.addWidget(buttonbox)
+
         self.update_map()
 
     def update_map(self, **kwargs):
