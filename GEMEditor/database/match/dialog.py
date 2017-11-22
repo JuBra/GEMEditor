@@ -159,6 +159,7 @@ class ManualMatchDialog(QDialog, Ui_ManualMatchDialog):
 
         # Update widgets
         self.update_selection_status()
+        self.next_metabolite()
 
     @QtCore.pyqtSlot()
     def update_selection_status(self):

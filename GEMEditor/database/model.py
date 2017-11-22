@@ -523,6 +523,13 @@ def update_metabolites_from_database(model, progress, update_names=False, update
     return updates
 
 
+def run_database_mapping(database, model, progress):
+    # Update metabolites
+    update_metabolite_database_mapping(database, model, progress)
+    check_ambiguous_mappings(model, None)
+    update_reaction_database_mapping(database, model, progress)
+
+
 def load_mapping(model, path):
     """ Load database mapping from file
 
@@ -578,7 +585,8 @@ def store_mapping(model, path):
         return
 
     # Substitute database items for their id
-    substituted = dict((key.id, value) for key, value in model.database_mapping.items())
+    substituted = dict((key.id, value) for key, value in
+                       model.database_mapping.items() if isinstance(value, int))
 
     with open(path, "w") as open_file:
         open_file.write(json.dumps(substituted))

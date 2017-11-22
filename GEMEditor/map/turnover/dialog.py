@@ -13,7 +13,7 @@ from GEMEditor.solution.base import fluxes_from_solution
 from PyQt5.QtCore import pyqtSlot, Qt
 from PyQt5.QtGui import QStandardItemModel, QStandardItem
 from PyQt5.QtWebEngineWidgets import QWebEngineSettings, QWebEnginePage
-from PyQt5.QtWidgets import QDialog
+from PyQt5.QtWidgets import QDialog, QAbstractItemView
 
 LOGGER = logging.getLogger(__name__)
 
@@ -43,6 +43,8 @@ class TurnoverDialog(QDialog, Ui_TurnoverDialog):
         # Setup data structures
         self.datatable = QStandardItemModel(self)
         self.dataView.setModel(self.datatable)
+        self.dataView.setEditTriggers(QAbstractItemView.NoEditTriggers)
+
         self.webpage = QWebEnginePage(self)
         self.mapView.setPage(self.webpage)
         self.mapView.settings().setAttribute(QWebEngineSettings.JavascriptEnabled, True)
