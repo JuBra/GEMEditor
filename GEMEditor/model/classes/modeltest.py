@@ -31,6 +31,7 @@ class ModelTest(ReferenceLink):
         return self.reaction_settings
 
     def all_settings(self):
+        # Note: For correct test running the order is important
         return self.reaction_settings + self.gene_settings
 
     def clear_all(self):

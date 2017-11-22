@@ -86,7 +86,8 @@ def gene_statistics(model):
 
 
 def reference_statistics(model):
-    return {"Total": len(model.references)}
+    return OrderedDict([("Total", len(model.references)),
+                        ("Unassigned", sum(not r.linked_items for r in model.references.values()))])
 
 
 def evidence_statistics(model):
