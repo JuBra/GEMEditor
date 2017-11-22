@@ -7,7 +7,7 @@ from GEMEditor.main.model.ui import Ui_StandardTab, Ui_AnalysisTab, Ui_SolutionT
 from GEMEditor.model.classes.cobra import Gene, Reaction, Metabolite, find_duplicate_metabolite
 from GEMEditor.model.classes.modeltest import ModelTest
 from GEMEditor.model.classes.reference import Reference
-from GEMEditor.model.display.proxymodels import ReactionProxyFilter, MetaboliteProxyFilter, GeneProxyFilter
+from GEMEditor.model.display.proxymodels import ReactionProxyFilter, MetaboliteProxyFilter, GeneProxyFilter, ReferenceProxyFilter
 from GEMEditor.model.edit.gene import GeneEditDialog
 from GEMEditor.model.edit.metabolite import MetaboliteEditDialog
 from GEMEditor.model.edit.modeltest import EditModelTestDialog
@@ -612,7 +612,7 @@ class ReferenceTab(StandardTab):
     data_type = "Reference"
 
     def __init__(self):
-        StandardTab.__init__(self)
+        StandardTab.__init__(self, ProxyModel=ReferenceProxyFilter)
         self.dataTable = None
 
     @QtCore.pyqtSlot()
