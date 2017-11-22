@@ -1,8 +1,15 @@
 from unittest.mock import Mock
-
 from GEMEditor.model.classes.cobra import Metabolite, Model
 from GEMEditor.model.display.metabolite import MetaboliteAttributesDisplayWidget
-from PyQt5 import QtTest, QtCore
+from PyQt5 import QtTest, QtCore, QtGui
+from PyQt5.QtWidgets import QApplication
+
+# Make sure to only start an application
+# if there is no active one. Opening multiple
+# applications will lead to a crash.
+app = QApplication.instance()
+if app is None:
+    app = QApplication([])
 
 
 class TestMetaboliteAttributesDisplayWidget:
@@ -131,3 +138,40 @@ class TestMetaboliteAttributesDisplayWidget:
         assert widget.valid_inputs() is True
         widget.iDLineEdit.clear()
         assert widget.valid_inputs() is False
+
+    def test_changing_id(self):
+        metabolite = Metabolite(compartment="m")
+        model = Model()
+
+        widget = MetaboliteAttributesDisplayWidget()
+        widget.set_item(metabolite, model)
+        assert widget._id_valid is False
+
+        QtTest.QTest.keyClick(widget.iDLineEdit, "V")
+        assert widget._id_valid is True
+
+        QtTest.QTest.keyClick(widget.iDLineEdit, "a")
+        assert widget._id_valid is True
+
+        QtTest.QTest.keyClick(widget.iDLineEdit, "#")
+        assert widget._id_valid is False
+
+    def test_changing_formula(self):
+        metabolite = Metabolite(id="m1", compartment="m")
+        model = Model()
+
+        widget = MetaboliteAttributesDisplayWidget()
+        widget.set_item(metabolite, model)
+        assert widget._id_valid is True
+
+        # Check empty formula is valid
+        assert widget._formula_valid is True
+
+        QtTest.QTest.keyClick(widget.formulaLineEdit, "C")
+        assert widget._formula_valid is True
+
+        QtTest.QTest.keyClick(widget.formulaLineEdit, "2")
+        assert widget._formula_valid is True
+
+        QtTest.QTest.keyClick(widget.formulaLineEdit, "(")
+        assert widget._formula_valid is False

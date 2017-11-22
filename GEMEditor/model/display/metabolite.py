@@ -1,13 +1,14 @@
 import string
-
 from GEMEditor import use_progress
 from GEMEditor.model.display.ui.MetaboliteAttributeDisplayWidget import \
     Ui_MetaboliteAttributeDisplayWidget as Ui_MetAttribs
 from GEMEditor.model.display.ui.ReactionsDisplayWidget import Ui_ReactionsDisplayWidget
 from PyQt5 import QtCore, QtGui
-from PyQt5.QtCore import QRegularExpression
-from PyQt5.QtGui import QRegularExpressionValidator
 from PyQt5.QtWidgets import QWidget, QApplication
+
+
+SBML_SYMBOLS = set(string.ascii_letters+string.digits+"_")
+FORMULA_CHARS = set(string.digits+string.ascii_letters)
 
 
 class MetaboliteAttributesDisplayWidget(QWidget, Ui_MetAttribs):
@@ -19,12 +20,10 @@ class MetaboliteAttributesDisplayWidget(QWidget, Ui_MetAttribs):
         self.setupUi(self)
         self.model = None
         self.metabolite = None
+        self._id_valid = True
+        self._formula_valid = True
+        self._comp_valid = True
         self.default_id_border = self.iDLineEdit.styleSheet()
-
-        # Setup validator for SBML compliant ids
-        self.validator = QRegularExpressionValidator()
-        self.validator.setRegularExpression(QRegularExpression(r"^[a-zA-Z0-9_]*$"))
-        self.iDLineEdit.setValidator(self.validator)
 
         # Toggle the warning signs
         self.validate_id()
@@ -40,11 +39,8 @@ class MetaboliteAttributesDisplayWidget(QWidget, Ui_MetAttribs):
         self.compartmentComboBox.currentTextChanged.connect(self.validate_compartment)
 
         # Connect inputs to changed
-        self.iDLineEdit.textChanged.connect(self.changed.emit)
-        self.nameLineEdit.textChanged.connect(self.changed.emit)
-        self.formulaLineEdit.textChanged.connect(self.changed.emit)
         self.chargeSpinBox.valueChanged.connect(self.changed.emit)
-        self.compartmentComboBox.currentIndexChanged.connect(self.changed.emit)
+        self.nameLineEdit.textChanged.connect(self.changed.emit)
 
     def set_item(self, item, model):
         self.model = model
@@ -140,52 +136,61 @@ class MetaboliteAttributesDisplayWidget(QWidget, Ui_MetAttribs):
 
     @QtCore.pyqtSlot(str)
     def validate_id(self, new_id=None):
+        tooltip = ""
+
         if not new_id:
-            self.iDLineEdit.setStyleSheet("border: 1px solid red;")
-            self.labelIdStatus.setToolTip("Empty Id!")
-            self.labelIdStatus.setVisible(True)
+            tooltip = "Empty Id!"
+            self._id_valid = False
+        elif any(c not in SBML_SYMBOLS for c in new_id):
+            invalid_chars = set([c for c in new_id if c not in SBML_SYMBOLS])
+            quoted = ['"{}"'.format(x) for x in invalid_chars]
+            tooltip = 'Invalid characters: {}'.format(", ".join(quoted))
+            self._id_valid = False
         elif self.metabolite and new_id != self.metabolite.id and new_id in self.model.metabolites:
-            self.iDLineEdit.setStyleSheet("border: 1px solid red;")
-            self.labelIdStatus.setToolTip("Id exists already in model!")
-            self.labelIdStatus.setVisible(True)
+            tooltip = "Id exists already in model!"
+            self._id_valid = False
         else:
-            self.iDLineEdit.setStyleSheet(self.default_id_border)
-            self.labelIdStatus.setVisible(False)
+            self._id_valid = True
+
+        self.labelIdStatus.setVisible(not self._id_valid)
+        self.labelIdStatus.setToolTip(tooltip)
+        self.iDLineEdit.setStyleSheet(self.default_id_border if self._id_valid else "border: 1px solid red;")
+        self.changed.emit()
 
     @QtCore.pyqtSlot(str)
     def validate_formula(self, new_formula=None):
-        if not new_formula:
-            return
+        tooltip = ""
 
-        chars = string.digits+string.ascii_letters
-        invalid_chars = set([x for x in new_formula if x not in chars])
-        if invalid_chars:
-            self.labelFormulaStatus.setVisible(True)
+        if not new_formula:
+            self._formula_valid = True
+        elif any(c not in FORMULA_CHARS for c in new_formula):
+            invalid_chars = set(new_formula) - FORMULA_CHARS
             quoted = ['"{}"'.format(x) for x in invalid_chars]
-            self.labelFormulaStatus.setToolTip('Invalid characters: {}'.format(", ".join(quoted)))
-            self.formulaLineEdit.setStyleSheet("border: 1px solid red;")
+            tooltip = 'Invalid characters: {}'.format(", ".join(quoted))
+            self._formula_valid = False
         else:
-            self.labelFormulaStatus.setVisible(False)
-            self.formulaLineEdit.setStyleSheet(self.default_id_border)
+            self._formula_valid = True
+
+        self.formulaLineEdit.setStyleSheet(self.default_id_border if self._formula_valid else "border: 1px solid red;")
+        self.labelFormulaStatus.setToolTip(tooltip)
+        self.labelFormulaStatus.setVisible(not self._formula_valid)
+        self.changed.emit()
 
     @QtCore.pyqtSlot(str)
     def validate_compartment(self, new_compartment=None):
         if not new_compartment:
             self.labelCompartmentStatus.setVisible(True)
             self.labelCompartmentStatus.setToolTip("Select compartment!")
+            self._comp_valid = False
         else:
             self.labelCompartmentStatus.setVisible(False)
+            self._comp_valid = True
+        self.changed.emit()
 
     def valid_inputs(self):
         """ Check that all input elements that are required to have a valid input
         actually do so """
-
-        if self.metabolite and self.iDLineEdit.text():
-            return ((self.iDLineEdit.text() not in self.model.metabolites or
-                     self.iDLineEdit.text() == self.metabolite.id) and
-                    self.compartmentComboBox.currentText() != "")
-        else:
-            return False
+        return all((self._id_valid, self._formula_valid, self._comp_valid))
 
 
 class ReactionsDisplayWidget(QWidget, Ui_ReactionsDisplayWidget):
