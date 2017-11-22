@@ -1,7 +1,7 @@
 from unittest.mock import Mock
 
 import pytest
-from GEMEditor.analysis.statistics import reaction_statistics, metabolite_statistics, gene_statistics
+from GEMEditor.analysis.statistics.functions import reaction_statistics, metabolite_statistics, gene_statistics
 from GEMEditor.model.classes.cobra import Model, Metabolite, Reaction, Gene
 from GEMEditor.model.classes.annotation import Annotation
 from PyQt5.QtWidgets import QApplication
