@@ -892,9 +892,9 @@ class TestReferenceTab:
         tab = ReferenceTab()
 
         # Check that the filter part is not hidden
-        assert tab.filterComboBox.isHidden() is True
-        assert tab.label_filter.isHidden() is True
-        assert tab.line.isHidden() is True
+        assert tab.filterComboBox.isHidden() is False
+        assert tab.label_filter.isHidden() is False
+        assert tab.line.isHidden() is False
 
     @pytest.mark.usefixtures("patch_button_slots")
     def test_add_button_triggering(self):
