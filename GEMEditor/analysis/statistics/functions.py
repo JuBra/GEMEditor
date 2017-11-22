@@ -1,11 +1,13 @@
 import logging
 from collections import OrderedDict
-
 from GEMEditor.analysis.model_test import get_original_settings, run_test
 from GEMEditor.analysis.statistics.dialog import logger
 from GEMEditor.model.classes import Reaction, Metabolite, Gene
 from GEMEditor.model.display.proxymodels import metabolite_is_dead_end
 from PyQt5.QtWidgets import QApplication
+
+
+LOGGER = logging.getLogger(__name__)
 
 
 def reaction_statistics(model):
@@ -143,7 +145,7 @@ def modeltest_statistics(model, progress):
     for i, case in enumerate(model.tests):
         # Return if user cancelled
         if progress.wasCanceled():
-            logger.info("Test simulation aborted by user")
+            LOGGER.debug("Test simulation aborted by user")
             break
         else:
             progress.setValue(i)
