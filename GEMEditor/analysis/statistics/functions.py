@@ -1,7 +1,6 @@
 import logging
 from collections import OrderedDict
 from GEMEditor.analysis.model_test import get_original_settings, run_test
-from GEMEditor.analysis.statistics.dialog import logger
 from GEMEditor.model.classes import Reaction, Metabolite, Gene
 from GEMEditor.model.display.proxymodels import metabolite_is_dead_end
 from PyQt5.QtWidgets import QApplication
