@@ -1,13 +1,22 @@
 from unittest.mock import Mock
 from PyQt5 import QtTest
+from PyQt5.QtWidgets import QApplication
 from GEMEditor.model.classes.cobra import Model, Gene
 from GEMEditor.model.display.gene import GeneAttributesDisplayWidget
+
+
+# Make sure to only start an application
+# if there is no active one. Opening multiple
+# applications will lead to a crash.
+app = QApplication.instance()
+if app is None:
+    app = QApplication([])
 
 
 class TestGeneAttributesDisplayWidget:
 
     def test_setting_item(self):
-        gene = Gene("test id", "name", "genome")
+        gene = Gene("test_id", "name", "genome")
         model = Model()
 
         widget = GeneAttributesDisplayWidget()

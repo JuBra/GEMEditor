@@ -1,8 +1,10 @@
+import string
 from PyQt5 import QtCore
-from PyQt5.QtCore import QRegularExpression
-from PyQt5.QtGui import QRegularExpressionValidator
 from PyQt5.QtWidgets import QWidget
 from GEMEditor.model.display.ui.GeneAttributesDisplayWidget import Ui_Form as Ui_GeneAttribs
+
+
+SBML_SYMBOLS = set(string.ascii_letters+string.digits+"_")
 
 
 class GeneAttributesDisplayWidget(QWidget, Ui_GeneAttribs):
@@ -15,15 +17,10 @@ class GeneAttributesDisplayWidget(QWidget, Ui_GeneAttribs):
         self.model = None
         self.gene = None
         self.default_id_border = self.iDLineEdit.styleSheet()
+        self._id_valid = True
 
         # Hide status icons before initialization
         self.labelIdStatus.setVisible(False)
-
-        # Setup validator for SBML compliant ids
-        self.validator = QRegularExpressionValidator()
-        self.validator.setRegularExpression(QRegularExpression(r"^[a-zA-Z0-9_]*$"))
-        self.iDLineEdit.setValidator(self.validator)
-
         self.validate_id()
 
         self.setup_connections()
@@ -33,7 +30,6 @@ class GeneAttributesDisplayWidget(QWidget, Ui_GeneAttribs):
         self.iDLineEdit.textChanged.connect(self.validate_id)
 
         # Connect inputs to changed
-        self.iDLineEdit.textChanged.connect(self.changed.emit)
         self.nameLineEdit.textChanged.connect(self.changed.emit)
         self.genomeLineEdit.textChanged.connect(self.changed.emit)
 
@@ -84,24 +80,28 @@ class GeneAttributesDisplayWidget(QWidget, Ui_GeneAttribs):
 
     @QtCore.pyqtSlot(str)
     def validate_id(self, new_id=None):
+        tooltip = ""
+
         if not new_id:
-            self.iDLineEdit.setStyleSheet("border: 1px solid red;")
-            self.labelIdStatus.setToolTip("Empty Id!")
-            self.labelIdStatus.setVisible(True)
+            tooltip = "Empty Id!"
+            self._id_valid = False
+        elif any(c not in SBML_SYMBOLS for c in new_id):
+            invalid_chars = set([c for c in new_id if c not in SBML_SYMBOLS])
+            quoted = ['"{}"'.format(x) for x in invalid_chars]
+            tooltip = 'Invalid characters: {}'.format(", ".join(quoted))
+            self._id_valid = False
         elif self.gene and new_id != self.gene.id and new_id in self.model.genes:
-            self.iDLineEdit.setStyleSheet("border: 1px solid red;")
-            self.labelIdStatus.setToolTip("Id exists already in model!")
-            self.labelIdStatus.setVisible(True)
+            tooltip = "Id exists already in model!"
+            self._id_valid = False
         else:
-            self.iDLineEdit.setStyleSheet(self.default_id_border)
-            self.labelIdStatus.setVisible(False)
+            self._id_valid = True
+
+        self.labelIdStatus.setVisible(not self._id_valid)
+        self.labelIdStatus.setToolTip(tooltip)
+        self.iDLineEdit.setStyleSheet(self.default_id_border if self._id_valid else "border: 1px solid red;")
+        self.changed.emit()
 
     def valid_inputs(self):
         """ Check that all input elements that are required to have a valid input
         actually do so """
-
-        if self.gene and self.iDLineEdit.text():
-            return (self.iDLineEdit.text() not in self.model.genes or
-                    self.iDLineEdit.text() == self.gene.id)
-        else:
-            return False
+        return self._id_valid
