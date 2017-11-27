@@ -1,8 +1,10 @@
 import cobra
+from collections import OrderedDict
 from GEMEditor.analysis.model_test import get_original_settings
 from GEMEditor.analysis.model_test import run_test
 from GEMEditor.base.classes import Settings
 from GEMEditor.base.functions import generate_copy_id
+from GEMEditor.base.dialogs import DataFrameDialog
 from GEMEditor.main.model.ui import Ui_StandardTab, Ui_AnalysisTab, Ui_SolutionTableWidget, Ui_model_stats_tab
 from GEMEditor.model.classes.cobra import Gene, Reaction, Metabolite, find_duplicate_metabolite
 from GEMEditor.model.classes.modeltest import ModelTest
@@ -20,7 +22,8 @@ from PyQt5.QtCore import QSortFilterProxyModel, QSize
 from PyQt5.QtWidgets import QWidget, QMessageBox, QApplication, QAction, QMenu, QInputDialog, QProgressDialog, \
     QStatusBar, QErrorMessage, QListWidgetItem
 from cobra.core.solution import LegacySolution, Solution
-from cobra.flux_analysis import pfba
+from cobra.flux_analysis import pfba, flux_variability_analysis, loopless_solution, single_gene_deletion, \
+    single_reaction_deletion
 
 
 class StandardTab(QWidget, Ui_StandardTab):
@@ -819,7 +822,14 @@ class AnalysesTab(QWidget, Ui_AnalysisTab):
         self.setupUi(self)
         self.model = None
 
-        self.analyses = ("Flux Balance Analysis", "Parsimonious FBA", "Reaction Knockout", "Gene Knockout", "Flux Variability Analysis")
+        self.analyses = OrderedDict([("Flux Balance Analysis", self.run_flux_balance_analysis),
+                                     ("Parsimonious FBA", self.run_parsimonous),
+                                     ("Loopless FBA", self.run_loopless),
+                                     ("Flux Variability Analysis", self.run_flux_variability),
+                                     ("Single Gene Deletion", self.run_single_gene_deletion),
+                                     ("Single Reaction Deletion", self.run_single_reaction_deletion),
+                                     ("Double Gene Deletion", self.run_double_gene_deletions),
+                                     ("Double Reaction Deletion", self.run_double_reaction_deletion)])
         self.populate_analyses()
 
         self.solvers = list(cobra.solvers.solver_dict.keys())
@@ -844,7 +854,7 @@ class AnalysesTab(QWidget, Ui_AnalysisTab):
             self.combo_solver.setEnabled(False)
 
     def populate_analyses(self):
-        self.combo_analysis.addItems(self.analyses)
+        self.combo_analysis.addItems(self.analyses.keys())
 
     @QtCore.pyqtSlot()
     def toggle_button(self):
@@ -864,41 +874,44 @@ class AnalysesTab(QWidget, Ui_AnalysisTab):
 
         selected_analysis = self.combo_analysis.currentText()
         selected_solver = self.combo_solver.currentText()
-
-        # If analysis is Flux Balance Analysis
-        if selected_analysis == "Flux Balance Analysis":
-            self.run_flux_balance_analysis(selected_solver)
-
-        elif selected_analysis == "Parsimonious FBA":
-            self.run_parsimonous(selected_solver)
-
-        elif selected_analysis == "Single knockout studies":
-            self.run_single_deletions()
-
-        elif selected_analysis == "Flux Variability Analysis":
-            self.run_flux_variability(selected_solver)
+        self.analyses[selected_analysis](selected_solver)
 
     def run_flux_balance_analysis(self, selected_solver):
         solution = self.model.optimize(solver=selected_solver)
-        if solution.status != "optimal":
-            self.show_infeasible_message(solution)
-        else:
-            self.add_solution(solution)
-            self.open_result(solution)
+        self.add_solution(solution)
 
-    def run_single_deletions(self):
-        raise NotImplementedError
-
-    def run_double_deletions(self):
-        raise NotImplementedError
-
-    def run_flux_variability(self, selected_solver):
-        solution = cobra.flux_analysis.flux_variability_analysis(cobra_model=self.model, solver=selected_solver)
-        self.open_result(solution)
+    def run_loopless(self, selected_solver):
+        solution = loopless_solution(self.model)
+        self.add_solution(solution)
 
     def run_parsimonous(self, selected_solver):
         solution = pfba(self.model, solver=selected_solver)
-        self.open_result(solution)
+        self.add_solution(solution)
+
+    def run_single_gene_deletion(self, selected_solver):
+        solution = single_gene_deletion(self.model)
+        self.open_dataframe(solution, "Single Gene Deletion")
+
+    def run_double_gene_deletions(self, selected_solver):
+        QMessageBox.critical(None, "Not Implemented", "This method has not been implemented yet.")
+
+    def run_single_reaction_deletion(self, selected_solver):
+        solution = single_reaction_deletion(self.model)
+        self.open_dataframe(solution, "Single Reaction Deletion")
+
+    def run_double_reaction_deletion(self, selected_solver):
+        QMessageBox.critical(None, "Not Implemented", "This method has not been implemented yet.")
+
+    def run_flux_variability(self, selected_solver):
+        solution = flux_variability_analysis(model=self.model, solver=selected_solver)
+        self.open_dataframe(solution, "Flux Variability Analysis")
+
+    def open_dataframe(self, solution, method):
+        if method == "Flux Variability Analysis":
+            solution["range"] = solution["maximum"] - solution["minimum"]
+        dialog = DataFrameDialog(solution)
+        dialog.setWindowTitle(method.title())
+        dialog.exec_()
 
     def open_result(self, solution):
         """ Display the solution in a dialog
@@ -938,7 +951,7 @@ class AnalysesTab(QWidget, Ui_AnalysisTab):
     def set_model(self, model):
         self.model = model
 
-    def add_solution(self, solution):
+    def add_solution(self, solution, open_solution=True):
         if solution.status != "optimal":
             self.show_infeasible_message(solution)
             return
@@ -954,6 +967,9 @@ class AnalysesTab(QWidget, Ui_AnalysisTab):
         display_widget.button_open_solution_table.clicked.connect(self.show_solution_as_table)
         display_widget.button_open_solution_map.clicked.connect(self.show_solution_on_map)
         self.list_solutions.setItemWidget(solution_widget, display_widget)
+
+        if open_solution:
+            self.open_result(solution)
 
     @QtCore.pyqtSlot()
     def show_solution_on_map(self):

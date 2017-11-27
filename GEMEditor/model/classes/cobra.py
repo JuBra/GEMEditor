@@ -161,14 +161,6 @@ class Gene(BaseTreeElement, EvidenceLink, cobraGene):
         self.annotation = set()
 
     @property
-    def _reaction(self):
-        return self._parents
-
-    @_reaction.setter
-    def _reaction(self, reaction_set):
-        self._reaction.extend(reaction_set)
-
-    @property
     def genes(self):
         return set([self])
 

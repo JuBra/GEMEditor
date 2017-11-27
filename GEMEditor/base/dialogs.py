@@ -1,6 +1,8 @@
 from PyQt5 import QtCore
 from PyQt5.QtWidgets import QDialog, QGridLayout, QLabel, QComboBox
-from GEMEditor.base.ui import Ui_EmptyDialogHorzButtons, Ui_ListDisplayDialog
+from PyQt5.QtCore import QSortFilterProxyModel
+from PyQt5.QtGui import QStandardItemModel, QStandardItem
+from GEMEditor.base.ui import Ui_EmptyDialogHorzButtons, Ui_ListDisplayDialog, Ui_DataFrameDialog
 from GEMEditor.base.classes import Settings
 
 
@@ -77,3 +79,31 @@ class ListDisplayDialog(QDialog, Ui_ListDisplayDialog):
         super(ListDisplayDialog, self).__init__(parent)
         self.setupUi(self)
         self.listWidget.addItems(display_list)
+
+
+class DataFrameDialog(QDialog, Ui_DataFrameDialog):
+
+    def __init__(self, dataframe):
+        super(DataFrameDialog, self).__init__()
+        self.setupUi(self)
+
+        def dataitem(value):
+            item = QStandardItem()
+            try:
+                item.setData(float(value), 2)
+            except ValueError:
+                item.setText(str(value))
+            return item
+
+        self.datatable = QStandardItemModel(self)
+        self.datatable.setColumnCount(dataframe.shape[1])
+        for idx in range(dataframe.shape[0]):
+            row = [dataitem(x) for x in dataframe.iloc[idx]]
+            self.datatable.appendRow(row)
+        self.datatable.setHorizontalHeaderLabels([x.title() for x in dataframe.axes[1]])
+        self.datatable.setVerticalHeaderLabels(list(dataframe.axes[0]))
+        self.proxymodel = QSortFilterProxyModel(self)
+        self.proxymodel.setSourceModel(self.datatable)
+        self.tableView.setModel(self.proxymodel)
+        self.proxymodel.setDynamicSortFilter(True)
+        self.proxymodel.sort(0)
