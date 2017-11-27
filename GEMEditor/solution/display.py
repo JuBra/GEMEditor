@@ -9,7 +9,7 @@ from GEMEditor.map.turnover import TurnoverDialog
 from GEMEditor.model.display.tables import ReactionBaseTable, MetaboliteTable
 from GEMEditor.solution.base import status_objective_from_solution, set_objective_to_label, set_status_to_label, \
     fluxes_from_solution, shadow_prices_from_solution
-from GEMEditor.solution.ui import Ui_SearchTab, Ui_SolutionDialog
+from GEMEditor.solution.ui import Ui_SearchTab, Ui_SolutionDialog, Ui_DataFrameDialog
 
 
 class BaseSolutionTab(QWidget, Ui_SearchTab):
@@ -341,3 +341,31 @@ class FluxTableProxyFilter(QSortFilterProxyModel):
     def set_custom_filter(self, n):
         self.custom_filter = n
         self.invalidateFilter()
+
+
+class DataFrameDialog(QDialog, Ui_DataFrameDialog):
+
+    def __init__(self, dataframe):
+        super(DataFrameDialog, self).__init__()
+        self.setupUi(self)
+
+        def dataitem(value):
+            item = QStandardItem()
+            try:
+                item.setData(float(value), 2)
+            except ValueError:
+                item.setText(str(value))
+            return item
+
+        self.datatable = QStandardItemModel(self)
+        self.datatable.setColumnCount(dataframe.shape[1])
+        for idx in range(dataframe.shape[0]):
+            row = [dataitem(x) for x in dataframe.iloc[idx]]
+            self.datatable.appendRow(row)
+        self.datatable.setHorizontalHeaderLabels([x.title() for x in dataframe.axes[1]])
+        self.datatable.setVerticalHeaderLabels(list(dataframe.axes[0]))
+        self.proxymodel = QSortFilterProxyModel(self)
+        self.proxymodel.setSourceModel(self.datatable)
+        self.tableView.setModel(self.proxymodel)
+        self.proxymodel.setDynamicSortFilter(True)
+        self.proxymodel.sort(0)
