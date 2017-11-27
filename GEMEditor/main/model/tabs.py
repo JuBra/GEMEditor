@@ -4,6 +4,7 @@ from GEMEditor.analysis.model_test import get_original_settings
 from GEMEditor.analysis.model_test import run_test
 from GEMEditor.base.classes import Settings
 from GEMEditor.base.functions import generate_copy_id
+from GEMEditor.base.dialogs import DataFrameDialog
 from GEMEditor.main.model.ui import Ui_StandardTab, Ui_AnalysisTab, Ui_SolutionTableWidget, Ui_model_stats_tab
 from GEMEditor.model.classes.cobra import Gene, Reaction, Metabolite, find_duplicate_metabolite
 from GEMEditor.model.classes.modeltest import ModelTest
@@ -15,14 +16,14 @@ from GEMEditor.model.edit.modeltest import EditModelTestDialog
 from GEMEditor.model.edit.reaction import ReactionInputDialog, SetFluxValueDialog
 from GEMEditor.model.edit.reference import ReferenceEditDialog
 from GEMEditor.solution.base import status_objective_from_solution, set_objective_to_label, set_status_to_label
-from GEMEditor.solution.display import SolutionDialog, DataFrameDialog
+from GEMEditor.solution.display import SolutionDialog
 from PyQt5 import QtCore, QtGui
 from PyQt5.QtCore import QSortFilterProxyModel, QSize
 from PyQt5.QtWidgets import QWidget, QMessageBox, QApplication, QAction, QMenu, QInputDialog, QProgressDialog, \
     QStatusBar, QErrorMessage, QListWidgetItem
 from cobra.core.solution import LegacySolution, Solution
 from cobra.flux_analysis import pfba, flux_variability_analysis, loopless_solution, single_gene_deletion, \
-    single_reaction_deletion, double_gene_deletion, double_reaction_deletion
+    single_reaction_deletion
 
 
 class StandardTab(QWidget, Ui_StandardTab):
