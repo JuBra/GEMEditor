@@ -2,7 +2,7 @@ from PyQt5 import QtCore
 from PyQt5.QtWidgets import QDialog, QGridLayout, QLabel, QComboBox
 from PyQt5.QtCore import QSortFilterProxyModel
 from PyQt5.QtGui import QStandardItemModel, QStandardItem
-from GEMEditor.base.ui import Ui_EmptyDialogHorzButtons, Ui_ListDisplayDialog
+from GEMEditor.base.ui import Ui_EmptyDialogHorzButtons, Ui_ListDisplayDialog, Ui_DataFrameDialog
 from GEMEditor.base.classes import Settings
 
 
