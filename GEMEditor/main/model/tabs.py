@@ -20,7 +20,7 @@ from PyQt5.QtCore import QSortFilterProxyModel, QSize
 from PyQt5.QtWidgets import QWidget, QMessageBox, QApplication, QAction, QMenu, QInputDialog, QProgressDialog, \
     QStatusBar, QErrorMessage, QListWidgetItem
 from cobra.core.solution import LegacySolution, Solution
-from cobra.flux_analysis import pfba
+from cobra.flux_analysis import pfba, flux_variability_analysis, loopless_solution
 
 
 class StandardTab(QWidget, Ui_StandardTab):
@@ -819,7 +819,8 @@ class AnalysesTab(QWidget, Ui_AnalysisTab):
         self.setupUi(self)
         self.model = None
 
-        self.analyses = ("Flux Balance Analysis", "Parsimonious FBA", "Reaction Knockout", "Gene Knockout", "Flux Variability Analysis")
+        self.analyses = ("Flux Balance Analysis", "Parsimonious FBA", "Loopless FBA", "Reaction Knockout",
+                         "Gene Knockout", "Flux Variability Analysis")
         self.populate_analyses()
 
         self.solvers = list(cobra.solvers.solver_dict.keys())
@@ -872,6 +873,9 @@ class AnalysesTab(QWidget, Ui_AnalysisTab):
         elif selected_analysis == "Parsimonious FBA":
             self.run_parsimonous(selected_solver)
 
+        elif selected_analysis == "Loopless FBA":
+            self.run_loopless(selected_solver)
+
         elif selected_analysis == "Single knockout studies":
             self.run_single_deletions()
 
@@ -880,11 +884,15 @@ class AnalysesTab(QWidget, Ui_AnalysisTab):
 
     def run_flux_balance_analysis(self, selected_solver):
         solution = self.model.optimize(solver=selected_solver)
-        if solution.status != "optimal":
-            self.show_infeasible_message(solution)
-        else:
-            self.add_solution(solution)
-            self.open_result(solution)
+        self.add_solution(solution)
+
+    def run_loopless(self, selected_solver):
+        solution = loopless_solution(self.model)
+        self.add_solution(solution)
+
+    def run_parsimonous(self, selected_solver):
+        solution = pfba(self.model, solver=selected_solver)
+        self.add_solution(solution)
 
     def run_single_deletions(self):
         raise NotImplementedError
@@ -893,11 +901,7 @@ class AnalysesTab(QWidget, Ui_AnalysisTab):
         raise NotImplementedError
 
     def run_flux_variability(self, selected_solver):
-        solution = cobra.flux_analysis.flux_variability_analysis(cobra_model=self.model, solver=selected_solver)
-        self.open_result(solution)
-
-    def run_parsimonous(self, selected_solver):
-        solution = pfba(self.model, solver=selected_solver)
+        solution = flux_variability_analysis(model=self.model, solver=selected_solver)
         self.open_result(solution)
 
     def open_result(self, solution):
@@ -938,7 +942,7 @@ class AnalysesTab(QWidget, Ui_AnalysisTab):
     def set_model(self, model):
         self.model = model
 
-    def add_solution(self, solution):
+    def add_solution(self, solution, open_solution=True):
         if solution.status != "optimal":
             self.show_infeasible_message(solution)
             return
@@ -954,6 +958,9 @@ class AnalysesTab(QWidget, Ui_AnalysisTab):
         display_widget.button_open_solution_table.clicked.connect(self.show_solution_as_table)
         display_widget.button_open_solution_map.clicked.connect(self.show_solution_on_map)
         self.list_solutions.setItemWidget(solution_widget, display_widget)
+
+        if open_solution:
+            self.open_result(solution)
 
     @QtCore.pyqtSlot()
     def show_solution_on_map(self):
