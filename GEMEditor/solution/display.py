@@ -81,7 +81,7 @@ class BaseSolutionTab(QWidget, Ui_SearchTab):
             except KeyError:
                 value = 0
             finally:
-                solution_item.setData(value, 2)
+                solution_item.setData(float(value), 2)
 
             row_items.append(solution_item)
             self.dataTable.appendRow(row_items)
