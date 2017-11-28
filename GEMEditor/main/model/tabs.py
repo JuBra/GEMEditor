@@ -950,6 +950,12 @@ class AnalysesTab(QWidget, Ui_AnalysisTab):
 
     def set_model(self, model):
         self.model = model
+        if model is None:
+            self.clear_solutions()
+
+    def clear_solutions(self):
+        for r in reversed(range(self.list_solutions.count())):
+            self.list_solutions.takeItem(r)
 
     def add_solution(self, solution, open_solution=True):
         if solution.status != "optimal":

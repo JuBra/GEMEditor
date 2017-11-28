@@ -1,4 +1,5 @@
 import pytest
+from cobra.core import Solution
 from unittest.mock import Mock
 from GEMEditor.main.model.tabs import *
 from GEMEditor.model.classes.cobra import Model
@@ -1020,3 +1021,15 @@ class TestReferenceTab:
         assert model.QtReferenceTable.update_row_from_item.called is False
         tab.editItemSlot()
         assert model.QtReferenceTable.update_row_from_item.called is False
+
+
+class TestAnalysesTab:
+
+    def test_unsetting_model_removes_solutions(self):
+        tab = AnalysesTab()
+        solution = Solution(objective_value=1., status="optimal")
+        tab.add_solution(solution, open_solution=False)
+
+        assert tab.list_solutions.count() == 1
+        tab.set_model(None)
+        assert tab.list_solutions.count() == 0
