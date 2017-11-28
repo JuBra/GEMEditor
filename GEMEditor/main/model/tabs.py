@@ -1,7 +1,6 @@
 import cobra
 from collections import OrderedDict
-from GEMEditor.analysis.model_test import get_original_settings
-from GEMEditor.analysis.model_test import run_test
+from GEMEditor.analysis.model_test import get_original_settings, run_test
 from GEMEditor.base.classes import Settings
 from GEMEditor.base.functions import generate_copy_id
 from GEMEditor.base.dialogs import DataFrameDialog
@@ -911,7 +910,8 @@ class AnalysesTab(QWidget, Ui_AnalysisTab):
             solution["range"] = solution["maximum"] - solution["minimum"]
         dialog = DataFrameDialog(solution)
         dialog.setWindowTitle(method.title())
-        dialog.exec_()
+        self.model.dialogs.add(dialog)
+        dialog.show()
 
     def open_result(self, solution):
         """ Display the solution in a dialog
@@ -950,6 +950,12 @@ class AnalysesTab(QWidget, Ui_AnalysisTab):
 
     def set_model(self, model):
         self.model = model
+        if model is None:
+            self.clear_solutions()
+
+    def clear_solutions(self):
+        for r in reversed(range(self.list_solutions.count())):
+            self.list_solutions.takeItem(r)
 
     def add_solution(self, solution, open_solution=True):
         if solution.status != "optimal":
