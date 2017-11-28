@@ -1,4 +1,5 @@
 import pytest
+import pandas as pd
 from cobra.core import Solution
 from unittest.mock import Mock
 from GEMEditor.main.model.tabs import *
@@ -1027,7 +1028,7 @@ class TestAnalysesTab:
 
     def test_unsetting_model_removes_solutions(self):
         tab = AnalysesTab()
-        solution = Solution(objective_value=1., status="optimal")
+        solution = Solution(objective_value=1., status="optimal", fluxes=pd.Series())
         tab.add_solution(solution, open_solution=False)
 
         assert tab.list_solutions.count() == 1
