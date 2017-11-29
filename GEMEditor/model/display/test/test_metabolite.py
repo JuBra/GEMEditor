@@ -52,7 +52,7 @@ class TestMetaboliteAttributesDisplayWidget:
     def test_save_state(self):
 
         metabolite = Metabolite()
-        model = Model()
+        model = Model("m1")
         model.add_metabolites((metabolite,))
         model.setup_metabolite_table()
 
