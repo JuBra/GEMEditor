@@ -1,7 +1,7 @@
 import cobra
 import logging
 from collections import OrderedDict
-from GEMEditor.analysis.model_test import get_original_settings, run_tests
+from GEMEditor.analysis.model_test import run_tests
 from GEMEditor.base.classes import Settings, ProgressDialog
 from GEMEditor.base.functions import generate_copy_id
 from GEMEditor.base.dialogs import DataFrameDialog

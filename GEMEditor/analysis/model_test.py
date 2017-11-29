@@ -7,6 +7,49 @@ from GEMEditor.model.classes.modeltest import ReactionSetting
 LOGGER = logging.getLogger(__name__)
 
 
+def _get_original_settings(model):
+    """ Get all settings needed to prepare for test run
+
+    In the preparation for running test cases care should
+    be taken that:
+
+    1) All objective coefficients should be set to 0
+    2) All boundary reactions are producing only
+
+    Both the active boundary reactions and the objective
+    coefficients need to be specified in the settings of
+    the test cases.
+
+    Parameters
+    ----------
+    model: GEMEditor.model.classes.Model,
+        Model context for the reactions
+
+
+    Returns
+    -------
+    original_settings: list,
+        List of settings that need to be executed in order
+        to prepare the model for running tests, and should
+        be reversed afterwards
+    """
+
+    original_settings = []
+
+    for x in model.reactions:
+
+        # Set all boundary reaction to producing only
+        if all(v < 0. for v in x.metabolites.values()):
+            original_settings.append(ReactionSetting(x, x.upper_bound, 0., 0.))
+        elif all(v > 0. for v in x.metabolites.values()):
+            original_settings.append(ReactionSetting(x, 0., x.lower_bound, 0.))
+        # Set all objective coefficients to zero
+        elif x.objective_coefficient != 0.:
+            original_settings.append(ReactionSetting(x, x.upper_bound, x.lower_bound, 0.))
+
+    return original_settings
+
+
 def _run_single_test(model, testcase):
     """ Run a testcase without preparing/restoring model
 
@@ -78,7 +121,7 @@ def run_tests(test_cases, model, progress):
     results = dict()
 
     # Prepare model for running tests
-    original_settings = get_original_settings(model)
+    original_settings = _get_original_settings(model)
     for setting in original_settings:
         setting.do()
 
@@ -102,40 +145,3 @@ def run_tests(test_cases, model, progress):
         setting.undo()
 
     return results
-
-
-def get_original_settings(model):
-    """ Get all settings needed to prepare for test run
-
-    In the preparation for running test cases care should
-    be taken that:
-
-    1) All objective coefficients should be set to 0
-    2) All boundary reactions are producing only
-
-    Both the active boundary reactions and the objective
-    coefficients need to be specified in the settings of
-    the test cases.
-
-    Returns
-    -------
-    original_settings: list,
-        List of settings that need to be executed in order
-        to prepare the model for running tests, and should
-        be reversed afterwards
-    """
-
-    original_settings = []
-
-    for x in model.reactions:
-
-        # Set all boundary reaction to producing only
-        if all(v < 0. for v in x.metabolites.values()):
-            original_settings.append(ReactionSetting(x, x.upper_bound, 0., 0.))
-        elif all(v > 0. for v in x.metabolites.values()):
-            original_settings.append(ReactionSetting(x, 0., x.lower_bound, 0.))
-        # Set all objective coefficients to zero
-        elif x.objective_coefficient != 0.:
-            original_settings.append(ReactionSetting(x, x.upper_bound, x.lower_bound, 0.))
-
-    return original_settings

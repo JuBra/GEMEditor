@@ -1,7 +1,7 @@
 from unittest.mock import Mock
 import GEMEditor
 import pytest
-from GEMEditor.analysis.model_test import get_original_settings, run_tests
+from GEMEditor.analysis.model_test import _get_original_settings, run_tests
 from GEMEditor.model.classes.cobra import Reaction, Metabolite, Model
 from GEMEditor.model.classes.modeltest import ModelTest, ReactionSetting, Outcome
 from cobra.core.solution import LegacySolution
@@ -26,7 +26,7 @@ class TestGetOriginalSettings:
         self.r1.objective_coefficient = 1
 
         # Get the setting of a boundary reaction
-        setting = get_original_settings(self.model)[0]
+        setting = _get_original_settings(self.model)[0]
 
         # Check that original values are stored
         assert setting.reaction is self.r1
@@ -45,7 +45,7 @@ class TestGetOriginalSettings:
         self.r1.objective_coefficient = 1
 
         # Get the setting of a boundary reaction
-        setting = get_original_settings(self.model)[0]
+        setting = _get_original_settings(self.model)[0]
 
         # Check that original values are stored
         assert setting.reaction is self.r1
@@ -63,7 +63,7 @@ class TestGetOriginalSettings:
         self.r1.objective_coefficient = 1.
 
         # Get the setting of a boundary reaction
-        setting = get_original_settings(self.model)[0]
+        setting = _get_original_settings(self.model)[0]
 
         # Check that objective setting is deactivated
         assert setting.reaction is self.r1
@@ -84,7 +84,7 @@ class TestGetOriginalSettings:
         self.r1.upper_bound = params[1]
         self.r1.objective_coefficient = params[2]
 
-        setting = get_original_settings(self.model)[0]
+        setting = _get_original_settings(self.model)[0]
 
         # Check that the settings are expected
         assert setting.lower_bound == expectations[0]
@@ -101,7 +101,7 @@ class TestGetOriginalSettings:
         self.r1.upper_bound = params[1]
         self.r1.objective_coefficient = params[2]
 
-        assert not get_original_settings(self.model)
+        assert not _get_original_settings(self.model)
 
 
 @pytest.fixture()
@@ -164,7 +164,7 @@ class TestRunTest:
     @pytest.fixture()
     def mock_get_original_settings(self, monkeypatch):
         return_value = [Mock(), Mock()]
-        monkeypatch.setattr("GEMEditor.analysis.model_test.get_original_settings", Mock(return_value=return_value))
+        monkeypatch.setattr("GEMEditor.analysis.model_test._get_original_settings", Mock(return_value=return_value))
         return return_value
 
     @pytest.fixture()
@@ -233,23 +233,23 @@ class TestRunTest:
 
     @pytest.mark.usefixtures("mock_optimize", "mock_get_original_settings")
     def test_restore_initial_get_original_not_called(self, progress):
-        assert GEMEditor.analysis.model_test.get_original_settings.called is False
+        assert GEMEditor.analysis.model_test._get_original_settings.called is False
         model_test = ModelTest()
         model_test.outcomes = [self.true_outcome1]
 
         results = run_tests((model_test,), Model(), progress)
         status, _ = results[model_test]
-        assert GEMEditor.analysis.model_test.get_original_settings.called is False
+        assert GEMEditor.analysis.model_test._get_original_settings.called is False
 
     @pytest.mark.usefixtures("mock_optimize")
     def test_restore_initial_get_original_called(self, mock_get_original_settings, progress):
         original_settings = mock_get_original_settings
-        assert GEMEditor.analysis.model_test.get_original_settings.called is False
+        assert GEMEditor.analysis.model_test._get_original_settings.called is False
         model_test = ModelTest()
         model_test.outcomes = [self.true_outcome1]
 
         results = run_tests((model_test,), Model(), progress)
         status, _ = results[model_test]
-        assert GEMEditor.analysis.model_test.get_original_settings.called is True
+        assert GEMEditor.analysis.model_test._get_original_settings.called is True
         for x in original_settings:
             assert x.do.called is True
