@@ -1,4 +1,4 @@
-|Build Status| |Coverage Status|
+|Build Status| |Coverage Status| |PyPI|
 
 ==========
 GEMEditor
@@ -36,10 +36,16 @@ Options
 =======
 
 ``--debug``
-  Run in debug mode for more detailed logging
+  Run in debug mode for detailed logging
+
+``--file``
+  Path to model
 
 .. |Build Status| image:: https://travis-ci.org/JuBra/GEMEditor.svg?branch=master
    :target: https://travis-ci.org/JuBra/GEMEditor
 
 .. |Coverage Status| image:: https://codecov.io/gh/JuBra/GEMEditor/branch/master/graphs/badge.svg?branch=master
    :target: https://codecov.io/github/JuBra/GEMEditor
+
+.. |PyPI| image:: https://img.shields.io/pypi/v/GEMEditor.svg
+   :target: https://pypi.python.org/pypi/GEMEditor
