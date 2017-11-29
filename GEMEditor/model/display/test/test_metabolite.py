@@ -53,6 +53,8 @@ class TestMetaboliteAttributesDisplayWidget:
 
         metabolite = Metabolite()
         model = Model()
+        model.add_metabolites((metabolite,))
+        model.setup_metabolite_table()
 
         widget = MetaboliteAttributesDisplayWidget()
 
