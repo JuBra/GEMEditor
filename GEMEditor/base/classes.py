@@ -7,7 +7,7 @@ LOGGER = logging.getLogger(__name__)
 
 
 class ProgressDialog(QProgressDialog):
-    def __init__(self, parent, title=None, label="", min=0, max=100, min_duration=500):
+    def __init__(self, parent=None, title=None, label="", min=0, max=100, min_duration=500):
         super(ProgressDialog, self).__init__(parent)
         self.setWindowTitle(title)
         self.setLabelText(label)

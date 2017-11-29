@@ -1,7 +1,6 @@
 import logging
-
 import lxml.etree as ET
-from GEMEditor import use_progress
+from GEMEditor.base import ProgressDialog
 from GEMEditor.model.classes.cobra import Compartment
 from GEMEditor.rw import *
 from GEMEditor.rw.compartment import add_compartments, parse_compartments
@@ -17,6 +16,29 @@ from PyQt5.QtWidgets import QProgressDialog
 from lxml.etree import Element, register_namespace, ElementTree
 
 LOGGER = logging.getLogger(__name__)
+
+
+class SBMLParser:
+
+    def __init__(self, path):
+        self.path = path
+        self.errors = []
+        self.warnings = []
+
+    def parse(self):
+        with ProgressDialog(title="Loading model..") as progress:
+            try:
+                model = read_sbml3_model(self.path, progress)
+            except:
+                import traceback
+                self.errors.append(str(traceback.format_exc()))
+                return None
+            else:
+                return model
+
+    def flush(self):
+        self.errors.clear()
+        self.warnings.clear()
 
 
 def setup_sbml3_node():
@@ -69,7 +91,6 @@ def write_sbml3_model(path, model, progress=None):
     return sbml_node
 
 
-@use_progress
 def read_sbml3_model(path, progress):
 
     # Update progess dialog

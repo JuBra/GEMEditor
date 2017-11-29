@@ -127,6 +127,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.testsTab.set_model(model)
         self.referenceTab.set_model(model)
         self.analysesTab.set_model(model)
+        self._set_model_loaded(model is not None)
 
     def _set_model_loaded(self, bool):
         # Set the accessibility of different elements of the GUI depending on if a model is loaded or not
@@ -160,35 +161,35 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     @QtCore.pyqtSlot()
     def open_model(self, filename=None):
-        if self.close_model():
-            settings = Settings()
-            last_path = settings.value("LastPath") or QStandardPaths.DesktopLocation or None
+        if not self.close_model():
+            return
 
-            if filename is None:
-                filename, filters = QFileDialog.getOpenFileName(self,
-                                                                self.tr("Open Model"),
-                                                                last_path,
-                                                                self.tr("Sbml files (*.xml *.sbml);;Json files (*.json)"))
-                if filename:
-                    settings.setValue("LastPath", os.path.dirname(filename))
+        if filename is None:
+            # Ask user to select file path
+            last_path = Settings().value("LastPath", None)
+            filename, filters = QFileDialog.getOpenFileName(self, "Open Model", last_path,
+                                                            "Sbml files (*.xml *.sbml);;Json files (*.json)")
 
-            if filename.endswith((".xml", ".sbml")):
-                try:
-                    model = sbml3.read_sbml3_model(filename)
-                except:
-                    import traceback
-                    QErrorMessage(self).showMessage("There has been an error parsing the model:\n{}".format(traceback.format_exc()),
-                                                          "Parsing error")
-                    return
-                else:
-                    if model is not None:
-                        model.setup_tables()
-                        self.set_model(model, filename)
-                        self._set_model_loaded(True)
-            elif filename.endswith(".json"):
-                model = cobra.io.load_json_model(filename)
-                self.set_model(model, filename)
-                self._set_model_loaded(True)
+        if not filename:
+            return
+        elif filename.endswith((".xml", ".sbml")):
+            parser = sbml3.SBMLParser(filename)
+        elif filename.endswith(".json"):
+            # model = cobra.io.load_json_model(filename)
+            # Todo: Implement JSON parser
+            QMessageBox().critical(None, "Not implemented", "JSON parsing is not implemented yet.")
+            return
+        else:
+            return
+
+        model = parser.parse()
+        # Todo: Show errors/warnings
+        if model:
+            model.setup_tables()
+            self.set_model(model, filename)
+
+        # Store model path
+        Settings().setValue("LastPath", os.path.dirname(filename))
 
     @QtCore.pyqtSlot()
     def database_load_mapping(self):

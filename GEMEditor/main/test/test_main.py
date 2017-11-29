@@ -150,7 +150,6 @@ class TestOpenModel:
         assert QFileDialog.getOpenFileName.called is True
         assert GEMEditor.rw.sbml3.read_sbml3_model.called is True
         assert main_window.set_model.called is True
-        assert main_window._set_model_loaded.called is True
 
     @pytest.mark.usefixtures("read_sbml3_none")
     def test_open_model_close_cancelled(self, main_window, mock_settings):

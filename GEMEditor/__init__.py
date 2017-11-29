@@ -12,7 +12,6 @@ from sqlalchemy import __version__ as sqlalchemy_version
 from lxml.etree import __version__ as lxml_version
 from os.path import join, abspath, dirname
 from PyQt5 import QtCore
-from PyQt5.QtWidgets import QProgressDialog
 from collections import namedtuple
 
 # Only log versions once
@@ -71,29 +70,6 @@ DB_GET_FL_AND_CH = True
 # Version number the user does not want to update to.
 # Do not inform the user if the latest version on pypi has this number
 VERSION_IGNORED = "IgnoreVersion"
-
-
-def use_progress(func):
-    """ Decorator function to use on methods to display a progress window
-
-    Parameters
-    ----------
-    func : func
-
-    Returns
-    -------
-    wrapper : decorated function
-    """
-    def wrapper(*args, **kwargs):
-        progress = QProgressDialog()
-        progress.setWindowModality(QtCore.Qt.WindowModal)
-        progress.setAutoClose(False)
-        # Add progress to the positional arguments
-        args = args+(progress,)
-        return_value = func(*args, **kwargs)
-        progress.close()
-        return return_value
-    return wrapper
 
 
 def log_package_versions():
