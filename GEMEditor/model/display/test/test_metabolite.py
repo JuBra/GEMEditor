@@ -60,7 +60,7 @@ class TestMetaboliteAttributesDisplayWidget:
 
         widget.set_item(metabolite, model)
 
-        new_id = "New id"
+        new_id = "New_id"
         new_name = "New name"
         new_charge = 3.
         new_compartment = "m"
