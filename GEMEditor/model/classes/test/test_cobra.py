@@ -1393,3 +1393,15 @@ class TestCleanupDict:
         # Remove reaction2
         self.cleandict.remove_reaction(subsystem, reaction2)
         assert len(self.cleandict) == 0
+
+
+class TestModelAddItems:
+
+    def test_add_metabolites(self):
+        model = Model()
+        metabolite = Metabolite("m1", compartment="c")
+        model.gem_add_metabolites((metabolite,))
+
+        assert metabolite in model.metabolites
+        assert metabolite in model.QtMetaboliteTable.get_items()
+        assert "c" in model.gem_compartments

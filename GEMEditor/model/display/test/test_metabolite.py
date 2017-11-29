@@ -49,15 +49,12 @@ class TestMetaboliteAttributesDisplayWidget:
         assert widget.valid_inputs() is False
         assert widget.content_changed is False
 
-    def test_save_state(self):
-
-        metabolite = Metabolite("m1")
+    def test_save_state_existing_metabolite(self):
+        metabolite = Metabolite(id="m1", charge=1, name="old name",
+                                formula="O2", compartment="c")
         model = Model()
-        model.add_metabolites((metabolite,))
-        model.setup_metabolite_table()
-
+        model.gem_add_metabolites((metabolite,))
         widget = MetaboliteAttributesDisplayWidget()
-
         widget.set_item(metabolite, model)
 
         new_id = "New_id"
@@ -80,6 +77,38 @@ class TestMetaboliteAttributesDisplayWidget:
         assert metabolite.charge == new_charge
         assert metabolite.compartment == new_compartment
         assert metabolite.formula == new_formula
+        assert model.metabolites.has_id(new_id)
+
+    def test_save_state_new_metabolite(self):
+        metabolite = Metabolite()
+        model = Model()
+
+        widget = MetaboliteAttributesDisplayWidget()
+        widget.set_item(metabolite, model)
+
+        new_id = "New"
+        new_name = "Name"
+        new_charge = 2.
+        new_formula = "H20"
+        new_compartment = "c"
+
+        widget.iDLineEdit.setText(new_id)
+        widget.nameLineEdit.setText(new_name)
+        widget.chargeSpinBox.setValue(new_charge)
+        widget.formulaLineEdit.setText(new_formula)
+        widget.compartmentComboBox.addItem(new_compartment)
+        widget.compartmentComboBox.setCurrentText(new_compartment)
+
+        widget.save_state()
+
+        assert metabolite.id == new_id
+        assert metabolite.name == new_name
+        assert metabolite.charge == new_charge
+        assert metabolite.formula == new_formula
+        assert metabolite.compartment == new_compartment
+
+        assert metabolite in model.metabolites
+        assert metabolite in model.QtMetaboliteTable.get_items()
 
     def test_changed_triggered_by_idchange(self):
 

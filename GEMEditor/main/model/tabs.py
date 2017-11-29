@@ -416,12 +416,7 @@ class MetaboliteTab(StandardTab):
 
     @QtCore.pyqtSlot()
     def addItemSlot(self):
-        new_metabolite = Metabolite()
-        dialog = MetaboliteEditDialog(self, new_metabolite, self.model)
-        status = dialog.exec_()
-        if status:
-            self.model.add_metabolites([new_metabolite])
-            self.dataTable.update_row_from_item(new_metabolite)
+        MetaboliteEditDialog(self, Metabolite(), self.model).exec_()
 
     @QtCore.pyqtSlot()
     def editItemSlot(self):
@@ -444,7 +439,6 @@ class MetaboliteTab(StandardTab):
 
             status = dialog.exec_()
             if status:
-                self.dataTable.update_row_from_link(row_index)
                 self.dataView.clearSelection()
 
     @QtCore.pyqtSlot()

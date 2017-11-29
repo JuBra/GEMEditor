@@ -59,8 +59,11 @@ class MetaboliteAttributesDisplayWidget(QWidget, Ui_MetAttribs):
             self.metabolite.id = self.iDLineEdit.text()
             self.model.repair(rebuild_relationships=False)
 
-        with ProgressDialog(title="Updating tables..") as progress:
-            self.model.gem_update_metabolites((self.metabolite,), progress)
+        if not self.metabolite.model:
+            self.model.gem_add_metabolites((self.metabolite,))
+        else:
+            with ProgressDialog(title="Updating tables..") as progress:
+                self.model.gem_update_metabolites((self.metabolite,), progress)
 
     @property
     def content_changed(self):
