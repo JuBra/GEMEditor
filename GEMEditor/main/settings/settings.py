@@ -2,12 +2,14 @@ import logging
 from PyQt5.QtWidgets import QDialog, QDialogButtonBox, QFileDialog
 from PyQt5.QtCore import QRegExp, pyqtSlot
 from PyQt5.QtGui import QRegExpValidator
+from GEMEditor import log_package_versions, LOGGER
 from GEMEditor.main.settings.ui import Ui_EditSettingsDialog
 from GEMEditor.base.classes import Settings
 from GEMEditor.database import database_path as DB_PATH
 
 
 class EditSettingsDialog(QDialog, Ui_EditSettingsDialog):
+
     def __init__(self, parent):
         QDialog.__init__(self, parent)
         self.setupUi(self)
@@ -22,8 +24,7 @@ class EditSettingsDialog(QDialog, Ui_EditSettingsDialog):
         self.pushButton_change_path.clicked.connect(self.change_database_path)
 
         # Setup debug checkbox with current state
-        logger = logging.getLogger("GEMEditor")
-        if logger.isEnabledFor(logging.DEBUG):
+        if LOGGER.isEnabledFor(logging.DEBUG):
             self.debugModeCheckBox.setChecked(True)
 
     @pyqtSlot()
@@ -45,19 +46,20 @@ class EditSettingsDialog(QDialog, Ui_EditSettingsDialog):
     def save_settings(self):
         """ Save the currently entered E-mail """
 
-        # Switch debug mode before settings
-        logger = logging.getLogger("GEMEditor")
         # Set logger to debug mode
-        if self.debugModeCheckBox.isChecked() and not logger.isEnabledFor(logging.DEBUG):
+        if self.debugModeCheckBox.isChecked() and not LOGGER.isEnabledFor(logging.DEBUG):
             logging.disable(logging.NOTSET)
-            logger.info("DEBUG MODE ON")
+            LOGGER.info("DEBUG MODE ON")
+            log_package_versions()
         # Switch debug mode off
-        elif not self.debugModeCheckBox.isChecked() and logger.isEnabledFor(logging.DEBUG):
+        elif not self.debugModeCheckBox.isChecked() and LOGGER.isEnabledFor(logging.DEBUG):
             logging.disable(logging.DEBUG)
-            logger.info("DEBUG MODE OFF")
+            LOGGER.info("DEBUG MODE OFF")
 
         # Save settings
-        self.settings.setValue("Email", self.eMailLineEdit.text())
-        self.settings.setValue("DATABASE_PATH", self.label_database_path.text())
+        if self.settings.value("Email") != self.eMailLineEdit.text():
+            self.settings.setValue("Email", self.eMailLineEdit.text())
+        if self.settings.value("DATABASE_PATH") != self.label_database_path.text():
+            self.settings.setValue("DATABASE_PATH", self.label_database_path.text())
         self.settings.sync()
 

@@ -140,7 +140,7 @@ def modeltest_statistics(model, progress):
     progress.setLabelText("Running model tests..")
     progress.setRange(0, len(model.tests))
     QApplication.processEvents()
-    logging.info("Running model test statistics..")
+    LOGGER.debug("Running model test statistics..")
     for i, case in enumerate(model.tests):
         # Return if user cancelled
         if progress.wasCanceled():

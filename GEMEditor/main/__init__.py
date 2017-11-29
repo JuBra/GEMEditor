@@ -33,8 +33,8 @@ LOGGER = logging.getLogger(__name__)
 
 class MainWindow(QMainWindow, Ui_MainWindow):
 
-    def __init__(self, *args):
-        QMainWindow.__init__(self, *args)
+    def __init__(self, parent=None):
+        super(MainWindow, self).__init__(parent)
         self.setupUi(self)
         self.thread = None
         self.worker = None
