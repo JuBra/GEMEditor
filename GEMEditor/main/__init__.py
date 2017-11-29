@@ -2,6 +2,7 @@ import logging
 import os
 
 import GEMEditor.rw.sbml3 as sbml3
+import GEMEditor.rw.parsers as parsers
 from GEMEditor.analysis.duplicates import group_duplicate_reactions, get_duplicated_metabolites, factory_duplicate_dialog
 from GEMEditor.analysis.formula import update_formulae_iteratively
 from GEMEditor.analysis.statistics import run_all_statistics, DisplayStatisticsDialog
@@ -161,35 +162,43 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     @QtCore.pyqtSlot()
     def open_model(self, filename=None):
+        """ Open model from file
+
+        Parameters
+        ----------
+        filename: str,
+            Path to model file
+
+        """
+        # Close existing model
         if not self.close_model():
             return
 
-        if filename is None:
-            # Ask user to select file path
+        # No path provided. Ask user.
+        if not filename:
             last_path = Settings().value("LastPath", None)
             filename, filters = QFileDialog.getOpenFileName(self, "Open Model", last_path,
                                                             "Sbml files (*.xml *.sbml);;Json files (*.json)")
 
-        if not filename:
+        # Setup file parser
+        if not filename or not isinstance(filename, str):
             return
         elif filename.endswith((".xml", ".sbml")):
-            parser = sbml3.SBMLParser(filename)
-        elif filename.endswith(".json"):
-            # model = cobra.io.load_json_model(filename)
-            # Todo: Implement JSON parser
-            QMessageBox().critical(None, "Not implemented", "JSON parsing is not implemented yet.")
-            return
+            parser = parsers.SBMLParser(filename)
         else:
+            # Todo: Implement JSON parser
+            QMessageBox().critical(None, "Not implemented",
+                                   "Unknown file type: '{0!s}'".format(os.path.splitext(filename)))
             return
 
+        # Parse model
         model = parser.parse()
-        # Todo: Show errors/warnings
-        if model:
-            model.setup_tables()
-            self.set_model(model, filename)
+        if parser.errors or parser.warnings:
+            parsers.ParserErrorDialog(parser).exec_()
 
-        # Store model path
-        Settings().setValue("LastPath", os.path.dirname(filename))
+        if model:
+            self.set_model(model, filename)
+            Settings().setValue("LastPath", os.path.dirname(filename))
 
     @QtCore.pyqtSlot()
     def database_load_mapping(self):
