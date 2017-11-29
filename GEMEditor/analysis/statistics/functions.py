@@ -1,15 +1,28 @@
 import logging
 from collections import OrderedDict
-from GEMEditor.analysis.model_test import get_original_settings, run_test
+from GEMEditor.analysis.model_test import run_tests
 from GEMEditor.model.classes import Reaction, Metabolite, Gene
 from GEMEditor.model.display.proxymodels import metabolite_is_dead_end
-from PyQt5.QtWidgets import QApplication
 
 
 LOGGER = logging.getLogger(__name__)
 
 
 def reaction_statistics(model):
+    """ Calculate the reaction stats
+
+    Parameters
+    ----------
+    model: GEMEditor.model.classes.Model,
+        Model for which to retrieve counts
+
+    Returns
+    -------
+    OrderedDict,
+        Dictionary containing the reaction stats
+
+    """
+
     num_reactions = len(model.reactions)
     num_transport = 0
     num_boundary = 0
@@ -47,6 +60,21 @@ def reaction_statistics(model):
 
 
 def metabolite_statistics(model):
+    """ Calculate the metabolite stats
+
+    Parameters
+    ----------
+    model: GEMEditor.model.classes.Model,
+        Model for which to retrieve counts
+
+    Returns
+    -------
+    OrderedDict,
+        Dictionary containing the metabolite stats
+
+    """
+
+    num_total = len(model.metabolites)
     num_anotated = 0
     num_dead_ends = 0
 
@@ -56,12 +84,26 @@ def metabolite_statistics(model):
         if metabolite_is_dead_end(metabolite):
             num_dead_ends += 1
 
-    return OrderedDict([("Total", len(model.metabolites)),
+    return OrderedDict([("Total", num_total),
                         ("Annotated", num_anotated),
                         ("DeadEnd", num_dead_ends)])
 
 
 def gene_statistics(model):
+    """ Calculate the gene stats
+
+    Parameters
+    ----------
+    model: GEMEditor.model.classes.Model,
+        Model for which to retrieve counts
+
+    Returns
+    -------
+    OrderedDict,
+        Dictionary containing the gene stats
+
+    """
+
     num_genes = len(model.genes)
     num_unassigned = 0
     num_exp_verified_localization = 0
@@ -87,11 +129,38 @@ def gene_statistics(model):
 
 
 def reference_statistics(model):
+    """ Calculate the reference stats
+
+    Parameters
+    ----------
+    model: GEMEditor.model.classes.Model,
+        Model for which to retrieve counts
+
+    Returns
+    -------
+    OrderedDict,
+        Dictionary containing the reference stats
+
+    """
+
     return OrderedDict([("Total", len(model.references)),
                         ("Unassigned", sum(not r.linked_items for r in model.references.values()))])
 
 
 def evidence_statistics(model):
+    """ Calculate the evidence stats
+
+    Parameters
+    ----------
+    model: GEMEditor.model.classes.Model,
+        Model for which to retrieve counts
+
+    Returns
+    -------
+    OrderedDict,
+        Dictionary containing the evidence stats
+
+    """
 
     num_gene_reaction_links = 0
     num_presence_absence = 0
@@ -127,44 +196,68 @@ def evidence_statistics(model):
 
 
 def modeltest_statistics(model, progress):
+    """ Calculate the test stats
 
-    num_passing_tests = 0
+    Parameters
+    ----------
+    model: GEMEditor.model.classes.Model,
+        Model for which to retrieve counts
 
-    original_state = get_original_settings(model)
+    progress: QProgressDialog,
+        Progress dialog informing user
 
-    # Prepare model for tests
-    for x in original_state:
-        x.do()
+    Returns
+    -------
+    result: OrderedDict,
+        Dictionary containing the test stats
 
-    # Run tests
-    progress.setLabelText("Running model tests..")
-    progress.setRange(0, len(model.tests))
-    QApplication.processEvents()
-    LOGGER.debug("Running model test statistics..")
-    for i, case in enumerate(model.tests):
-        # Return if user cancelled
-        if progress.wasCanceled():
-            LOGGER.debug("Test simulation aborted by user")
-            break
+    """
+    LOGGER.debug("Running test statistics..")
+
+    num_total = len(model.tests)
+    num_passing = 0
+    num_failing = 0
+    num_not_run = 0
+
+    test_results = run_tests(model.tests, model, progress)
+
+    for testcase in model.tests:
+        try:
+            status, _ = test_results[testcase]
+        except KeyError:
+            num_not_run += 1
         else:
-            progress.setValue(i)
-            QApplication.processEvents()
+            if status:
+                num_passing += 1
+            else:
+                num_failing += 1
 
-        # Run test
-        passed, _ = run_test(case, model, None)
-        if passed:
-            num_passing_tests += 1
+    result = OrderedDict([("Total", num_total),
+                          ("Passing", num_passing),
+                          ("Failing", num_failing)])
+    if num_not_run:
+        result["Not run"] = num_not_run
 
-    # Restore state
-    for x in original_state:
-        x.undo()
-
-    return OrderedDict([("Total", len(model.tests)),
-                        ("Passing", num_passing_tests),
-                        ("Failing", len(model.tests)-num_passing_tests)])
+    return result
 
 
 def run_all_statistics(model, progress):
+    """ Calculate all statistics
+
+    Parameters
+    ----------
+    model: GEMEditor.model.classes.Model,
+        Model for which to retrieve counts
+
+    progress: QProgressDialog,
+        Progress dialog informing user
+
+    Returns
+    -------
+    OrderedDict,
+        Dictionary containing all stats grouped by item type
+
+    """
 
     reaction_stats = reaction_statistics(model)
     metabolite_stats = metabolite_statistics(model)

@@ -1,43 +1,107 @@
+import logging
+from PyQt5.QtWidgets import QApplication
+from GEMEditor.solution.base import fluxes_from_solution
 from GEMEditor.model.classes.modeltest import ReactionSetting
 
 
-def run_test(test_case, model, solver, restore_initial=False):
-    """ Run a specific model test case.
+LOGGER = logging.getLogger(__name__)
 
-    The objective values of all reactions are set to zero before
-    the test, as well as the upper and lower bounds of all boundary
-    reactions.
-    If restore_initials is True this changes will be
-    performed during the test, otherwise the function expects a
-    model that already meets these criteria. """
 
-    # Store original values of boundary reactions and
-    # reactions with objective coefficient != 0. in list
-    if restore_initial:
-        original_settings = get_original_settings(model)
-        for x in original_settings:
-            x.do()
+def _run_single_test(model, testcase):
+    """ Run a testcase without preparing/restoring model
 
-    # Execute all settings
-    for setting in test_case.all_settings():
+    This function should only be used in a setting where
+    the model has been prepared for running tests and the
+    original state is restored after completion of test
+    runs.
+
+    Parameters
+    ----------
+    model: GEMEditor.model.classes.Model,
+        Model for which to run the test
+    testcase: GEMEditor.model.classes.ModelTest,
+        Testcase to run
+
+    Returns
+    -------
+    status: bool,
+        True if the solution matches all test conditions,
+        False otherwise
+    solution: cobra.core.Solution,
+        FBA solution of the simulation run
+
+    """
+    status = False
+
+    # Apply all settings
+    for setting in testcase.all_settings():
         setting.do()
 
     # Solve the model
-    solution = model.optimize(solver=solver)
+    solution = model.optimize()
 
-    # Revert test specific changes
-    for setting in reversed(test_case.all_settings()):
+    # Undo test settings
+    for setting in reversed(testcase.all_settings()):
         setting.undo()
 
-    # Restore original values
-    if restore_initial:
-        for setting in reversed(original_settings):
-            setting.undo()
+    # Check solution
+    if solution:
+        fluxes = fluxes_from_solution(solution)
+        status = all([x.check(fluxes) for x in testcase.outcomes])
 
-    if solution.x_dict is not None:
-        return all([x.check_solution(solution) for x in test_case.outcomes]), solution
-    else:
-        return False, solution
+    return status, solution
+
+
+def run_tests(test_cases, model, progress):
+    """ Run and check test cases
+
+    Before running the test cases the model is prepared by:
+    1) Setting all objective values to zero
+    2) Setting all boundary reactions to production only
+
+    These settings will be restored after running all tests.
+
+    Parameters
+    ----------
+    test_cases: list,
+        Testcases that should be run
+    model: GEMEditor.model.classes.Model,
+        Model for which to run the test
+    progress: QProgressDialog,
+        Progress dialog to notify user
+
+    Returns
+    -------
+    results: dict,
+        Collected results of the individual tests
+    """
+    results = dict()
+
+    # Prepare model for running tests
+    original_settings = get_original_settings(model)
+    for setting in original_settings:
+        setting.do()
+
+    LOGGER.debug("Running test cases..")
+    progress.setLabelText("Running test cases..")
+    progress.setRange(0, len(test_cases))
+
+    # Run testcases
+    for i, test_case in enumerate(test_cases):
+        if progress.wasCanceled():
+            LOGGER.debug("Running test aborted at #{0!s}".format(i))
+            break
+        progress.setValue(i)
+        QApplication.processEvents()
+
+        # Run test
+        results[test_case] = _run_single_test(model, test_case)
+
+    # Restore original values
+    for setting in reversed(original_settings):
+        setting.undo()
+
+    return results
 
 
 def get_original_settings(model):

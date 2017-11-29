@@ -3,6 +3,7 @@ from GEMEditor.model.classes.modeltest import ReactionSetting, GeneSetting, Outc
 from GEMEditor.model.display.tables import ReactionSettingsTable, GeneSettingsTable, OutcomesTable
 from GEMEditor.model.display.ui.SettingDisplayWiget import Ui_SettingsDisplayWidget
 from GEMEditor.model.selection import ReactionSelectionDialog, GeneSelectionDialog
+from GEMEditor.solution.base import fluxes_from_solution
 from PyQt5 import QtCore, QtGui
 from PyQt5.QtWidgets import QWidget
 
@@ -249,9 +250,10 @@ class OutcomeDisplayWidget(QWidget, Ui_SettingsDisplayWidget):
 
             # Display the failure/success for individual outcomes
             if solution:
+                fluxes = fluxes_from_solution(solution)
                 for i, outcome in enumerate(model_test.outcomes):
                     new_item = QtGui.QStandardItem()
-                    if outcome.check_solution(solution):
+                    if outcome.check(fluxes):
                         new_item.setIcon(self.ok_icon)
                     else:
                         new_item.setIcon(self.error_icon)

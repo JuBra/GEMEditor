@@ -138,15 +138,14 @@ class Outcome:
         self.value = value
         self.operator = operator
 
-    def check_solution(self, solution, precision=0.01):
+    def check(self, fluxes, precision=0.01):
         """ Check if the flux value in the solution matches the expectation in the testcase """
         if not self.operator:
             return False
         selected_operator = self.options[self.operator]
         if selected_operator is operator.gt:
-            return selected_operator(solution.x_dict[self.reaction.id]-precision, self.value)
-        else:
-            return selected_operator(solution.x_dict[self.reaction.id]+precision, self.value)
+            precision *= -1
+        return selected_operator(fluxes[self.reaction.id]+precision, self.value)
 
     def is_valid(self):
         return (self.operator in self.options and
