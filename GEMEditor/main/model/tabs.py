@@ -844,7 +844,7 @@ class AnalysesTab(QWidget, Ui_AnalysisTab):
         self.analyses[selected_analysis](selected_solver)
 
     def run_flux_balance_analysis(self, selected_solver):
-        solution = self.model.optimize(solver=selected_solver)
+        solution = self.model.optimize()
         self.add_solution(solution)
 
     def run_loopless(self, selected_solver):
@@ -852,7 +852,7 @@ class AnalysesTab(QWidget, Ui_AnalysisTab):
         self.add_solution(solution)
 
     def run_parsimonous(self, selected_solver):
-        solution = pfba(self.model, solver=selected_solver)
+        solution = pfba(self.model)
         self.add_solution(solution)
 
     def run_single_gene_deletion(self, selected_solver):
