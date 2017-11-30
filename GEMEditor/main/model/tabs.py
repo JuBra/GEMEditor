@@ -1,7 +1,8 @@
 import cobra
+import logging
 from collections import OrderedDict
-from GEMEditor.analysis.model_test import get_original_settings, run_test
-from GEMEditor.base.classes import Settings
+from GEMEditor.analysis.model_test import run_tests
+from GEMEditor.base.classes import Settings, ProgressDialog
 from GEMEditor.base.functions import generate_copy_id
 from GEMEditor.base.dialogs import DataFrameDialog
 from GEMEditor.main.model.ui import Ui_StandardTab, Ui_AnalysisTab, Ui_SolutionTableWidget, Ui_model_stats_tab
@@ -23,6 +24,9 @@ from PyQt5.QtWidgets import QWidget, QMessageBox, QApplication, QAction, QMenu, 
 from cobra.core.solution import LegacySolution, Solution
 from cobra.flux_analysis import pfba, flux_variability_analysis, loopless_solution, single_gene_deletion, \
     single_reaction_deletion
+
+
+LOGGER = logging.getLogger(__name__)
 
 
 class StandardTab(QWidget, Ui_StandardTab):
@@ -416,12 +420,7 @@ class MetaboliteTab(StandardTab):
 
     @QtCore.pyqtSlot()
     def addItemSlot(self):
-        new_metabolite = Metabolite()
-        dialog = MetaboliteEditDialog(self, new_metabolite, self.model)
-        status = dialog.exec_()
-        if status:
-            self.model.add_metabolites([new_metabolite])
-            self.dataTable.update_row_from_item(new_metabolite)
+        MetaboliteEditDialog(self, Metabolite(), self.model).exec_()
 
     @QtCore.pyqtSlot()
     def editItemSlot(self):
@@ -444,7 +443,6 @@ class MetaboliteTab(StandardTab):
 
             status = dialog.exec_()
             if status:
-                self.dataTable.update_row_from_link(row_index)
                 self.dataView.clearSelection()
 
     @QtCore.pyqtSlot()
@@ -720,76 +718,46 @@ class ModelTestsTab(StandardTab):
 
     @QtCore.pyqtSlot()
     def run_selected(self):
-        if self.dataView.selectedIndexes():
-            self.run_tests(run_on_selection=True)
+        selected_tests = self.dataView.get_selected_items()
+        self.run_tests(selected_tests)
 
     @QtCore.pyqtSlot()
-    def run_tests(self, run_on_selection=False):
-
-        # Get the test cases to run
-        if run_on_selection:
-            tests_to_run = [(i, self.dataTable.item_from_row(i)) for i in self.dataView.get_selected_rows()]
-        else:
-            tests_to_run = [(i, self.dataTable.item_from_row(i)) for i in range(self.dataTable.rowCount())]
-
-        # Return if no tests have been selected or the table is empty
-        if not tests_to_run:
+    def run_tests(self, selected=()):
+        if not self.model.tests:
             return
+        elif not selected:
+            # Run all tests if no selection specified
+            selected = self.model.tests
 
-        # Get the solver for running the test cases
-        solvers = list(cobra.solvers.solver_dict.keys())
-        if not solvers:
-            dialog = QErrorMessage(self)
-            dialog.showMessage("No solver found!")
-            return
+        with ProgressDialog(title="Running tests..") as progress:
+            try:
+                test_results = run_tests(selected, self.model, progress)
+            except Exception as e:
+                LOGGER.exception("Error running tests")
+                QMessageBox().critical(None, "Error", "The following error occured "
+                                                      "while running the tests:\n{}".format(str(e)))
+                return
 
-        solver, status = QInputDialog().getItem(self, "Select solver", "Solver:", solvers, 0, False)
-        if status:
-            original_state = get_original_settings(self.model)
+            mapping = self.dataTable.get_item_to_row_mapping()
 
-            # Prepare model for tests
-            for x in original_state:
-                x.do()
-
-            dialog = QProgressDialog("Running tests..", "Cancel", 0, len(tests_to_run), self)
-            dialog.show()
-            i = 0
-            results = []
-            for i, tuple_case in enumerate(tests_to_run):
-
-                # Unpack tuple
-                row, test_case = tuple_case
-
-                # Set value to progress dialog
-                dialog.setValue(i)
-                QApplication.processEvents()
-                if dialog.wasCanceled():
-                    break
-
-                passed, solution = run_test(test_case, self.model, solver)
-                results.append((row, solution, passed))
-
+            num_passed = 0
             self.dataTable.blockSignals(True)
-            for x in results:
-                self.dataTable.set_status(*x)
+            for testcase, result in test_results.items():
+                row = mapping[testcase]
+                status, solution = result
+                if status:
+                    num_passed += 1
+                self.dataTable.set_status(row, solution, status)
             self.dataTable.blockSignals(False)
             self.dataTable.all_data_changed()
 
-            num_passed = sum(x[1].status == "optimal" and x[2] for x in results)
-
-            if len(results) == 0:
-                self.statusBar.setStyleSheet("color: red; font-weight: bold;")
-            elif len(results) == i:
-                self.statusBar.setStyleSheet("color: green; font-weight: bold;")
-            else:
-                self.statusBar.setStyleSheet("color: orange; font-weight: bold;")
-            self.statusBar.showMessage("{0!s} out of {1!s} tests passed!".format(num_passed, i+1), 4000)
-
-            # Restore state
-            for x in original_state:
-                x.undo()
-
-            dialog.close()
+        if num_passed == 0:
+            self.statusBar.setStyleSheet("color: red; font-weight: bold;")
+        elif num_passed == len(test_results):
+            self.statusBar.setStyleSheet("color: green; font-weight: bold;")
+        else:
+            self.statusBar.setStyleSheet("color: orange; font-weight: bold;")
+        self.statusBar.showMessage("{0!s} out of {1!s} tests passed!".format(num_passed, len(test_results)), 4000)
 
     @QtCore.pyqtSlot(QtCore.QPoint)
     def showContextMenu(self, pos):

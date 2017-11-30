@@ -1,10 +1,10 @@
 import string
-from GEMEditor import use_progress
+from GEMEditor.base.classes import ProgressDialog
 from GEMEditor.model.display.ui.MetaboliteAttributeDisplayWidget import \
     Ui_MetaboliteAttributeDisplayWidget as Ui_MetAttribs
 from GEMEditor.model.display.ui.ReactionsDisplayWidget import Ui_ReactionsDisplayWidget
 from PyQt5 import QtCore, QtGui
-from PyQt5.QtWidgets import QWidget, QApplication
+from PyQt5.QtWidgets import QWidget
 
 
 SBML_SYMBOLS = set(string.ascii_letters+string.digits+"_")
@@ -47,44 +47,23 @@ class MetaboliteAttributesDisplayWidget(QWidget, Ui_MetAttribs):
         self.metabolite = item
         self.populate_widgets()
 
-    @use_progress
-    def save_state(self, progress):
+    def save_state(self):
         """ Save the current state of the inputs to the metabolite that is currently
         edited"""
-        update_reactions = False
-        update_balance = False
         self.metabolite.name = self.nameLineEdit.text()
+        self.metabolite.charge = self.chargeSpinBox.value()
+        self.metabolite.formula = self.formulaLineEdit.text()
         self.metabolite.compartment = self.compartmentComboBox.currentText()
 
         if self.metabolite.id != self.iDLineEdit.text():
             self.metabolite.id = self.iDLineEdit.text()
             self.model.repair(rebuild_relationships=False)
-            update_reactions = True
 
-        if self.metabolite.charge != self.chargeSpinBox.value():
-            self.metabolite.charge = self.chargeSpinBox.value()
-            update_reactions = True
-            update_balance = True
-
-        if self.metabolite.formula != self.formulaLineEdit.text():
-            self.metabolite.formula = self.formulaLineEdit.text()
-            update_reactions = True
-            update_balance = True
-
-        if update_reactions is True:
-            progress.setRange(0, len(self.metabolite.reactions))
-            progress.setLabelText("Saving metabolite..")
-
-            # Update reaction rows that contain this metabolite
-            self.model.QtReactionTable.blockSignals(True)
-            for i, reaction in enumerate(self.metabolite.reactions):
-                progress.setValue(i)
-                QApplication.processEvents()
-                if update_balance:
-                    reaction.update_balancing_status()
-                self.model.QtReactionTable.update_row_from_id(reaction.id)
-            self.model.QtReactionTable.blockSignals(False)
-            self.model.QtReactionTable.all_data_changed()
+        if not self.metabolite.model:
+            self.model.gem_add_metabolites((self.metabolite,))
+        else:
+            with ProgressDialog(title="Updating tables..") as progress:
+                self.model.gem_update_metabolites((self.metabolite,), progress)
 
     @property
     def content_changed(self):

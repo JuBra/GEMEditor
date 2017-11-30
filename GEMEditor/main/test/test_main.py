@@ -109,6 +109,15 @@ def getsavefilename_xml(monkeypatch, tmpdir):
     monkeypatch.setattr("PyQt5.QtWidgets.QFileDialog.getSaveFileName", Mock(return_value=(path, "*.xml")))
     return path
 
+@pytest.fixture()
+def parser_model(monkeypatch):
+    model = Model()
+    monkeypatch.setattr("GEMEditor.rw.parsers.BaseParser.parse", Mock(return_value=model))
+    return model
+
+@pytest.fixture()
+def parser_none(monkeypatch):
+    monkeypatch.setattr("GEMEditor.rw.parsers.BaseParser.parse", Mock(return_value=None))
 
 @pytest.fixture()
 def main_window(no_update_check):
@@ -118,39 +127,24 @@ def main_window(no_update_check):
 @pytest.mark.usefixtures("progress_not_cancelled")
 class TestOpenModel:
 
-    @pytest.mark.usefixtures("read_sbml3_none", "openfilename_empty")
+    @pytest.mark.usefixtures("openfilename_empty")
     def test_model_not_read_if_user_aborts_file_selection(self, main_window, mock_settings):
-        main_window.close_model = Mock(return_value=True)
         main_window.set_model = Mock()
-        main_window._set_model_loaded = Mock()
         main_window.open_model()
-        assert GEMEditor.rw.sbml3.read_sbml3_model.called is False
         assert main_window.set_model.called is False
-        assert main_window._set_model_loaded.called is False
         assert mock_settings.setValue.called is False
 
-    @pytest.mark.usefixtures("read_sbml3_none")
-    def test_open_model_close_accepted_xml_path(self, main_window, openfilename_xml, mock_settings):
-        main_window.close_model = Mock(return_value=True)
+    def test_open_model_close_accepted_xml_path(self, main_window, openfilename_xml, mock_settings, parser_model):
         main_window.set_model = Mock()
-        main_window._set_model_loaded = Mock()
         main_window.open_model()
-        assert GEMEditor.rw.sbml3.read_sbml3_model.called is True
         mock_settings.setValue.assert_called_with("LastPath", os.path.dirname(openfilename_xml))
-        assert main_window.set_model.called is False
-        assert main_window._set_model_loaded.called is False
+        main_window.set_model.assert_called_with(parser_model, openfilename_xml)
 
-    @pytest.mark.usefixtures("read_sbml3_model")
-    def test_open_model_close_accepted_xml_path2(self, main_window, openfilename_xml, mock_settings):
-        main_window.close_model = Mock(return_value=True)
+    def test_no_model_set_with_parsing_error(self, main_window, openfilename_xml, mock_settings, parser_none):
         main_window.set_model = Mock()
-        main_window._set_model_loaded = Mock()
         main_window.open_model()
-        mock_settings.setValue.assert_called_with("LastPath", os.path.dirname(openfilename_xml))
-        assert QFileDialog.getOpenFileName.called is True
-        assert GEMEditor.rw.sbml3.read_sbml3_model.called is True
-        assert main_window.set_model.called is True
-        assert main_window._set_model_loaded.called is True
+        assert main_window.set_model.called is False
+        assert mock_settings.setValue.called is False
 
     @pytest.mark.usefixtures("read_sbml3_none")
     def test_open_model_close_cancelled(self, main_window, mock_settings):

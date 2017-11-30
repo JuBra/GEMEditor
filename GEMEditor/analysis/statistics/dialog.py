@@ -10,6 +10,18 @@ logger = logging.getLogger(__name__)
 
 
 class DisplayStatisticsDialog(QDialog, Ui_StatisticsDialog):
+    """ Display model statistics
+
+    Show model statistics one groupboxes per item type
+    containing all computed numbers. The user has the
+    choice to save the displayed statistics to a file.
+
+    Parameters
+    ----------
+    statistics: OrderedDict,
+        Dictionary containing the statistics grouped in categories
+
+    """
 
     def __init__(self, statistics):
         super(DisplayStatisticsDialog, self).__init__()
@@ -22,6 +34,8 @@ class DisplayStatisticsDialog(QDialog, Ui_StatisticsDialog):
         self.update_statistics()
 
     def update_statistics(self):
+        """ Populate the dialogs with numbers from
+        the statistics dictionary. """
 
         # Delete existing child widgets
         for i in reversed(range(self.mainLayout.count())):
@@ -55,6 +69,7 @@ class DisplayStatisticsDialog(QDialog, Ui_StatisticsDialog):
 
     @QtCore.pyqtSlot()
     def save_statistics(self):
+        """ Write stats to file """
         filename, filter = QFileDialog.getSaveFileName(self, self.tr("Save statistics"), None,
                                                        self.tr("Text file (*.txt)"))
         if filename:
@@ -62,15 +77,14 @@ class DisplayStatisticsDialog(QDialog, Ui_StatisticsDialog):
 
 
 def write_stats_to_file(path, model_stats):
-    """ Write the statistics of the model to file
+    """ Write the statistics to file
 
     Parameters
     ----------
     path: str
+        File path to save statistics to
     model_stats: OrderedDict
-
-    Returns
-    -------
+        Dictionary containing the statistics grouped in categories
 
     """
     with open(path, "w") as open_file:

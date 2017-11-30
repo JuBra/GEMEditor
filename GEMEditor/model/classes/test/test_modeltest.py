@@ -65,22 +65,20 @@ class TestOutcomes:
     def test_check_solution(self):
         reaction_id = "test_id"
         reaction = Reaction(reaction_id)
-        self.solution.x_dict = {reaction_id: 5.}
+        fluxes = {reaction_id: 5.}
 
-        new_outcome = Outcome(reaction,
-                              value=0.,
-                              operator="greater than")
-        assert new_outcome.check_solution(self.solution) is True
-        self.solution.x_dict = {reaction_id: 0.}
-        assert new_outcome.check_solution(self.solution) is False
+        new_outcome = Outcome(reaction, value=0., operator="greater than")
+        assert new_outcome.check(fluxes) is True
+        fluxes = {reaction_id: 0.}
+        assert new_outcome.check(fluxes) is False
 
         new_outcome.operator = "less than"
-        assert new_outcome.check_solution(self.solution) is False
+        assert new_outcome.check(fluxes) is False
         new_outcome.value = 10.
-        assert new_outcome.check_solution(self.solution) is True
+        assert new_outcome.check(fluxes) is True
 
         new_outcome.operator = ""
-        assert new_outcome.check_solution(self.solution) is False
+        assert new_outcome.check(fluxes) is False
 
     def test_empty_outcome_is_not_valid(self):
         assert self.outcome.is_valid() is False

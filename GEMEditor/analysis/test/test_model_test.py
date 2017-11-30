@@ -1,8 +1,7 @@
 from unittest.mock import Mock
-
 import GEMEditor
 import pytest
-from GEMEditor.analysis.model_test import get_original_settings, run_test
+from GEMEditor.analysis.model_test import _get_original_settings, run_tests
 from GEMEditor.model.classes.cobra import Reaction, Metabolite, Model
 from GEMEditor.model.classes.modeltest import ModelTest, ReactionSetting, Outcome
 from cobra.core.solution import LegacySolution
@@ -27,7 +26,7 @@ class TestGetOriginalSettings:
         self.r1.objective_coefficient = 1
 
         # Get the setting of a boundary reaction
-        setting = get_original_settings(self.model)[0]
+        setting = _get_original_settings(self.model)[0]
 
         # Check that original values are stored
         assert setting.reaction is self.r1
@@ -46,7 +45,7 @@ class TestGetOriginalSettings:
         self.r1.objective_coefficient = 1
 
         # Get the setting of a boundary reaction
-        setting = get_original_settings(self.model)[0]
+        setting = _get_original_settings(self.model)[0]
 
         # Check that original values are stored
         assert setting.reaction is self.r1
@@ -64,7 +63,7 @@ class TestGetOriginalSettings:
         self.r1.objective_coefficient = 1.
 
         # Get the setting of a boundary reaction
-        setting = get_original_settings(self.model)[0]
+        setting = _get_original_settings(self.model)[0]
 
         # Check that objective setting is deactivated
         assert setting.reaction is self.r1
@@ -85,7 +84,7 @@ class TestGetOriginalSettings:
         self.r1.upper_bound = params[1]
         self.r1.objective_coefficient = params[2]
 
-        setting = get_original_settings(self.model)[0]
+        setting = _get_original_settings(self.model)[0]
 
         # Check that the settings are expected
         assert setting.lower_bound == expectations[0]
@@ -102,15 +101,12 @@ class TestGetOriginalSettings:
         self.r1.upper_bound = params[1]
         self.r1.objective_coefficient = params[2]
 
-        assert not get_original_settings(self.model)
+        assert not _get_original_settings(self.model)
 
 
 @pytest.fixture()
 def solution():
-    solution = LegacySolution(f=None)
-    solution.x_dict = {"r1": 10.,
-                       "r2": 0.}
-    return solution
+    return LegacySolution(f=1., x_dict={"r1": 10., "r2": 0.}, status="optimal")
 
 
 @pytest.fixture()
@@ -168,12 +164,16 @@ class TestRunTest:
     @pytest.fixture()
     def mock_get_original_settings(self, monkeypatch):
         return_value = [Mock(), Mock()]
-        monkeypatch.setattr("GEMEditor.analysis.model_test.get_original_settings", Mock(return_value=return_value))
+        monkeypatch.setattr("GEMEditor.analysis.model_test._get_original_settings", Mock(return_value=return_value))
         return return_value
 
+    @pytest.fixture()
+    def progress(self):
+        return Mock(wasCanceled=Mock(return_value=False))
+
     def test_outcomes(self, solution):
-        assert self.true_outcome1.check_solution(solution) is True
-        assert self.false_outcome1.check_solution(solution) is False
+        assert self.true_outcome1.check(solution.x_dict) is True
+        assert self.false_outcome1.check(solution.x_dict) is False
 
     @pytest.mark.usefixtures("mock_optimize")
     def test_mock(self):
@@ -181,62 +181,65 @@ class TestRunTest:
         assert isinstance(result.x_dict, dict)
 
     @pytest.mark.usefixtures("mock_optimize")
-    def test_run_test_true_outcome(self):
+    def test_run_test_true_outcome(self, progress):
         model_test = ModelTest()
         model_test.outcomes = [self.true_outcome1]
-        status, _ = run_test(model_test, Model(), None)
+
+        results = run_tests((model_test,), Model(), progress)
+        status, _ = results[model_test]
         assert status is True
 
     @pytest.mark.usefixtures("mock_optimize")
-    def test_run_test_false_outcome(self):
+    def test_run_test_false_outcome(self, progress):
         model_test = ModelTest()
         model_test.outcomes = [self.false_outcome1]
-        status, _ = run_test(model_test, Model(), None)
+
+        results = run_tests((model_test,), Model(), progress)
+        status, _ = results[model_test]
         assert status is False
 
     @pytest.mark.usefixtures("mock_optimize")
-    def test_run_test_false_outcome2(self):
+    def test_run_test_false_outcome2(self, progress):
         model_test = ModelTest()
         model_test.outcomes = [self.true_outcome1, self.false_outcome1]
-        status, _ = run_test(model_test, Model(), None)
+
+        results = run_tests((model_test,), Model(), progress)
+        status, _ = results[model_test]
         assert status is False
 
-    def test_run_test_infeasible_solution(self, mock_optimize_infeasible):
+    def test_run_test_infeasible_solution(self, mock_optimize_infeasible, progress):
         model_test = ModelTest()
         model_test.outcomes = [self.true_outcome1, self.false_outcome1]
-        status, solution = run_test(model_test, Model(), None)
+
+        results = run_tests((model_test,), Model(), progress)
+        status, solution = results[model_test]
         assert solution is mock_optimize_infeasible
         assert status is False
 
     @pytest.mark.usefixtures("mock_optimize")
-    def test_value_restored(self):
+    def test_value_restored(self, progress):
         model_test = ModelTest()
         self.setting2.do = Mock()
         model_test.reaction_settings = [self.setting1, self.setting2]
         assert self.setting2.do.called is False
         assert self.reaction1 is self.setting1.reaction
 
-        status, _ = run_test(model_test, Model(), None)
+        results = run_tests((model_test,), Model(), progress)
+        status, _ = results[model_test]
         assert self.setting2.do.called is True
         assert self.reaction1.upper_bound == self.r1_init_setting.upper_bound
         assert self.reaction1.lower_bound == self.r1_init_setting.lower_bound
         assert self.reaction1.objective_coefficient == self.r1_init_setting.objective_coefficient
 
-    @pytest.mark.usefixtures("mock_optimize", "mock_get_original_settings")
-    def test_restore_initial_get_original_not_called(self):
-        assert GEMEditor.analysis.model_test.get_original_settings.called is False
-        model_test = ModelTest()
-        model_test.outcomes = [self.true_outcome1]
-        status, _ = run_test(model_test, Model(), None, restore_initial=False)
-        assert GEMEditor.analysis.model_test.get_original_settings.called is False
-
     @pytest.mark.usefixtures("mock_optimize")
-    def test_restore_initial_get_original_called(self, mock_get_original_settings):
+    def test_restore_initial_get_original_called(self, mock_get_original_settings, progress):
         original_settings = mock_get_original_settings
-        assert GEMEditor.analysis.model_test.get_original_settings.called is False
+        assert GEMEditor.analysis.model_test._get_original_settings.called is False
         model_test = ModelTest()
         model_test.outcomes = [self.true_outcome1]
-        status, _ = run_test(model_test, Model(), None, restore_initial=True)
-        assert GEMEditor.analysis.model_test.get_original_settings.called is True
+
+        results = run_tests((model_test,), Model(), progress)
+        status, _ = results[model_test]
+        assert GEMEditor.analysis.model_test._get_original_settings.called is True
         for x in original_settings:
             assert x.do.called is True

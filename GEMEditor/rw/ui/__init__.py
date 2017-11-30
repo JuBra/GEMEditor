@@ -1,0 +1,1 @@
+from .ParserErrorDialog import Ui_ParserErrorDialog

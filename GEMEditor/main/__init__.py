@@ -2,6 +2,7 @@ import logging
 import os
 
 import GEMEditor.rw.sbml3 as sbml3
+import GEMEditor.rw.parsers as parsers
 from GEMEditor.analysis.duplicates import group_duplicate_reactions, get_duplicated_metabolites, factory_duplicate_dialog
 from GEMEditor.analysis.formula import update_formulae_iteratively
 from GEMEditor.analysis.statistics import run_all_statistics, DisplayStatisticsDialog
@@ -28,13 +29,14 @@ from PyQt5.QtCore import QStandardPaths, Qt
 from PyQt5.QtGui import QKeySequence
 from PyQt5.QtWidgets import QFileDialog, QMainWindow
 
+
 LOGGER = logging.getLogger(__name__)
 
 
 class MainWindow(QMainWindow, Ui_MainWindow):
 
-    def __init__(self, *args):
-        QMainWindow.__init__(self, *args)
+    def __init__(self, parent=None):
+        super(MainWindow, self).__init__(parent)
         self.setupUi(self)
         self.thread = None
         self.worker = None
@@ -127,6 +129,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.testsTab.set_model(model)
         self.referenceTab.set_model(model)
         self.analysesTab.set_model(model)
+        self._set_model_loaded(model is not None)
 
     def _set_model_loaded(self, bool):
         # Set the accessibility of different elements of the GUI depending on if a model is loaded or not
@@ -160,35 +163,43 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     @QtCore.pyqtSlot()
     def open_model(self, filename=None):
-        if self.close_model():
-            settings = Settings()
-            last_path = settings.value("LastPath") or QStandardPaths.DesktopLocation or None
+        """ Open model from file
 
-            if filename is None:
-                filename, filters = QFileDialog.getOpenFileName(self,
-                                                                self.tr("Open Model"),
-                                                                last_path,
-                                                                self.tr("Sbml files (*.xml *.sbml);;Json files (*.json)"))
-                if filename:
-                    settings.setValue("LastPath", os.path.dirname(filename))
+        Parameters
+        ----------
+        filename: str,
+            Path to model file
 
-            if filename.endswith((".xml", ".sbml")):
-                try:
-                    model = sbml3.read_sbml3_model(filename)
-                except:
-                    import traceback
-                    QErrorMessage(self).showMessage("There has been an error parsing the model:\n{}".format(traceback.format_exc()),
-                                                          "Parsing error")
-                    return
-                else:
-                    if model is not None:
-                        model.setup_tables()
-                        self.set_model(model, filename)
-                        self._set_model_loaded(True)
-            elif filename.endswith(".json"):
-                model = cobra.io.load_json_model(filename)
-                self.set_model(model, filename)
-                self._set_model_loaded(True)
+        """
+        # Close existing model
+        if not self.close_model():
+            return
+
+        # No path provided. Ask user.
+        if not filename:
+            last_path = Settings().value("LastPath", None)
+            filename, filters = QFileDialog.getOpenFileName(self, "Open Model", last_path,
+                                                            "Sbml files (*.xml *.sbml);;Json files (*.json)")
+
+        # Setup file parser
+        if not filename or not isinstance(filename, str):
+            return
+        elif filename.endswith((".xml", ".sbml")):
+            parser = parsers.SBMLParser(filename)
+        else:
+            # Todo: Implement JSON parser
+            QMessageBox().critical(None, "Not implemented",
+                                   "Unknown file type: '{0!s}'".format(os.path.splitext(filename)))
+            return
+
+        # Parse model
+        model = parser.parse()
+        if parser.errors or parser.warnings:
+            parsers.ParserErrorDialog(parser).exec_()
+
+        if model:
+            self.set_model(model, filename)
+            Settings().setValue("LastPath", os.path.dirname(filename))
 
     @QtCore.pyqtSlot()
     def database_load_mapping(self):

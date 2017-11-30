@@ -12,20 +12,23 @@ class DuplicateDialog(CustomStandardDialog, Ui_Duplicates):
 
     This dialog is used for the display of potential duplicated
     model items in groups. The user is able to select a group
-    and merge the corresponding items by click. """
+    and merge the corresponding items by click.
+
+    Parameters
+    ----------
+    groups: list or dict,
+        Containing the groups of duplicated items
+    merge_function: func,
+        The function called in order to merge a group of functions
+    row_factory: func,
+        The function called for retrieving a row to add to the table
+    headers: list,
+        The headers used in the table
+    item_type: str,
+        Type of the items being displayed
+    """
 
     def __init__(self, groups, merge_function, row_factory, headers, item_type):
-        """ Setup dialog
-
-        Parameters
-        ----------
-        groups: list or dict, Containing the groups of duplicated items
-        merge_function: func, The function called in order to merge a group of functions
-        row_factory: func, The function called for retrieving a row to add to the table
-        headers: list, The headers used in the table
-        item_type: str, The type of the items being displayed
-        """
-
         super(DuplicateDialog, self).__init__()
         self.setupUi(self)
 

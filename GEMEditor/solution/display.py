@@ -249,6 +249,7 @@ class SolutionDialog(QDialog, Ui_SolutionDialog):
         self.tabWidget.addTab(ReactionTab(self), "Reactions")
         self.tabWidget.addTab(MetaboliteTab(self), "Metabolite")
         self.setWindowTitle("Solution")
+        self.setWindowFlags(Qt.Window)
         self.finished.connect(self.save_geometry)
 
         # Update display

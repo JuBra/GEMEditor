@@ -137,12 +137,11 @@ class TurnoverDialog(QDialog, Ui_TurnoverDialog):
             rates[reaction] = coeff * fluxes[reaction.id]
 
         for reaction, rate in sorted(rates.items(), key=lambda x: abs(x[1]), reverse=True):
-            percent_item, rate_item = QStandardItem(), QStandardItem()
+            percent_item, rate_item = QStandardItem(), QStandardItem(str(rate))
             try:
-                percent_item.setData('{:.2%}'.format(abs(rate/turnover)), role=2)
+                percent_item.setText('{:.2%}'.format(abs(rate/turnover)))
             except ZeroDivisionError:
-                percent_item.setData(0, role=2)
-            rate_item.setData(rate, role=2)
+                percent_item.setText(0)
 
             row = [percent_item, rate_item] + ReactionBaseTable.row_from_item(reaction)
 

@@ -376,6 +376,11 @@ class Model(QtCore.QObject, EvidenceLink, cobraModel):
             self.genes.add(gene)
             gene._model = self
 
+    def gem_add_metabolites(self, metabolites_list):
+        self.add_metabolites(metabolites_list)
+        for metabolite in metabolites_list:
+            self.QtMetaboliteTable.update_row_from_item(metabolite)
+
     def gem_update_metabolites(self, metabolites, progress=None):
         """ Update the metabolite entries in the QTable
 

@@ -1,7 +1,5 @@
 import logging
-
 import lxml.etree as ET
-from GEMEditor import use_progress
 from GEMEditor.model.classes.cobra import Compartment
 from GEMEditor.rw import *
 from GEMEditor.rw.compartment import add_compartments, parse_compartments
@@ -15,6 +13,7 @@ from GEMEditor.rw.reference import add_references, parse_references
 from GEMEditor.rw.units import add_unit_definitions
 from PyQt5.QtWidgets import QProgressDialog
 from lxml.etree import Element, register_namespace, ElementTree
+
 
 LOGGER = logging.getLogger(__name__)
 
@@ -69,16 +68,19 @@ def write_sbml3_model(path, model, progress=None):
     return sbml_node
 
 
-@use_progress
 def read_sbml3_model(path, progress):
+    """ Read SBML model
 
-    # Update progess dialog
-    if progress is not None:
-        progress.setMinimumDuration(0)
-        progress.setLabelText("Reading model...")
+    Parameters
+    ----------
+    path: str
+        Path to model file
+    progress: QProgressDialog
+        Progress dialog
+
+    """
 
     # Read file
-    LOGGER.debug("Reading file: {}".format(path))
     with open(path, "r", encoding="UTF-8") as open_file:
         tree = ET.parse(open_file)
 
@@ -110,4 +112,5 @@ def read_sbml3_model(path, progress):
         if x.compartment not in model.gem_compartments:
             model.gem_compartments[x.compartment] = Compartment(x.compartment, None)
 
+    model.setup_tables()
     return model
