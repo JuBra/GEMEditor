@@ -319,20 +319,6 @@ class TestMetaboliteTab:
         if user_response:
             assert len(model.metabolites) == model.QtMetaboliteTable.rowCount() == 2
 
-    @pytest.mark.usefixtures("patch_edit_dialog_true")
-    def test_add_item_dialog_accept(self):
-        tab = MetaboliteTab()
-        model = Model()
-        model.add_metabolites = Mock()
-        model.QtMetaboliteTable.update_row_from_item = Mock()
-        tab.set_model(model)
-
-        assert model.add_metabolites.called is False
-        assert model.QtMetaboliteTable.update_row_from_item.called is False
-        tab.addItemSlot()
-        assert model.add_metabolites.called is True
-        assert model.QtMetaboliteTable.update_row_from_item.called is True
-
     @pytest.mark.usefixtures("patch_edit_dialog_false")
     def test_add_item_dialog_reject(self):
         tab = MetaboliteTab()
@@ -346,20 +332,6 @@ class TestMetaboliteTab:
         tab.addItemSlot()
         assert model.add_metabolites.called is False
         assert model.QtMetaboliteTable.update_row_from_item.called is False
-
-    @pytest.mark.usefixtures("patch_edit_dialog_true")
-    def test_edit_item_dialog_accept(self):
-        tab = MetaboliteTab()
-        model = Model()
-        metabolite1 = Metabolite("m1")
-        model.add_metabolites([metabolite1])
-        model.setup_metabolite_table()
-        model.QtMetaboliteTable.update_row_from_link = Mock()
-        tab.set_model(model)
-        tab.dataView.selectRow(0)
-        assert model.QtMetaboliteTable.update_row_from_link.called is False
-        tab.editItemSlot()
-        assert model.QtMetaboliteTable.update_row_from_link.called is True
 
     @pytest.mark.usefixtures("patch_edit_dialog_false")
     def test_edit_item_dialog_reject(self):
