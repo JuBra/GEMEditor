@@ -105,8 +105,8 @@ class TestGetOriginalSettings:
 
 
 @pytest.fixture()
-def fluxes():
-    return {"r1": 10., "r2": 0.}
+def solution():
+    return LegacySolution(f=1., x_dict={"r1": 10., "r2": 0.}, status="optimal")
 
 
 @pytest.fixture()
@@ -171,9 +171,9 @@ class TestRunTest:
     def progress(self):
         return Mock(wasCanceled=Mock(return_value=False))
 
-    def test_outcomes(self, fluxes):
-        assert self.true_outcome1.check(fluxes) is True
-        assert self.false_outcome1.check(fluxes) is False
+    def test_outcomes(self, solution):
+        assert self.true_outcome1.check(solution.x_dict) is True
+        assert self.false_outcome1.check(solution.x_dict) is False
 
     @pytest.mark.usefixtures("mock_optimize")
     def test_mock(self):
@@ -196,7 +196,7 @@ class TestRunTest:
 
         results = run_tests((model_test,), Model(), progress)
         status, _ = results[model_test]
-        assert status is True
+        assert status is False
 
     @pytest.mark.usefixtures("mock_optimize")
     def test_run_test_false_outcome2(self, progress):
@@ -230,16 +230,6 @@ class TestRunTest:
         assert self.reaction1.upper_bound == self.r1_init_setting.upper_bound
         assert self.reaction1.lower_bound == self.r1_init_setting.lower_bound
         assert self.reaction1.objective_coefficient == self.r1_init_setting.objective_coefficient
-
-    @pytest.mark.usefixtures("mock_optimize", "mock_get_original_settings")
-    def test_restore_initial_get_original_not_called(self, progress):
-        assert GEMEditor.analysis.model_test._get_original_settings.called is False
-        model_test = ModelTest()
-        model_test.outcomes = [self.true_outcome1]
-
-        results = run_tests((model_test,), Model(), progress)
-        status, _ = results[model_test]
-        assert GEMEditor.analysis.model_test._get_original_settings.called is False
 
     @pytest.mark.usefixtures("mock_optimize")
     def test_restore_initial_get_original_called(self, mock_get_original_settings, progress):

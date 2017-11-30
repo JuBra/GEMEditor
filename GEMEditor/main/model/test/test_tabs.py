@@ -1,6 +1,5 @@
 import pytest
 import pandas as pd
-from cobra.core import Solution
 from unittest.mock import Mock
 from GEMEditor.main.model.tabs import *
 from GEMEditor.model.classes.cobra import Model

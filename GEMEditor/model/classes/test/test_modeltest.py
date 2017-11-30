@@ -69,7 +69,7 @@ class TestOutcomes:
 
         new_outcome = Outcome(reaction, value=0., operator="greater than")
         assert new_outcome.check(fluxes) is True
-        self.solution.x_dict = {reaction_id: 0.}
+        fluxes = {reaction_id: 0.}
         assert new_outcome.check(fluxes) is False
 
         new_outcome.operator = "less than"

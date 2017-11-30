@@ -88,7 +88,7 @@ def _run_single_test(model, testcase):
         setting.undo()
 
     # Check solution
-    if solution:
+    if solution and solution.status == "optimal":
         fluxes = fluxes_from_solution(solution)
         status = all([x.check(fluxes) for x in testcase.outcomes])
 

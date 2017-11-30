@@ -29,6 +29,7 @@ from PyQt5.QtCore import QStandardPaths, Qt
 from PyQt5.QtGui import QKeySequence
 from PyQt5.QtWidgets import QFileDialog, QMainWindow
 
+
 LOGGER = logging.getLogger(__name__)
 
 
