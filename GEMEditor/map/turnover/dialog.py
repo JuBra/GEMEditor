@@ -141,7 +141,7 @@ class TurnoverDialog(QDialog, Ui_TurnoverDialog):
             try:
                 percent_item.setText('{:.2%}'.format(abs(rate/turnover)))
             except ZeroDivisionError:
-                percent_item.setText(0)
+                percent_item.setText('0')
 
             row = [percent_item, rate_item] + ReactionBaseTable.row_from_item(reaction)
 
