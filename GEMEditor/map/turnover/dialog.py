@@ -42,6 +42,7 @@ class TurnoverDialog(QDialog, Ui_TurnoverDialog):
 
         # Setup data structures
         self.datatable = QStandardItemModel(self)
+        self.datatable.setHorizontalHeaderLabels(("%", "Rate") + ReactionBaseTable.header)
         self.dataView.setModel(self.datatable)
         self.dataView.setEditTriggers(QAbstractItemView.NoEditTriggers)
 
@@ -160,8 +161,6 @@ class TurnoverDialog(QDialog, Ui_TurnoverDialog):
         root.setChild(0, consuming)
         root.setChild(1, producing)
         root.setChild(2, inactive)
-
-        self.datatable.setHorizontalHeaderLabels(("%", "Rate")+ReactionBaseTable.header)
 
         # Expand consuming/producing node
         for item in (consuming, producing):
