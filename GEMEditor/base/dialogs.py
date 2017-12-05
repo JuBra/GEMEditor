@@ -97,11 +97,9 @@ class DataFrameDialog(QDialog, Ui_DataFrameDialog):
 
         self.datatable = QStandardItemModel(self)
         self.datatable.setColumnCount(dataframe.shape[1])
-        for idx in range(dataframe.shape[0]):
-            row = [dataitem(x) for x in dataframe.iloc[idx]]
-            self.datatable.appendRow(row)
-        self.datatable.setHorizontalHeaderLabels([x.title() for x in dataframe.axes[1]])
-        self.datatable.setVerticalHeaderLabels(list(dataframe.axes[0]))
+        for row in dataframe.itertuples(index=True):
+            self.datatable.appendRow([dataitem(x) for x in row])
+        self.datatable.setHorizontalHeaderLabels(["Index"]+[x.title() for x in dataframe.axes[1]])
         self.proxymodel = QSortFilterProxyModel(self)
         self.proxymodel.setSourceModel(self.datatable)
         self.tableView.setModel(self.proxymodel)
