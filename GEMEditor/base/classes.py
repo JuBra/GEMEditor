@@ -1,12 +1,12 @@
 import logging
-from PyQt5.QtWidgets import QProgressDialog
-from PyQt5.QtCore import QObject, pyqtSlot, QSettings
+from PyQt5 import QtCore, QtWidgets
 
 
 LOGGER = logging.getLogger(__name__)
 
 
-class ProgressDialog(QProgressDialog):
+class ProgressDialog(QtWidgets.QProgressDialog):
+
     def __init__(self, parent=None, title=None, label="", min=0, max=100, min_duration=500):
         super(ProgressDialog, self).__init__(parent)
         self.setWindowTitle(title)
@@ -28,7 +28,14 @@ class ProgressDialog(QProgressDialog):
         self.deleteLater()
 
 
-class Settings(QSettings):
+class Settings(QtCore.QSettings):
+    """ Access to program settings
+
+    This class used throughout the application
+    in order to log changes to the program
+    settings.
+
+    """
 
     def __init__(self, *args):
         super(Settings, self).__init__(*args)
@@ -44,10 +51,16 @@ class Settings(QSettings):
 
     def setValue(self, p_str, Any):
         super(Settings, self).setValue(p_str, Any)
-        LOGGER.debug("Setting '{0}{1!s}' changed to '{2!s:.100}'".format(self.prefix, p_str, Any))
+
+        # Do not log QByteArrays e.g. from header states
+        if isinstance(Any, QtCore.QByteArray):
+            msg = "Setting '{0}{1!s}' changed.".format(self.prefix, p_str)
+        else:
+            msg = "Setting '{0}{1!s}' changed to '{2!s:.100}'".format(self.prefix, p_str, Any)
+        LOGGER.debug(msg)
 
 
-class WindowManager(QObject):
+class WindowManager(QtCore.QObject):
     """ Manage dialog windows
 
     This class is intended for the management of
@@ -101,13 +114,14 @@ class WindowManager(QObject):
         -------
         None
         """
+        LOGGER.debug("Closing all dialogs.")
         for dialog in self.windows:
             # Remove c object before deleting dialog otherwise warnings
             # are thrown due to external deletion of object
             dialog.done(2)
             dialog.deleteLater()
 
-    @pyqtSlot()
+    @QtCore.pyqtSlot()
     def delete_dialog(self):
         """ Slot called by finished signal
 
