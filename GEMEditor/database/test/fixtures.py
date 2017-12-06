@@ -7,7 +7,7 @@ from GEMEditor.database.base import DatabaseWrapper
 def database(tmpdir_factory):
     path = tmpdir_factory.mktemp('data').join('database.db')
     path = str(path)
-    setup_empty_database(database_path=path)
+    setup_empty_database(path)
 
     # Create sesssion for adding information
     engine = create_engine('sqlite:///{}'.format(path))
