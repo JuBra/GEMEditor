@@ -1,5 +1,14 @@
 import pandas as pd
 from GEMEditor.base.dialogs import DataFrameDialog
+from PyQt5.QtWidgets import QApplication
+
+
+# Make sure to only start an application
+# if there is no active one. Opening multiple
+# applications will lead to a crash.
+app = QApplication.instance()
+if app is None:
+    app = QApplication([])
 
 
 class TestDataFrameDialog:
@@ -10,7 +19,7 @@ class TestDataFrameDialog:
         dialog = DataFrameDialog(df)
 
         assert dialog.datatable.rowCount() == 1
-        assert dialog.datatable.columnCount() == 2
-        assert dialog.datatable.horizontalHeaderItem(0).text() == "A"
-        assert dialog.datatable.horizontalHeaderItem(1).text() == "B"
-        assert dialog.datatable.verticalHeaderItem(0).text() == "Value"
+        assert dialog.datatable.columnCount() == 3
+        assert dialog.datatable.horizontalHeaderItem(0).text() == "Index"
+        assert dialog.datatable.horizontalHeaderItem(1).text() == "A"
+        assert dialog.datatable.horizontalHeaderItem(2).text() == "B"
