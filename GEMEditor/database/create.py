@@ -966,7 +966,7 @@ def create_database_de_novo(parent, database_path):
     """
 
     # Generate an empty database
-    if not setup_empty_database(parent, database_path):
+    if not setup_empty_database(database_path):
         return
 
     # Download files

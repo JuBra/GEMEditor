@@ -1,6 +1,5 @@
 import logging
 import os
-
 import GEMEditor.rw.sbml3 as sbml3
 import GEMEditor.rw.parsers as parsers
 from GEMEditor.analysis.duplicates import group_duplicate_reactions, get_duplicated_metabolites, factory_duplicate_dialog
@@ -26,7 +25,6 @@ from GEMEditor.model.edit.evidence import BatchEvidenceDialog
 from GEMEditor.model.edit.model import EditModelDialog
 from GEMEditor.model.edit.reference import PubmedBrowser
 from PyQt5 import QtCore
-from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QKeySequence
 from PyQt5.QtWidgets import QFileDialog, QMainWindow
 
@@ -44,7 +42,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.model_path = None
 
         # Thread pool for concurrent actions
-        self.thread_pool = QtCore.QThreadPool()
+        self.thread_pool = QtCore.QThreadPool.globalInstance()
 
         # Time regular update checks
         self.update_timer = QtCore.QTimer()
@@ -151,24 +149,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.update_window_title()
 
     @QtCore.pyqtSlot()
-    def open_test_model(self):
-        try:
-            from cobra.test import data_dir
-        except ImportError:
-            LOGGER.debug("Cobra path to test model not found.")
-            QMessageBox().warning(None, "Error", "Path to test model not found!")
-            return
-        else:
-            full_path = os.path.join(data_dir, "iJO1366.xml")
-            LOGGER.debug("Opening Testmodel at '{}'".format(full_path))
-            self.open_model(full_path)
-
-    @QtCore.pyqtSlot()
     def show_about(self):
         AboutDialog(self).exec_()
 
     @QtCore.pyqtSlot()
-    def open_model(self, filename=None):
+    def open_model(self, filename=None, save_path=True):
         """ Open model from file
 
         Parameters
@@ -176,6 +161,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         filename: str,
             Path to model file
 
+        save_path: bool,
+            Store path in settings
         """
         # Close existing model
         if not self.close_model():
@@ -203,9 +190,25 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if parser.errors or parser.warnings:
             parsers.ParserErrorDialog(parser).exec_()
 
+        # Store most recent path for next model opening
+        if model and save_path:
+            Settings().setValue("LastPath", os.path.dirname(filename))
+
         if model:
             self.set_model(model, filename)
-            Settings().setValue("LastPath", os.path.dirname(filename))
+
+    @QtCore.pyqtSlot()
+    def open_test_model(self):
+        try:
+            from cobra.test import data_dir
+        except ImportError:
+            LOGGER.debug("Cobra path to test model not found.")
+            QMessageBox().warning(None, "Error", "Path to test model not found!")
+            return
+        else:
+            full_path = os.path.join(data_dir, "iJO1366.xml")
+            LOGGER.debug("Opening Testmodel at '{}'".format(full_path))
+            self.open_model(full_path, save_path=False)
 
     @QtCore.pyqtSlot()
     def database_load_mapping(self):
