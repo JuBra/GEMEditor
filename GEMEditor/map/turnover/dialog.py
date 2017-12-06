@@ -42,6 +42,7 @@ class TurnoverDialog(QDialog, Ui_TurnoverDialog):
 
         # Setup data structures
         self.datatable = QStandardItemModel(self)
+        self.datatable.setHorizontalHeaderLabels(("%", "Rate") + ReactionBaseTable.header)
         self.dataView.setModel(self.datatable)
         self.dataView.setEditTriggers(QAbstractItemView.NoEditTriggers)
 
@@ -141,7 +142,7 @@ class TurnoverDialog(QDialog, Ui_TurnoverDialog):
             try:
                 percent_item.setText('{:.2%}'.format(abs(rate/turnover)))
             except ZeroDivisionError:
-                percent_item.setText(0)
+                percent_item.setText('0')
 
             row = [percent_item, rate_item] + ReactionBaseTable.row_from_item(reaction)
 
@@ -160,8 +161,6 @@ class TurnoverDialog(QDialog, Ui_TurnoverDialog):
         root.setChild(0, consuming)
         root.setChild(1, producing)
         root.setChild(2, inactive)
-
-        self.datatable.setHorizontalHeaderLabels(("%", "Rate")+ReactionBaseTable.header)
 
         # Expand consuming/producing node
         for item in (consuming, producing):

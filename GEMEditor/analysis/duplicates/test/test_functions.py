@@ -11,57 +11,73 @@ if app is None:
     app = QApplication([])
 
 
-def test_get_reaction_set_wo_directionality():
-    reaction = Reaction("React1")
-    metabolite1 = Metabolite("Met1")
-    metabolite2 = Metabolite("Met2")
-    stoichiometry = {metabolite1: -1,
-                     metabolite2: 1}
-    reaction.add_metabolites(stoichiometry)
-    assert get_reaction_set(reaction, remove_directionality=True) == \
-           frozenset([frozenset([(metabolite1, 1)]), frozenset([(metabolite2, 1)])])
+class Test_get_reaction_set:
+
+    def test_get_reaction_set_wo_directionality(self):
+        reaction = Reaction("React1")
+        metabolite1 = Metabolite("Met1")
+        metabolite2 = Metabolite("Met2")
+        stoichiometry = {metabolite1: -1,
+                         metabolite2: 1}
+        reaction.add_metabolites(stoichiometry)
+        assert get_reaction_set(reaction, remove_directionality=True) == \
+               frozenset([frozenset([(metabolite1, 1)]), frozenset([(metabolite2, 1)])])
+
+    def test_get_reaction_set_with_directionality(self):
+        reaction = Reaction("React1")
+        metabolite1 = Metabolite("Met1")
+        metabolite2 = Metabolite("Met2")
+        stoichiometry = {metabolite1: -1,
+                         metabolite2: 1}
+        reaction.add_metabolites(stoichiometry)
+        assert get_reaction_set(reaction, remove_directionality=False) == \
+               frozenset([frozenset([(metabolite1, -1)]), frozenset([(metabolite2, 1)])])
+
+    def test_match_for_different_directionality(self):
+        r1 = Reaction("r1")
+        r2 = Reaction("r2")
+        m1 = Metabolite("m1")
+        m2 = Metabolite("m2")
+        r1.add_metabolites({m1: -1, m2: 1})
+        r2.add_metabolites({m1: 1, m2: -1})
+
+        assert get_reaction_set(r1, remove_directionality=True) == \
+               get_reaction_set(r2, remove_directionality=True)
+
+        assert get_reaction_set(r1, remove_directionality=False) != \
+               get_reaction_set(r2, remove_directionality=False)
 
 
-def test_get_reaction_set_with_directionality():
-    reaction = Reaction("React1")
-    metabolite1 = Metabolite("Met1")
-    metabolite2 = Metabolite("Met2")
-    stoichiometry = {metabolite1: -1,
-                     metabolite2: 1}
-    reaction.add_metabolites(stoichiometry)
-    assert get_reaction_set(reaction, remove_directionality=False) == \
-           frozenset([frozenset([(metabolite1, -1)]), frozenset([(metabolite2, 1)])])
+class Test_group_duplicate_reactions:
 
+    def test_group_duplicate_reactions(self):
+        reaction1 = Reaction("React1")
+        reaction2 = Reaction("React2")
+        metabolite1 = Metabolite("Met1")
+        metabolite2 = Metabolite("Met2")
+        reaction1.add_metabolites({metabolite1: -1,
+                                   metabolite2: 1})
+        reaction2.add_metabolites({metabolite1: 1,
+                                   metabolite2: -1})
+        result = group_duplicate_reactions([reaction1, reaction2])
+        assert len(result) == 1
+        assert reaction1 in list(result.values())[0]
+        assert reaction2 in list(result.values())[0]
 
-def test_group_duplicate_reactions():
-    reaction1 = Reaction("React1")
-    reaction2 = Reaction("React2")
-    metabolite1 = Metabolite("Met1")
-    metabolite2 = Metabolite("Met2")
-    reaction1.add_metabolites({metabolite1: -1,
-                               metabolite2: 1})
-    reaction2.add_metabolites({metabolite1: 1,
-                               metabolite2: -1})
-    result = group_duplicate_reactions([reaction1, reaction2])
-    assert len(result) == 1
-    assert reaction1 in list(result.values())[0]
-    assert reaction2 in list(result.values())[0]
-
-
-def test_group_duplicates_reactions_different_reactions():
-    reaction1 = Reaction("React1")
-    reaction2 = Reaction("React2")
-    metabolite1 = Metabolite("Met1")
-    metabolite2 = Metabolite("Met2")
-    reaction1.add_metabolites({metabolite1: -1,
-                               metabolite2: 1})
-    reaction2.add_metabolites({metabolite1: 1,
-                               metabolite2: -2})
-    result = group_duplicate_reactions([reaction1, reaction2])
-    assert len(result) == 2
-    assert all(len(x) == 1 for x in itertools.chain(result.values()))
-    assert reaction1 in itertools.chain(*result.values())
-    assert reaction2 in itertools.chain(*result.values())
+    def test_group_duplicates_reactions_different_reactions(self):
+        reaction1 = Reaction("React1")
+        reaction2 = Reaction("React2")
+        metabolite1 = Metabolite("Met1")
+        metabolite2 = Metabolite("Met2")
+        reaction1.add_metabolites({metabolite1: -1,
+                                   metabolite2: 1})
+        reaction2.add_metabolites({metabolite1: 1,
+                                   metabolite2: -2})
+        result = group_duplicate_reactions([reaction1, reaction2])
+        assert len(result) == 2
+        assert all(len(x) == 1 for x in itertools.chain(result.values()))
+        assert reaction1 in itertools.chain(*result.values())
+        assert reaction2 in itertools.chain(*result.values())
 
 
 class Test_get_metabolites_same_compartment:

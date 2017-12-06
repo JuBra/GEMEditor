@@ -1,5 +1,6 @@
+import webbrowser
 from PyQt5.QtWidgets import QTableWidget, QTableWidgetItem, QMenu, QAction, QWidget, QAbstractItemView
-from PyQt5 import QtCore, QtGui
+from PyQt5 import QtCore
 from GEMEditor.base.ui.TableSearchWidget import Ui_StandardTab
 
 
@@ -52,9 +53,8 @@ class AnnotationTableWidget(QTableWidget):
 
     def open_in_browser(self):
         row = self.currentRow()
-        QtGui.QDesktopServices().openUrl(
-            QtCore.QUrl("http://identifiers.org/{collection}/{identifier}".format(collection=self.item(row, 0).text(),
-                                                                                  identifier=self.item(row, 1).text())))
+        webbrowser.open("http://identifiers.org/{0}/{1}".format(self.item(row, 0).text(),
+                                                                self.item(row, 1).text()))
 
 
 class SearchTableWidget(QWidget, Ui_StandardTab):

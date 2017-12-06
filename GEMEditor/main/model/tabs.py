@@ -15,7 +15,7 @@ from GEMEditor.model.edit.metabolite import MetaboliteEditDialog
 from GEMEditor.model.edit.modeltest import EditModelTestDialog
 from GEMEditor.model.edit.reaction import ReactionInputDialog, SetFluxValueDialog
 from GEMEditor.model.edit.reference import ReferenceEditDialog
-from GEMEditor.solution.base import status_objective_from_solution, set_objective_to_label, set_status_to_label
+from GEMEditor.solution.base import status_objective_from_solution, set_objective_to_label, set_status_to_label, fluxes_from_solution
 from GEMEditor.solution.display import SolutionDialog
 from PyQt5 import QtCore, QtGui
 from PyQt5.QtCore import QSortFilterProxyModel, QSize
@@ -108,6 +108,9 @@ class StandardTab(QWidget, Ui_StandardTab):
             self.copySelectionToClipboard()
         elif event.matches(QtGui.QKeySequence.Delete):
             self.deleteItemSlot()
+        elif event.matches(QtGui.QKeySequence.Find):
+            self.searchInput.selectAll()
+            self.searchInput.setFocus(QtCore.Qt.ShortcutFocusReason)
         QWidget.keyPressEvent(self, event)
 
     def copySelectionToClipboard(self):
@@ -834,17 +837,16 @@ class AnalysesTab(QWidget, Ui_AnalysisTab):
 
     @QtCore.pyqtSlot()
     def run_analysis(self):
-        if not self.model.objective:
-            QMessageBox.critical(self, self.tr("Error in objective values"),
-                                 self.tr("The objective value of all reactions is 0!\nPlease specify the reactions to optimize for."),
-                                 QMessageBox.Ok)
-
-        selected_analysis = self.combo_analysis.currentText()
-        selected_solver = self.combo_solver.currentText()
-        self.analyses[selected_analysis](selected_solver)
+        if not self.model.objective.expression:
+            QMessageBox.warning(self, "Warning",
+                                "The objective values of all reactions are 0.", QMessageBox.Ok)
+        else:
+            selected_analysis = self.combo_analysis.currentText()
+            selected_solver = self.combo_solver.currentText()
+            self.analyses[selected_analysis](selected_solver)
 
     def run_flux_balance_analysis(self, selected_solver):
-        solution = self.model.optimize(solver=selected_solver)
+        solution = self.model.optimize()
         self.add_solution(solution)
 
     def run_loopless(self, selected_solver):
@@ -852,7 +854,7 @@ class AnalysesTab(QWidget, Ui_AnalysisTab):
         self.add_solution(solution)
 
     def run_parsimonous(self, selected_solver):
-        solution = pfba(self.model, solver=selected_solver)
+        solution = pfba(self.model)
         self.add_solution(solution)
 
     def run_single_gene_deletion(self, selected_solver):
@@ -993,11 +995,27 @@ class ModelInfoTab(QWidget, Ui_model_stats_tab):
 
 
 class SolutionWidget(QWidget, Ui_SolutionTableWidget):
+    """ Widget used to display a solution entry
+
+    This widget is used to display the solutions
+    in a list of the AnalysisTab. The entry shows
+    the status of the solution as well as the
+    objective value. Two buttons are displayed:
+
+    1) Open solution dialog
+    2) Plot solution in open map dialogs
+
+    """
 
     def __init__(self, solution=None):
         super(SolutionWidget, self).__init__()
         self.setupUi(self)
         self.solution = solution
+
+        # Add tooltips to buttons
+        self.button_open_solution_map.setToolTip("Update open map dialogs with solution")
+        self.button_open_solution_table.setToolTip("Open solution dialog")
+
         self.update_display()
 
     def update_display(self):

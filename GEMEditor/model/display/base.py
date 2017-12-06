@@ -1,3 +1,4 @@
+import webbrowser
 from GEMEditor.base.ui.TableDisplayWidgetAddDel import Ui_TableDisplayWidgetAddDel
 from GEMEditor.base.widgets import TableDisplayWidget
 from GEMEditor.model.classes.evidence import Evidence
@@ -7,7 +8,7 @@ from GEMEditor.model.display.ui.SettingDisplayWiget import Ui_SettingsDisplayWid
 from GEMEditor.model.edit.annotation import EditAnnotationDialog
 from GEMEditor.model.edit.evidence import EditEvidenceDialog
 from GEMEditor.model.selection import ReferenceSelectionDialog
-from PyQt5 import QtCore, QtGui
+from PyQt5 import QtCore
 from PyQt5.QtWidgets import QMenu, QAction, QWidget, QAbstractItemView
 
 
@@ -69,7 +70,7 @@ class AnnotationDisplayWidget(TableDisplayWidget, Ui_TableDisplayWidgetAddDel):
         selected_rows = self.dataView.get_selected_rows()
         for row in selected_rows:
             item = self.dataTable.item(row).link
-            QtGui.QDesktopServices.openUrl(QtCore.QUrl("http://identifiers.org/{0}/{1}".format(item.collection, item.identifier)))
+            webbrowser.open("http://identifiers.org/{0}/{1}".format(item.collection, item.identifier))
 
     @property
     def content_changed(self):

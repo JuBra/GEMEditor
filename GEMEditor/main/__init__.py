@@ -231,6 +231,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if self.model is None:
             return True
         elif self.check_model_closing():
+            LOGGER.debug("Closing model..")
             self.save_table_headers()
             self.model.close()
             self.set_model(None, None)

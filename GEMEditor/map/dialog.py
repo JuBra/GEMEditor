@@ -150,7 +150,7 @@ class MapDisplayWidget(QWidget):
         """
 
         fluxes = fluxes_from_solution(solution)
-        self.update_map(reaction_data=fluxes)
+        self.update_map(reaction_data=dict(fluxes))
 
     def set_gene_data(self, gene_data):
         self.update_map(gene_data=gene_data)
