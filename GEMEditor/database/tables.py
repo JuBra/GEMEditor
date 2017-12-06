@@ -120,6 +120,10 @@ class PathwayItem(Base):
 def setup_empty_database(path):
     """ Setup an empty database
 
+    Create an empty database containing all relevant resources.
+    The resulting database is populated using the information
+    from MetaNetX.
+
     Parameters
     ----------
     path: str
@@ -150,7 +154,7 @@ def setup_empty_database(path):
     Base.metadata.create_all(engine)
     Session = sessionmaker(bind=engine)
 
-    # Setup tables
+    # Load all resources
     session = Session()
     for database in miriam_databases:
         session.add(Resource(use_resource=True, **database._asdict()))

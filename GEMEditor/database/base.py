@@ -1,7 +1,6 @@
 import logging
 import os
 import sqlite3
-
 from GEMEditor.base.classes import Settings
 from GEMEditor.database import database_path as DB_PATH
 from GEMEditor.database.ui import Ui_MetaboliteEntryDisplayWidget, Ui_ReactionEntryDisplayWidget
@@ -338,7 +337,6 @@ class DatabaseWrapper:
     def store_database_path(database_path):
         settings = Settings()
         settings.setValue("DATABASE_PATH", database_path)
-        LOGGER.debug("Database path changed to: {0!s}".format(database))
         settings.sync()
 
     @staticmethod
@@ -582,11 +580,6 @@ def pyqt_database_connection(database_path=None):
     db.setDatabaseName(database_path)
     db.setConnectOptions("QSQLITE_OPEN_READONLY=1")
     return db
-
-
-if __name__ == '__main__':
-    with DatabaseWrapper() as database:
-        print(database.get_reaction_id_from_participant_ids([5, 6]))
 
 
 
