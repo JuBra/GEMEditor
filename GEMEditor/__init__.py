@@ -65,14 +65,9 @@ DB_GET_REACT_NAME = True
 DB_GET_FL_AND_CH = True
 
 
-# Values stored in settings #
-
-# Version number the user does not want to update to.
-# Do not inform the user if the latest version on pypi has this number
-VERSION_IGNORED = "IgnoreVersion"
-
-
 def log_package_versions():
+    """ Log the versions of all dependencies """
+
     global VERSIONS_LOGGED
 
     if not VERSIONS_LOGGED:

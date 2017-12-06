@@ -40,7 +40,7 @@ app.setApplicationName(app_name)
 @pytest.fixture()
 def no_update_check(monkeypatch):
     # Prevent main window of checking if a new version is available
-    monkeypatch.setattr("GEMEditor.main.MainWindow._check_updates", Mock())
+    monkeypatch.setattr("GEMEditor.main.MainWindow.check_updates", Mock())
 
 
 @pytest.fixture()
