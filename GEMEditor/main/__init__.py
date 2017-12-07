@@ -489,8 +489,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def closeEvent(self, event):
         if self.close_model():
-            self.update_timer.stop()
             LOGGER.debug("Update timer stopped.")
             event.accept()
         else:
             event.ignore()
+
+    def __del__(self):
+        self.update_timer.stop()
