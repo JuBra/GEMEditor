@@ -1,7 +1,6 @@
 import logging
-from collections import defaultdict
-
 import escher
+from collections import defaultdict
 from GEMEditor.base.classes import Settings
 from GEMEditor.base.functions import convert_to_bool
 from GEMEditor.map.base import ESCHER_GET_HTML_OPTIONS
@@ -14,6 +13,7 @@ from PyQt5.QtCore import pyqtSlot, Qt
 from PyQt5.QtGui import QStandardItemModel, QStandardItem
 from PyQt5.QtWebEngineWidgets import QWebEngineSettings, QWebEnginePage
 from PyQt5.QtWidgets import QDialog, QAbstractItemView
+
 
 LOGGER = logging.getLogger(__name__)
 
