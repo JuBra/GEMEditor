@@ -92,4 +92,8 @@ def log_package_versions():
         for pkg, version in sorted(packages.items()):
             LOGGER.info("{0} version: {1!s}".format(pkg, version))
 
+        # Log threadpool size
+        pool = QtCore.QThreadPool.globalInstance()
+        LOGGER.info("Max available threads: {0!s}".format(pool.maxThreadCount()))
+
         VERSIONS_LOGGED = True
