@@ -1,6 +1,5 @@
 import logging
 import os
-
 import GEMEditor.rw.sbml3 as sbml3
 import GEMEditor.rw.parsers as parsers
 from GEMEditor.analysis.duplicates import group_duplicate_reactions, get_duplicated_metabolites, factory_duplicate_dialog
@@ -25,7 +24,7 @@ from GEMEditor.model.classes.cobra import Model, prune_gene_tree
 from GEMEditor.model.edit.evidence import BatchEvidenceDialog
 from GEMEditor.model.edit.model import EditModelDialog
 from GEMEditor.model.edit.reference import PubmedBrowser
-from PyQt5.QtCore import QStandardPaths, Qt
+from PyQt5 import QtCore
 from PyQt5.QtGui import QKeySequence
 from PyQt5.QtWidgets import QFileDialog, QMainWindow
 
@@ -38,13 +37,21 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def __init__(self, parent=None):
         super(MainWindow, self).__init__(parent)
         self.setupUi(self)
-        self.thread = None
-        self.worker = None
+
         self.model = None
         self.model_path = None
 
-        # Check if there is a new version of the software
-        self._check_updates()
+        # Thread pool for concurrent actions
+        self.thread_pool = QtCore.QThreadPool.globalInstance()
+
+        # Time regular update checks
+        self.update_timer = QtCore.QTimer()
+        self.update_timer.timeout.connect(self.check_updates)
+        self.update_timer.start(900000)  # Check every 15 min
+
+        # Run update check
+        self.check_updates()
+
         # Create all widgets, layouts and connects
         self._create_connections()
         # Set initial state of editor
@@ -107,14 +114,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # Debugging class
         LOGGER.debug("MainWindow menu signals connected.")
 
-    def _check_updates(self):
-        self.thread = QtCore.QThread()
-        self.worker = UpdateCheck()
-        self.worker.moveToThread(self.thread)
-        self.thread.started.connect(self.worker.check_for_updates)
-        self.worker.new_version.connect(self.show_new_version_dialog)
-        self.worker.finished.connect(self.thread.quit)
-        self.thread.start()
+    def check_updates(self):
+        """ Check for updates of GEMEditor """
+        worker = UpdateCheck()
+        worker.signals.new_version.connect(self.show_new_version_dialog)
+        self.thread_pool.start(worker)
 
     def set_model(self, model, path):
         self.model = model
@@ -145,24 +149,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.update_window_title()
 
     @QtCore.pyqtSlot()
-    def open_test_model(self):
-        try:
-            from cobra.test import data_dir
-        except ImportError:
-            LOGGER.debug("Cobra path to test model not found.")
-            QMessageBox().warning(None, "Error", "Path to test model not found!")
-            return
-        else:
-            full_path = os.path.join(data_dir, "iJO1366.xml")
-            LOGGER.debug("Opening Testmodel at '{}'".format(full_path))
-            self.open_model(full_path)
-
-    @QtCore.pyqtSlot()
     def show_about(self):
         AboutDialog(self).exec_()
 
     @QtCore.pyqtSlot()
-    def open_model(self, filename=None):
+    def open_model(self, filename=None, save_path=True):
         """ Open model from file
 
         Parameters
@@ -170,6 +161,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         filename: str,
             Path to model file
 
+        save_path: bool,
+            Store path in settings
         """
         # Close existing model
         if not self.close_model():
@@ -197,29 +190,45 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if parser.errors or parser.warnings:
             parsers.ParserErrorDialog(parser).exec_()
 
+        # Store most recent path for next model opening
+        if model and save_path:
+            Settings().setValue("LastPath", os.path.dirname(filename))
+
         if model:
             self.set_model(model, filename)
-            Settings().setValue("LastPath", os.path.dirname(filename))
+
+    @QtCore.pyqtSlot()
+    def open_test_model(self):
+        try:
+            from cobra.test import data_dir
+        except ImportError:
+            LOGGER.debug("Cobra path to test model not found.")
+            QMessageBox().warning(None, "Error", "Path to test model not found!")
+            return
+        else:
+            full_path = os.path.join(data_dir, "iJO1366.xml")
+            LOGGER.debug("Opening Testmodel at '{}'".format(full_path))
+            self.open_model(full_path, save_path=False)
 
     @QtCore.pyqtSlot()
     def database_load_mapping(self):
-        filename, _ = QFileDialog.getOpenFileName(self, self.tr("Open mapping"), "",
-                                                  self.tr("Json files (*.json)"))
+        filename, _ = QFileDialog.getOpenFileName(self, "Open mapping", "",
+                                                  "Json files (*.json)")
         load_mapping(self.model, filename)
 
     @QtCore.pyqtSlot()
     def database_save_mapping(self):
-        filename, _ = QFileDialog.getSaveFileName(self, self.tr("Save Model"), "",
-                                                  self.tr("Json files (*.json)"))
+        filename, _ = QFileDialog.getSaveFileName(self, "Save mapping", "",
+                                                  "Json files (*.json)")
         store_mapping(self.model, filename)
 
     @QtCore.pyqtSlot()
     def save_model(self):
         settings = Settings()
-        last_path = settings.value("LastPath") or QStandardPaths.DesktopLocation or None
-        filename, filter = QFileDialog.getSaveFileName(self, self.tr("Save Model"), last_path,
-                                                       self.tr("Sbml files (*.xml *.sbml)"))
-        if filename.endswith(".xml"):
+        last_path = settings.value("LastPath")
+        filename, filter = QFileDialog.getSaveFileName(None, "Save Model", last_path,
+                                                       "Sbml files (*.xml *.sbml)")
+        if filename:
             sbml3.write_sbml3_model(filename, self.model)
             settings.setValue("LastPath", os.path.dirname(filename))
             # Set path to saved path
@@ -287,16 +296,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.setWindowTitle(app_name)
 
     @QtCore.pyqtSlot()
-    def show_new_version_dialog(self):
-        # Get the current version from the CheckUpdate Thread
-        try:
-            current_version = self.sender().current_version
-        except AttributeError:
-            LOGGER.warning("Error fetching current version from worker!")
-            return
-
-        # Show update dialog
-        dialog = UpdateAvailableDialog(current_version, parent=self)
+    def show_new_version_dialog(self, new_version):
+        dialog = UpdateAvailableDialog(new_version)
         if not dialog.version_is_ignored():
             dialog.exec_()
 
@@ -321,17 +322,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     @QtCore.pyqtSlot()
     def model_show_statistics(self):
-        # Run the statistics
-        progress = QProgressDialog()
-        progress.setWindowTitle("Statistics")
-        progress.setLabelText("Running stats..")
-        QApplication.processEvents()
-        model_stats = run_all_statistics(self.model, progress)
-        progress.close()
+        with ProgressDialog(self, "Statistics", "Running stats..") as progress:
+            model_stats = run_all_statistics(self.model, progress)
 
         # Display results
-        dialog = DisplayStatisticsDialog(model_stats)
-        dialog.exec_()
+        DisplayStatisticsDialog(model_stats).exec_()
 
     @QtCore.pyqtSlot()
     def database_update_mapping(self):
@@ -459,12 +454,12 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     @QtCore.pyqtSlot()
     def map_show_list(self):
-        if self.model is not None:
+        if self.model:
             MapListDialog(None, self.model).exec_()
 
     @QtCore.pyqtSlot()
     def check_all_evidences(self):
-        if self.model is not None:
+        if self.model:
             DialogEvidenceStatus(self.model).exec_()
 
     @QtCore.pyqtSlot()
@@ -481,8 +476,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     @QtCore.pyqtSlot()
     def add_batch_evidences(self):
         if self.model:
-            dialog = BatchEvidenceDialog(self.model, self)
-            dialog.exec_()
+            BatchEvidenceDialog(self.model, self).exec_()
 
     def check_model_closing(self):
         close_msg = "Are you sure you want to close the model and discard changes?"
@@ -493,24 +487,12 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         else:
             return False
 
-    def trigger_experimental_feature(self):
-        LOGGER.debug("Experimental feature triggered")
-
-    def keyPressEvent(self, event):
-
-        LOGGER.debug(str(event.modifiers()))
-
-        if event.key() == Qt.Key_E and event.modifiers() == Qt.ControlModifier:
-            LOGGER.debug("Triggering experimental feature.")
-            self.trigger_experimental_feature()
-        else:
-            LOGGER.debug("Calling super")
-            # Calling super version
-            super(MainWindow, self).keyPressEvent(event)
-
     def closeEvent(self, event):
-        # Save the column width of the individual tabs
         if self.close_model():
+            LOGGER.debug("Update timer stopped.")
             event.accept()
         else:
             event.ignore()
+
+    def __del__(self):
+        self.update_timer.stop()

@@ -9,33 +9,42 @@ from GEMEditor import __versionlookup__, __version__
 LOGGER = logging.getLogger(__name__)
 
 
-class UpdateCheck(QtCore.QObject):
-    """ Check for updates of GEM Editor in a secondary thread to not block gui
+class Signals(QtCore.QObject):
+    """ Container for signals
 
-        finished is emitted if either the check is done or there has been an error
-        new_version is emitted if a new version has been found
+    QRunnable is not derived from QObject
+    and therefore can not have signals
+
     """
 
-    finished = QtCore.pyqtSignal()
-    new_version = QtCore.pyqtSignal()
+    new_version = QtCore.pyqtSignal(str)
 
     def __init__(self):
-        QtCore.QObject.__init__(self)
-        self.current_version = None
+        super(Signals, self).__init__()
 
-    @QtCore.pyqtSlot()
-    def check_for_updates(self):
+
+class UpdateCheck(QtCore.QRunnable):
+    """ Worker to be run in a QThreadpool
+
+        Checks if a new version of GEMEditor
+        is available.
+
+    """
+
+    def __init__(self, *args):
+        super(UpdateCheck, self).__init__(*args)
+        self.signals = Signals()
+
+    def run(self):
         LOGGER.debug("Checking for updates..")
         # Check if there is a new version
         try:
             url_object = urlopen(__versionlookup__)
         except HTTPError:
             LOGGER.exception("Check for Update unsuccessful:")
-            self.finished.emit()
             return
         except URLError:
             LOGGER.debug("Check for updates failed. No internet connection?")
-            self.finished.emit()
             return
 
         # Read config file
@@ -45,14 +54,12 @@ class UpdateCheck(QtCore.QObject):
         config.read_string(url_data)
 
         # Get version in Git repository
-        self.current_version = config.get("DEFAULT", "version")
-        LOGGER.debug("Remote version: {0!s}".format(self.current_version))
+        current_version = config.get("DEFAULT", "version")
+        LOGGER.debug("Remote version: {0!s}".format(current_version))
         LOGGER.debug("Local version: {0!s}".format(__version__))
 
-        if StrictVersion(self.current_version) > StrictVersion(__version__):
+        if StrictVersion(current_version) > StrictVersion(__version__):
             LOGGER.info("A new version is available!")
-            self.new_version.emit()
+            self.signals.new_version.emit(current_version)
         else:
             LOGGER.debug("Installation is up-to-date!")
-
-        self.finished.emit()

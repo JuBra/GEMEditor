@@ -383,6 +383,7 @@ class GenesDisplayWidget(QWidget, Ui_GenesDisplayWidget):
 
         new_item = LinkedItem(text=gene.id,
                               link=gene)
+        new_item.setEditable(False)
         table_item.appendRow(new_item)
         self.cached_actions.append((model_item, "addition", gene))
         self.changed.emit()
@@ -396,7 +397,7 @@ class GenesDisplayWidget(QWidget, Ui_GenesDisplayWidget):
         new_group = GeneGroup()
         new_item = LinkedItem(text=str(new_group.type).upper(),
                               link=new_group)
-
+        new_item.setEditable(False)
         table_item.appendRow(new_item)
 
         # Buffer the function call for when user accepts dialog

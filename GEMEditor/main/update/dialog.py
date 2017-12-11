@@ -1,15 +1,15 @@
+import webbrowser
 from PyQt5.QtWidgets import QDialog, QDialogButtonBox
-from PyQt5.QtGui import QDesktopServices
-from PyQt5.QtCore import QUrl, pyqtSlot
-from GEMEditor import __projectpage__, VERSION_IGNORED
+from PyQt5.QtCore import pyqtSlot
+from GEMEditor import __projectpage__
 from GEMEditor.main.update.ui import Ui_UpdateAvailableDialog
 from GEMEditor.base.classes import Settings
 
 
 class UpdateAvailableDialog(QDialog, Ui_UpdateAvailableDialog):
 
-    def __init__(self, latest_version, parent=None):
-        super(UpdateAvailableDialog, self).__init__(parent)
+    def __init__(self, latest_version):
+        super(UpdateAvailableDialog, self).__init__()
         self.setupUi(self)
         self.status = None
         self.latest_version = latest_version
@@ -17,20 +17,16 @@ class UpdateAvailableDialog(QDialog, Ui_UpdateAvailableDialog):
 
         # Connect buttons
         self.buttonBox.button(QDialogButtonBox.Yes).clicked.connect(self.open_project_page)
-        self.buttonBox.button(QDialogButtonBox.No).clicked.connect(self.store_ignore_version)
+        self.buttonBox.button(QDialogButtonBox.No).clicked.connect(self.ignore_version)
 
     @pyqtSlot()
-    def store_ignore_version(self):
+    def ignore_version(self):
         if self.checkBox.isChecked():
-            settings = Settings()
-            settings.setValue(VERSION_IGNORED, self.latest_version)
-            settings.sync()
+            Settings().setValue("IgnoreVersion", self.latest_version)
 
     @pyqtSlot()
     def open_project_page(self):
-        QDesktopServices.openUrl(QUrl(__projectpage__))
+        webbrowser.open(__projectpage__)
 
     def version_is_ignored(self):
-        settings = Settings()
-        return self.latest_version == settings.value(VERSION_IGNORED)
-
+        return Settings().value("IgnoreVersion") == self.latest_version

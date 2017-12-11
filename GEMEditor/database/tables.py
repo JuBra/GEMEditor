@@ -1,10 +1,13 @@
+import logging
 import os.path
 from PyQt5.QtWidgets import QMessageBox, QDialogButtonBox
 from GEMEditor.database import miriam_databases
-from GEMEditor.database.base import DatabaseWrapper
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import create_engine, Column, String, Integer, Float, ForeignKey, Boolean
 from sqlalchemy.orm import sessionmaker
+
+
+LOGGER = logging.getLogger(__name__)
 
 
 Base = declarative_base()
@@ -114,57 +117,47 @@ class PathwayItem(Base):
     reaction_id = Column(Integer, ForeignKey("reactions.id"))
 
 
-def setup_resources(session):
-    """ Setup the resource tables in the database
+def setup_empty_database(path):
+    """ Setup an empty database
+
+    Create an empty database containing all relevant resources.
+    The resulting database is populated using the information
+    from MetaNetX.
 
     Parameters
     ----------
-    session: sqlalchemy.Session
+    path: str
+        Path of the database file
 
     Returns
     -------
-    None
+    bool
+        True if database could be created, False otherwise
+
     """
-    for database in miriam_databases:
-        new_resource = Resource(name=database.name,
-                                miriam_collection=database.miriam_collection,
-                                validator=database.validator,
-                                mnx_prefix=database.mnx_prefix,
-                                type=database.type,
-                                use_resource=True)
-        session.add(new_resource)
-    session.commit()
-
-
-def setup_empty_database(parent=None, database_path=None):
-
-    if database_path is None:
-        database_path = DatabaseWrapper.get_database_path()
 
     # Database already exists
-    if os.path.isfile(database_path):
-        status = QMessageBox().question(parent, "Database found",
-                                        "It seems like there is already a database present.\n"
-                                        "Would you like to delete the old database and generate a new one?")
-        if status == QDialogButtonBox.No:
+    if os.path.isfile(path):
+        reply = QMessageBox().question(None, "Warning", "{} exists already.\nDo you want to override it?".format(path))
+        if reply != QDialogButtonBox.Yes:
             return False
-        elif status == QDialogButtonBox.Yes:
-            try:
-                os.remove(database_path)
-            except OSError:
-                QMessageBox().critical(parent, "Error deleting database",
-                                       "Could not remove the existing database. Is it currently in use?")
-                return False
-        else:
-            raise ValueError("Unknown status from question messagebox")
+
+        try:
+            os.remove(path)
+        except:
+            LOGGER.debug("Could not remove existing database:", exc_info=True)
+            QMessageBox().critical(None, "Error", "Could not remove the existing database. Is it currently in use?")
+            return False
 
     # Setup the database engine
-    engine = create_engine('sqlite:///{}'.format(database_path))
+    engine = create_engine('sqlite:///{}'.format(path))
     Base.metadata.create_all(engine)
     Session = sessionmaker(bind=engine)
-    session = Session()
 
-    # Create tables
-    setup_resources(session)
+    # Load all resources
+    session = Session()
+    for database in miriam_databases:
+        session.add(Resource(use_resource=True, **database._asdict()))
+    session.commit()
     session.close()
     return True

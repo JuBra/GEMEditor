@@ -1,7 +1,7 @@
 import logging
 from PyQt5 import QtCore
-from PyQt5.QtWidgets import QApplication, QInputDialog, QWidget, QMessageBox, QDialogButtonBox, QDialog, QHBoxLayout, QCheckBox, QVBoxLayout, QTabWidget, QPushButton, QGroupBox, QProgressDialog
-from PyQt5.QtSql import QSqlQuery, QSqlQueryModel, QSql
+from PyQt5.QtWidgets import QInputDialog, QWidget, QMessageBox, QDialogButtonBox, QDialog, QHBoxLayout, QCheckBox, QVBoxLayout, QTabWidget, QPushButton
+from PyQt5.QtSql import QSqlQueryModel
 from collections import OrderedDict
 from GEMEditor.base.functions import generate_copy_id, invert_mapping, get_annotation_to_item_map, convert_to_bool
 from GEMEditor.base.dialogs import DialogMapCompartment, CustomStandardDialog

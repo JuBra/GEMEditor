@@ -11,7 +11,8 @@ def get_turnover(fluxes, metabolite):
 
     Returns
     -------
-    float
+    float:
+        Turnover of the metabolite
     """
     sum_rates = 0
 
@@ -19,7 +20,7 @@ def get_turnover(fluxes, metabolite):
         rate = fluxes[reaction.id] * reaction.metabolites[metabolite]
         sum_rates += abs(rate)
 
-    return sum_rates / 2
+    return float(sum_rates / 2)
 
 
 def get_yields(fluxes, model):
