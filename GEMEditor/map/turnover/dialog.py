@@ -2,14 +2,13 @@ import logging
 import escher
 from collections import defaultdict
 from GEMEditor.base.classes import Settings
-from GEMEditor.base.functions import convert_to_bool
 from GEMEditor.map.base import ESCHER_GET_HTML_OPTIONS
 from GEMEditor.map.turnover.generate import setup_turnover_map
 from GEMEditor.map.turnover.ui import Ui_TurnoverDialog
 from GEMEditor.model.display.tables import ReactionBaseTable
 from GEMEditor.solution.analysis import get_turnover
 from GEMEditor.solution.base import fluxes_from_solution
-from PyQt5.QtCore import pyqtSlot, Qt
+from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QStandardItemModel, QStandardItem
 from PyQt5.QtWebEngineWidgets import QWebEngineSettings, QWebEnginePage
 from PyQt5.QtWidgets import QDialog, QAbstractItemView
@@ -54,7 +53,6 @@ class TurnoverDialog(QDialog, Ui_TurnoverDialog):
         self.mapView.settings().setAttribute(QWebEngineSettings.LocalContentCanAccessFileUrls, True)
 
         # Connect signals/slots
-        self.checkBox_hide_inactive.stateChanged.connect(self.refresh_map)
         self.finished.connect(self.save_settings)
 
         # Restore settings
@@ -65,23 +63,17 @@ class TurnoverDialog(QDialog, Ui_TurnoverDialog):
         self.solution = solution
 
         if metabolite:
-            self.refresh_map(self.checkBox_hide_inactive.isChecked())
+            self._refresh_map()
             self._populate_tree()
             self.setWindowTitle("{0!s} turnover".format(metabolite.id))
 
-    @pyqtSlot(int, name="refresh_map")
-    def refresh_map(self, hide_inactive):
+    def _refresh_map(self):
         """ Refresh the map being displayed
 
         Generate a map from the set solution
         and metabolite. Only display those
         reactions that are active in the set
         solution if hide_active is set.
-
-        Parameters
-        ----------
-        hide_inactive: bool,    True if only show active reactions
-                                False otherwise
 
         Returns
         -------
@@ -97,12 +89,10 @@ class TurnoverDialog(QDialog, Ui_TurnoverDialog):
         fluxes = None
 
         # Change settings according to state
-        if self.solution and hide_inactive:
+        if self.solution:
             fluxes = dict(fluxes_from_solution(self.solution))
             reactions = [r for r in self.metabolite.reactions
                          if r.id in fluxes and fluxes[r.id] > 0]
-        elif self.solution:
-            fluxes = dict(fluxes_from_solution(self.solution))
 
         # Generate escher turnover map
         map_json = setup_turnover_map(self.metabolite, reactions)
@@ -177,10 +167,6 @@ class TurnoverDialog(QDialog, Ui_TurnoverDialog):
         settings = Settings()
         settings.beginGroup(self.__class__.__name__)
 
-        # Hide inactive checkbox
-        hide_inactive = convert_to_bool(settings.value("HideInactive", True))
-        self.checkBox_hide_inactive.setChecked(hide_inactive)
-
         # Table header
         header_state = settings.value("TableHeader")
         if header_state is not None:
@@ -198,7 +184,6 @@ class TurnoverDialog(QDialog, Ui_TurnoverDialog):
 
         settings.endGroup()
 
-    @pyqtSlot(name="save_settings")
     def save_settings(self):
         """ Store dialog geometry in settings
 
@@ -209,7 +194,6 @@ class TurnoverDialog(QDialog, Ui_TurnoverDialog):
 
         settings = Settings()
         settings.beginGroup(self.__class__.__name__)
-        settings.setValue("HideInactive", bool(self.checkBox_hide_inactive.isChecked()))
         settings.setValue("SplitterState", self.splitter.saveState())
         settings.setValue("TableHeader", self.dataView.header().saveState())
         settings.setValue("DialogGeometry", self.saveGeometry())
