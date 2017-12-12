@@ -9,7 +9,7 @@ from GEMEditor.model.display.tables import MetaboliteTable
 from GEMEditor.solution.base import status_objective_from_solution, set_objective_to_label, set_status_to_label, \
     shadow_prices_from_solution
 from GEMEditor.solution.ui import Ui_SearchTab, Ui_SolutionDialog
-from GEMEditor.solution.tables import FBATable, FBAProxy, FVATable, FVAProxy, ReactionDeletionTable, DeletionProxy
+from GEMEditor.solution.tables import FBATable, FBAProxy, FVATable, FVAProxy, ReactionDeletionTable, DeletionProxy, GeneDeletionTable
 
 
 class BaseSolutionTab(QWidget, Ui_SearchTab):
@@ -201,6 +201,12 @@ class MetaboliteTab(BaseSolutionTab):
             dialog.show()
 
 
+class GeneTab(BaseSolutionTab):
+
+    def __init__(self, Table, Proxy, parent=None):
+        super(GeneTab, self).__init__(Table, Proxy, parent)
+
+
 class SolutionDialog(QDialog, Ui_SolutionDialog):
 
     def __init__(self):
@@ -281,10 +287,10 @@ def factory_solution(method, model, solution):
     if method in ("fba", "fva"):
         dialog.add_tab(factory_reaction_tab(method), "Reactions")
         dialog.add_tab(MetaboliteTab(), "Metabolites")
-    elif method == "single_reaction_del":
+    elif method == "single_reaction_deletion":
         dialog.add_tab(factory_reaction_tab(method), "Reactions")
-    elif method == "single_gene_del":
-        dialog.add_tab()
+    elif method == "single_gene_deletion":
+        dialog.add_tab(GeneTab(GeneDeletionTable, DeletionProxy), "Genes")
 
     dialog.set_solution(solution, model)
     dialog.restore_geometry()
