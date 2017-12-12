@@ -694,9 +694,10 @@ class ModelTestsTab(StandardTab):
             if len(selected_indices) == 1 and selected_indices[0].column() == 1:
                 solution = self.dataTable.itemFromIndex(selected_indices[0]).link
                 if solution:
-                    solution_dialog = SolutionDialog(solution, self.model)
-                    self.model.dialogs.add(solution_dialog)
-                    solution_dialog.show()
+                    solution.method = "fba"
+                    dialog = factory_solution(self.model, solution)
+                    self.model.dialogs.add(dialog)
+                    dialog.show()
                     return
 
             if dialog is None:
