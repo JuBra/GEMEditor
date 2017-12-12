@@ -7,7 +7,7 @@ from cobra.flux_analysis import pfba, single_gene_deletion, single_reaction_dele
 
 class TestSolutionDialog:
 
-    @pytest.fixture(autouse=True, scope="session")
+    @pytest.fixture(autouse=True, scope="class")
     def setup(self):
         self.model = cobra.test.create_test_model("ecoli")
 
