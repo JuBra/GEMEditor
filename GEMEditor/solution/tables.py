@@ -235,6 +235,21 @@ class ReactionDeletionTable(CustomSolutionTable):
                deletion_items(reaction, solution)
 
     def objective(self, row):
+        """ Get objective value for KO item in row
+
+        This function is called by the proxymodel
+        for filtering.
+
+        Parameters
+        ----------
+        row: int,
+            Current row
+
+        Returns
+        -------
+        float:
+            Objective value for the knockout
+        """
         return self.item(row, self._col_objective).data(2)
 
 
@@ -259,6 +274,21 @@ class GeneDeletionTable(CustomSolutionTable):
                deletion_items(gene, solution)
 
     def objective(self, row):
+        """ Get objective value for KO item in row
+
+        This function is called by the proxymodel
+        for filtering.
+
+        Parameters
+        ----------
+        row: int,
+            Current row
+
+        Returns
+        -------
+        float:
+            Objective value for the knockout
+        """
         return self.item(row, self._col_objective).data(2)
 
 

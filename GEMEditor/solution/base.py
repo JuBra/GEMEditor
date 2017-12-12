@@ -50,12 +50,12 @@ def status_objective_from_solution(solution):
     status: str
     objective: str or float
     """
+    status, objective = "NA", "NA"
     if isinstance(solution, LegacySolution):
         status, objective = solution.status, solution.f
     elif isinstance(solution, Solution):
         status, objective = solution.status, solution.objective_value
-    else:
-        raise TypeError("Expected LegacySolution or Solution object")
+
     return str(status), objective
 
 
