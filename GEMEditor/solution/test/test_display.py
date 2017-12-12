@@ -10,7 +10,8 @@ def model():
     model = cobra.test.create_test_model("ecoli")
     for g in model.genes:
         g.genome = None
-    return
+    # FIXME: Parse model using GEMEditor parser
+    return model
 
 
 class TestSolutionDialog:
