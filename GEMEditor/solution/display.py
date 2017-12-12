@@ -235,13 +235,11 @@ class SolutionDialog(QDialog, Ui_SolutionDialog):
             self.tabWidget.widget(i).restore_geometry(string, settings)
 
 
-def factory_solution(method, model, solution):
+def factory_solution(model, solution):
     """ Factory for solution dialogs
 
     Parameters
     ----------
-    method: str,
-        The method used for retrieving the solution
     model: GEMEditor.model.classes.Model,
         Model for which the solution was calculated
     solution: cobra.core.Solution or pandas.Dataframe,
@@ -254,6 +252,7 @@ def factory_solution(method, model, solution):
 
     """
     dialog = SolutionDialog()
+    method = solution.method
     if method == "fba":
         dialog.add_tab(factory_reaction_tab(method), "Reactions")
         dialog.add_tab(MetaboliteTab(ShadowPriceTable, QSortFilterProxyModel), "Metabolites")

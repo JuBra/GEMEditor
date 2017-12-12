@@ -873,7 +873,7 @@ class AnalysesTab(QWidget, Ui_AnalysisTab):
         self.add_solution(solution)
 
     def open_solution(self, solution):
-        dialog = factory_solution(solution.method, self.model, solution)
+        dialog = factory_solution(self.model, solution)
         self.model.dialogs.add(dialog)
         dialog.show()
 
