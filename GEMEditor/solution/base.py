@@ -34,7 +34,7 @@ def set_objective_to_label(label, objective):
     """
     try:
         label.setText("{0:.2f}".format(objective))
-    except TypeError:
+    except (TypeError, ValueError):
         label.setText("{0!s}".format(objective))
 
 

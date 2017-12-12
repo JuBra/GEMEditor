@@ -16,7 +16,7 @@ from GEMEditor.model.edit.modeltest import EditModelTestDialog
 from GEMEditor.model.edit.reaction import ReactionInputDialog, SetFluxValueDialog
 from GEMEditor.model.edit.reference import ReferenceEditDialog
 from GEMEditor.solution.base import status_objective_from_solution, set_objective_to_label, set_status_to_label, fluxes_from_solution
-from GEMEditor.solution.display import SolutionDialog
+from GEMEditor.solution.display import SolutionDialog, factory_solution
 from PyQt5 import QtCore, QtGui
 from PyQt5.QtCore import QSortFilterProxyModel, QSize
 from PyQt5.QtWidgets import QWidget, QMessageBox, QApplication, QAction, QMenu, QInputDialog, QProgressDialog, \
@@ -797,9 +797,7 @@ class AnalysesTab(QWidget, Ui_AnalysisTab):
                                      ("Loopless FBA", self.run_loopless),
                                      ("Flux Variability Analysis", self.run_flux_variability),
                                      ("Single Gene Deletion", self.run_single_gene_deletion),
-                                     ("Single Reaction Deletion", self.run_single_reaction_deletion),
-                                     ("Double Gene Deletion", self.run_double_gene_deletions),
-                                     ("Double Reaction Deletion", self.run_double_reaction_deletion)])
+                                     ("Single Reaction Deletion", self.run_single_reaction_deletion)])
         self.populate_analyses()
 
         self.solvers = list(cobra.solvers.solver_dict.keys())
@@ -847,61 +845,43 @@ class AnalysesTab(QWidget, Ui_AnalysisTab):
 
     def run_flux_balance_analysis(self, selected_solver):
         solution = self.model.optimize()
+        solution.method = "fba"
         self.add_solution(solution)
 
     def run_loopless(self, selected_solver):
         solution = loopless_solution(self.model)
+        solution.method = "fba"
         self.add_solution(solution)
 
     def run_parsimonous(self, selected_solver):
         solution = pfba(self.model)
+        solution.method = "fba"
         self.add_solution(solution)
 
     def run_single_gene_deletion(self, selected_solver):
         solution = single_gene_deletion(self.model)
-        self.open_dataframe(solution, "Single Gene Deletion")
-
-    def run_double_gene_deletions(self, selected_solver):
-        QMessageBox.critical(None, "Not Implemented", "This method has not been implemented yet.")
+        solution.method = "single_gene_deletion"
+        self.add_solution(solution)
 
     def run_single_reaction_deletion(self, selected_solver):
         solution = single_reaction_deletion(self.model)
-        self.open_dataframe(solution, "Single Reaction Deletion")
-
-    def run_double_reaction_deletion(self, selected_solver):
-        QMessageBox.critical(None, "Not Implemented", "This method has not been implemented yet.")
+        solution.method = "single_reaction_deletion"
+        self.add_solution(solution)
 
     def run_flux_variability(self, selected_solver):
         solution = flux_variability_analysis(model=self.model, solver=selected_solver)
-        self.open_dataframe(solution, "Flux Variability Analysis")
+        solution["range"] = solution["maximum"] - solution["minimum"]
+        solution.method = "fva"
+        self.add_solution(solution)
 
-    def open_dataframe(self, solution, method):
-        if method == "Flux Variability Analysis":
-            solution["range"] = solution["maximum"] - solution["minimum"]
-        dialog = DataFrameDialog(solution)
-        dialog.setWindowTitle(method.title())
+    def open_solution(self, solution):
+        dialog = factory_solution(solution.method, self.model, solution)
         self.model.dialogs.add(dialog)
         dialog.show()
 
-    def open_result(self, solution):
-        """ Display the solution in a dialog
-
-        Parameters
-        ----------
-        solution: LegacySolution or Solution
-
-        Returns
-        -------
-        None
-        """
-        if solution.status != "optimal":
-            self.show_infeasible_message(solution)
-        else:
-            solution_dialog = SolutionDialog(solution, self.model)
-            self.model.dialogs.add(solution_dialog)
-            solution_dialog.show()
-
     def open_map(self, solution):
+        if solution.method != "fba":
+            return
         if solution.status != "optimal":
             self.show_infeasible_message(solution)
             return
@@ -928,7 +908,7 @@ class AnalysesTab(QWidget, Ui_AnalysisTab):
             self.list_solutions.takeItem(r)
 
     def add_solution(self, solution, open_solution=True):
-        if solution.status != "optimal":
+        if solution.method == "fba" and solution.status != "optimal":
             self.show_infeasible_message(solution)
             return
         elif self.list_solutions.isEnabled() is False:
@@ -945,7 +925,7 @@ class AnalysesTab(QWidget, Ui_AnalysisTab):
         self.list_solutions.setItemWidget(solution_widget, display_widget)
 
         if open_solution:
-            self.open_result(solution)
+            self.open_solution(solution)
 
     @QtCore.pyqtSlot()
     def show_solution_on_map(self):
@@ -963,7 +943,7 @@ class AnalysesTab(QWidget, Ui_AnalysisTab):
         except AttributeError:
             return
         else:
-            self.open_result(solution)
+            self.open_solution(solution)
 
     @QtCore.pyqtSlot()
     def remove_solution(self, item):
@@ -1022,6 +1002,8 @@ class SolutionWidget(QWidget, Ui_SolutionTableWidget):
         status, objective = status_objective_from_solution(self.solution)
         set_status_to_label(self.label_status, status)
         set_objective_to_label(self.label_value, objective)
+        if self.solution.status != "fba":
+            self.button_open_solution_map.setEnabled(False)
 
     def get_solution(self):
         return self.solution

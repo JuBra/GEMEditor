@@ -1,15 +1,13 @@
 from collections import OrderedDict
 from PyQt5.QtCore import Qt, QSortFilterProxyModel, pyqtSlot, QPoint
-from PyQt5.QtGui import QBrush, QKeySequence
+from PyQt5.QtGui import QKeySequence
 from PyQt5.QtWidgets import QWidget, QDialog, QAction, QMenu, QApplication, QMessageBox
 from GEMEditor.base.classes import Settings
 from GEMEditor.map.dialog import MapDisplayDialog
 from GEMEditor.map.turnover import TurnoverDialog
-from GEMEditor.model.display.tables import MetaboliteTable
-from GEMEditor.solution.base import status_objective_from_solution, set_objective_to_label, set_status_to_label, \
-    shadow_prices_from_solution
+from GEMEditor.solution.base import status_objective_from_solution, set_objective_to_label, set_status_to_label
 from GEMEditor.solution.ui import Ui_SearchTab, Ui_SolutionDialog
-from GEMEditor.solution.tables import FBATable, FBAProxy, FVATable, FVAProxy, ReactionDeletionTable, DeletionProxy, GeneDeletionTable
+from GEMEditor.solution.tables import FBATable, FBAProxy, FVATable, FVAProxy, ReactionDeletionTable, DeletionProxy, GeneDeletionTable, ShadowPriceTable
 
 
 class BaseSolutionTab(QWidget, Ui_SearchTab):
@@ -168,15 +166,6 @@ class MetaboliteTab(BaseSolutionTab):
         self.dataView.setContextMenuPolicy(Qt.CustomContextMenu)
         self.dataView.customContextMenuRequested.connect(self.show_context_menu)
 
-    def populate_table(self, model, solution):
-        self.dataTable.setRowCount(0)
-        if not solution or not model:
-            return
-        else:
-            prices = shadow_prices_from_solution(solution)
-
-        self.run_population(model.metabolites, prices, MetaboliteTable.row_from_item)
-
     @pyqtSlot(QPoint)
     def show_context_menu(self, pos):
         idx = self.dataView.indexAt(pos)
@@ -284,9 +273,11 @@ def factory_solution(method, model, solution):
 
     """
     dialog = SolutionDialog()
-    if method in ("fba", "fva"):
+    if method == "fba":
         dialog.add_tab(factory_reaction_tab(method), "Reactions")
-        dialog.add_tab(MetaboliteTab(), "Metabolites")
+        dialog.add_tab(MetaboliteTab(ShadowPriceTable, QSortFilterProxyModel), "Metabolites")
+    elif method == "fva":
+        dialog.add_tab(factory_reaction_tab(method), "Reactions")
     elif method == "single_reaction_deletion":
         dialog.add_tab(factory_reaction_tab(method), "Reactions")
     elif method == "single_gene_deletion":
@@ -302,5 +293,5 @@ def factory_reaction_tab(method):
         return ReactionTab(FBATable, FBAProxy)
     elif method == "fva":
         return ReactionTab(FVATable, FVAProxy)
-    elif method == "single_reaction_del":
+    elif method == "single_reaction_deletion":
         return ReactionTab(ReactionDeletionTable, DeletionProxy)

@@ -1,6 +1,6 @@
 from collections import OrderedDict
 from PyQt5 import QtCore, QtGui
-from GEMEditor.model.display.tables import ReactionBaseTable, GeneTable
+from GEMEditor.model.display.tables import ReactionBaseTable, GeneTable, MetaboliteTable
 
 
 class CustomProxy(QtCore.QSortFilterProxyModel):
@@ -33,10 +33,13 @@ class CustomProxy(QtCore.QSortFilterProxyModel):
 
 class CustomSolutionTable(QtGui.QStandardItemModel):
 
-    def __init__(self):
-        super(CustomSolutionTable, self).__init__()
+    header = ()
+
+    def __init__(self, parent=None):
+        super(CustomSolutionTable, self).__init__(parent)
         self._model = None
         self._solution = None
+        self.setHorizontalHeaderLabels(self.header)
 
     def set_solution(self, model, solution):
         self._model = model
@@ -69,8 +72,8 @@ class FBATable(CustomSolutionTable):
 
     header = ReactionBaseTable.header + ("Flux",)
 
-    def __init__(self):
-        super(FBATable, self).__init__()
+    def __init__(self, parent=None):
+        super(FBATable, self).__init__(parent)
         self._col_flux = self.header.index("Flux")
         self._col_lb = self.header.index("Lower Bound")
         self._col_ub = self.header.index("Upper Bound")
@@ -141,8 +144,8 @@ class FVATable(CustomSolutionTable):
 
     header = ReactionBaseTable.header + ("Min", "Max", "Range")
 
-    def __init__(self):
-        super(FVATable, self).__init__()
+    def __init__(self, parent=None):
+        super(FVATable, self).__init__(parent)
 
         # Column containing the flux value
         self._col_min = self.header.index("Min")
@@ -162,16 +165,15 @@ class FVATable(CustomSolutionTable):
         list:
             List containing the items to add to the table
         """
-
         try:
-            fva_results = solution.fluxes[reaction.id]
+            results = solution.loc[reaction.id]
         except KeyError:
-            items = [QtGui.QStandardItem("NA")]*3
+            itms = [QtGui.QStandardItem("NA") for _ in range(3)]
         else:
-            items = [QtGui.QStandardItem()]*3
-            items[0].setData(float(fva_results["minimum"]), 2)
-            items[1].setData(float(fva_results["maximum"]), 2)
-            items[2].setData(float(fva_results["range"]), 2)
+            items = [QtGui.QStandardItem() for _ in range(3)]
+            items[0].setData(float(results["minimum"]), 2)
+            items[1].setData(float(results["maximum"]), 2)
+            items[2].setData(float(results["range"]), 2)
 
         return ReactionBaseTable.row_from_item(reaction) + items
 
@@ -218,10 +220,10 @@ class ReactionDeletionTable(CustomSolutionTable):
 
     """
 
-    header = ReactionBaseTable.header + ("ID", "Objective", "Status")
+    header = ReactionBaseTable.header + ("Objective", "Status")
 
-    def __init__(self):
-        super(ReactionDeletionTable, self).__init__()
+    def __init__(self, parent=None):
+        super(ReactionDeletionTable, self).__init__(parent)
         self._col_objective = self.header.index("Objective")
         self.max_flux = None
 
@@ -255,10 +257,10 @@ class ReactionDeletionTable(CustomSolutionTable):
 
 class GeneDeletionTable(CustomSolutionTable):
 
-    header = GeneTable.header + ("ID", "Objective", "Status")
+    header = GeneTable.header + ("Objective", "Status")
 
-    def __init__(self):
-        super(GeneDeletionTable, self).__init__()
+    def __init__(self, parent=None):
+        super(GeneDeletionTable, self).__init__(parent)
         self._col_objective = self.header.index("Objective")
         self.max_flux = None
 
@@ -309,24 +311,43 @@ class DeletionProxy(CustomProxy):
         self._options["No phenotype"] = self.filter_no_phenotype
 
     def filter_ko_phenotype(self, row, _):
-        return self.sourceModel().objective(row) == 0.
+        return self.sourceModel().objective(row) <= 10**-6
 
     def filter_partial_phenotype(self, row, _):
         table = self.sourceModel()
-        return 0. < table.objective(row) < table.max_flux
+        return 10**-6 < table.objective(row) < 0.999 * table.max_flux
 
     def filter_no_phenotype(self, row, _):
         table = self.sourceModel()
-        return table.objective(row) == table.max_flux
+        return table.objective(row) >= 0.999 * table.max_flux
+
+
+class ShadowPriceTable(CustomSolutionTable):
+
+    header = MetaboliteTable.header + ("Shadow prices",)
+
+    def __init__(self, parent=None):
+        super(ShadowPriceTable, self).__init__(parent)
+
+    def set_solution(self, model, solution):
+        self._model = model
+        self._solution = solution
+        self._populate_table("metabolites")
+
+    @staticmethod
+    def row_factory(metabolite, solution):
+        sp_item = QtGui.QStandardItem()
+        sp_item.setData(float(solution.shadow_prices[metabolite.id]), 2)
+        return MetaboliteTable.row_from_item(metabolite) + [sp_item]
 
 
 def deletion_items(item, solution):
     try:
-        ko_result = solution[item.id]
+        results = solution.loc[item.id]
     except KeyError:
         flux, status = QtGui.QStandardItem("NA"), QtGui.QStandardItem("NA")
     else:
         flux = QtGui.QStandardItem()
-        flux.setData(float(ko_result["flux"]), 2)
-        status = QtGui.QStandardItem(ko_result["status"])
+        flux.setData(float(results["flux"]), 2)
+        status = QtGui.QStandardItem(results["status"])
     return [flux, status]
