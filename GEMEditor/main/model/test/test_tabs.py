@@ -1001,6 +1001,7 @@ class TestAnalysesTab:
     def test_unsetting_model_removes_solutions(self):
         tab = AnalysesTab()
         solution = Solution(objective_value=1., status="optimal", fluxes=pd.Series())
+        solution.method = "fba"
         tab.add_solution(solution, open_solution=False)
 
         assert tab.list_solutions.count() == 1

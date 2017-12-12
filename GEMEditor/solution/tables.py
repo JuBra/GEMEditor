@@ -306,18 +306,18 @@ class DeletionProxy(CustomProxy):
         super(DeletionProxy, self).__init__(*args, **kwargs)
 
         # Setup options
-        self._options["KO phenotype"] = self.filter_ko_phenotype
-        self._options["Partial phenotype"] = self.filter_partial_phenotype
-        self._options["No phenotype"] = self.filter_no_phenotype
+        self._options["KO phenotype"] = self._filter_ko_phenotype
+        self._options["Partial phenotype"] = self._filter_partial_phenotype
+        self._options["No phenotype"] = self._filter_no_phenotype
 
-    def filter_ko_phenotype(self, row, _):
+    def _filter_ko_phenotype(self, row, _):
         return self.sourceModel().objective(row) <= 10**-6
 
-    def filter_partial_phenotype(self, row, _):
+    def _filter_partial_phenotype(self, row, _):
         table = self.sourceModel()
         return 10**-6 < table.objective(row) < 0.999 * table.max_flux
 
-    def filter_no_phenotype(self, row, _):
+    def _filter_no_phenotype(self, row, _):
         table = self.sourceModel()
         return table.objective(row) >= 0.999 * table.max_flux
 
