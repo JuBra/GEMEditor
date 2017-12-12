@@ -18,36 +18,42 @@ class TestSolutionDialog:
 
     def test_setup_fba_dialog(self, model):
         solution = model.optimize()
-        dialog = factory_solution("fba", model, solution)
+        solution.method = "fba"
+        dialog = factory_solution(model, solution)
         assert dialog.label_status.text() == solution.status
         assert dialog.label_label_objective.text() == str(round(solution.objective_value, 2))
 
     def test_setup_loopless_dialog(self, model):
         solution = loopless_solution(model)
-        dialog = factory_solution("fba", model, solution)
+        solution.method = "fba"
+        dialog = factory_solution(model, solution)
         assert dialog.label_status.text() == solution.status
         assert dialog.label_label_objective.text() == str(round(solution.objective_value, 2))
 
     def test_setup_pfba_dialog(self, model):
         solution = pfba(model)
-        dialog = factory_solution("fba", model, solution)
+        solution.method = "fba"
+        dialog = factory_solution(model, solution)
         assert dialog.label_status.text() == solution.status
         assert dialog.label_label_objective.text() == str(round(solution.objective_value, 2))
 
     def test_setup_fva_dialog(self, model):
         solution = flux_variability_analysis(model)
-        dialog = factory_solution("fva", model, solution)
+        solution.method = "fva"
+        dialog = factory_solution(model, solution)
         assert dialog.label_status.text() == "NA"
         assert dialog.label_label_objective.text() == "NA"
 
     def test_setup_single_gene_deletion(self, model):
         solution = single_gene_deletion(model)
-        dialog = factory_solution("single_gene_deletion", model, solution)
+        solution.method = "single_gene_deletion"
+        dialog = factory_solution(model, solution)
         assert dialog.label_status.text() == "NA"
         assert dialog.label_label_objective.text() == "NA"
 
     def test_setup_single_reaction_deletion(self, model):
         solution = single_reaction_deletion(model)
-        dialog = factory_solution("single_reaction_deletion", model, solution)
+        solution.method = "single_reaction_deletion"
+        dialog = factory_solution(model, solution)
         assert dialog.label_status.text() == "NA"
         assert dialog.label_label_objective.text() == "NA"
