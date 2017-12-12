@@ -24,8 +24,9 @@ class TestGetAttributesFromSolution:
         assert status == "optimal"
         assert objective == 0.9
 
-        with pytest.raises(TypeError):
-            status_objective_from_solution(None)
+        status, objective = status_objective_from_solution(None)
+        assert status == "NA"
+        assert objective == "NA"
 
     def test_fluxes_from_solution(self, new_solution, legacy_solution):
         fluxes = fluxes_from_solution(new_solution)
