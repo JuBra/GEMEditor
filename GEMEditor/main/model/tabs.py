@@ -15,13 +15,12 @@ from GEMEditor.model.edit.metabolite import MetaboliteEditDialog
 from GEMEditor.model.edit.modeltest import EditModelTestDialog
 from GEMEditor.model.edit.reaction import ReactionInputDialog, SetFluxValueDialog
 from GEMEditor.model.edit.reference import ReferenceEditDialog
-from GEMEditor.solution.base import status_objective_from_solution, set_objective_to_label, set_status_to_label, fluxes_from_solution
+from GEMEditor.solution.base import status_objective_from_solution, set_objective_to_label, set_status_to_label
 from GEMEditor.solution.display import SolutionDialog, factory_solution
 from PyQt5 import QtCore, QtGui
 from PyQt5.QtCore import QSortFilterProxyModel, QSize
 from PyQt5.QtWidgets import QWidget, QMessageBox, QApplication, QAction, QMenu, QInputDialog, QProgressDialog, \
-    QStatusBar, QErrorMessage, QListWidgetItem
-from cobra.core.solution import LegacySolution, Solution
+    QStatusBar, QListWidgetItem
 from cobra.flux_analysis import pfba, flux_variability_analysis, loopless_solution, single_gene_deletion, \
     single_reaction_deletion
 
@@ -870,7 +869,6 @@ class AnalysesTab(QWidget, Ui_AnalysisTab):
 
     def run_flux_variability(self, selected_solver):
         solution = flux_variability_analysis(model=self.model, solver=selected_solver)
-        solution["range"] = solution["maximum"] - solution["minimum"]
         solution.method = "fva"
         self.add_solution(solution)
 

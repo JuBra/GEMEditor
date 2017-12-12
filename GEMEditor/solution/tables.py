@@ -168,12 +168,12 @@ class FVATable(CustomSolutionTable):
         try:
             results = solution.loc[reaction.id]
         except KeyError:
-            itms = [QtGui.QStandardItem("NA") for _ in range(3)]
+            items = [QtGui.QStandardItem("NA") for _ in range(3)]
         else:
             items = [QtGui.QStandardItem() for _ in range(3)]
             items[0].setData(float(results["minimum"]), 2)
             items[1].setData(float(results["maximum"]), 2)
-            items[2].setData(float(results["range"]), 2)
+            items[2].setData(float(results["maximum"]-results["minimum"]), 2)
 
         return ReactionBaseTable.row_from_item(reaction) + items
 
