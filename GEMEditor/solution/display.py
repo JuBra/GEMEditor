@@ -110,25 +110,6 @@ class ReactionTab(BaseSolutionTab):
         self.dataView.setContextMenuPolicy(Qt.CustomContextMenu)
         self.dataView.customContextMenuRequested.connect(self.show_context_menu)
 
-    # def color_values_at_bound(self):
-    #     if not self.model:
-    #         return
-    #
-    #     col = self.dataTable.columnCount() - 1
-    #     for i in range(self.dataTable.rowCount()):
-    #         flux_item = self.dataTable.item(i, col)
-    #         value = flux_item.data(2)
-    #         if not value:
-    #             continue
-    #
-    #         # Get reaction settings
-    #         lower_bound = self.dataTable.item(i, 4).data(2)
-    #         upper_bound = self.dataTable.item(i, 5).data(2)
-    #
-    #         # Color flux value if close to boundary
-    #         if value >= 0.99 * upper_bound or value <= 0.99 * lower_bound:
-    #             flux_item.setForeground(QBrush(Qt.red, Qt.SolidPattern))
-
     @pyqtSlot(QPoint)
     def show_context_menu(self, pos):
         idx = self.dataView.indexAt(pos)

@@ -1000,7 +1000,7 @@ class SolutionWidget(QWidget, Ui_SolutionTableWidget):
         status, objective = status_objective_from_solution(self.solution)
         set_status_to_label(self.label_status, status)
         set_objective_to_label(self.label_value, objective)
-        if self.solution.status != "fba":
+        if self.solution.method != "fba":
             self.button_open_solution_map.setEnabled(False)
 
     def get_solution(self):

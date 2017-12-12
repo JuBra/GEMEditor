@@ -86,10 +86,16 @@ class FBATable(CustomSolutionTable):
         except KeyError:
             value = 0
         finally:
-            solution_item = QtGui.QStandardItem()
-            solution_item.setData(float(value), 2)
+            flux_item = QtGui.QStandardItem()
+            flux_item.setData(float(value), 2)
 
-        return ReactionBaseTable.row_from_item(reaction)+[solution_item]
+            # Color flux value if close to boundary
+            if value >= 0.99 * reaction.upper_bound or \
+                    value <= 0.99 * reaction.lower_bound:
+                brush = QtGui.QBrush(QtCore.Qt.red, QtCore.Qt.SolidPattern)
+                flux_item.setForeground(brush)
+
+        return ReactionBaseTable.row_from_item(reaction)+[flux_item]
 
     def get_flux(self, row):
         return self.item(row, self._col_flux).data(2)
