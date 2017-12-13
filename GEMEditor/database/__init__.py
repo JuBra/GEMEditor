@@ -44,6 +44,10 @@ miriam_databases = [Database("mnx", 'MetaNetX Chemical', "metabolite", 'metanetx
                     Database(None, 'EC code', "reaction", "ec-code", r"^\d+\.-\.-\.-|\d+\.\d+\.-\.-|\d+\.\d+\.\d+\.-|\d+\.\d+\.\d+\.(n)?\d+$")]
 
 
+gene_databases = [Database(None, "InterPro", "gene", "interpro", r"^IPR\d{6}$"),
+                  Database(None, "UniProtKB", "gene", "uniprot", r"^([A-N,R-Z][0-9]([A-Z][A-Z, 0-9][A-Z, 0-9][0-9]){1,2})|([O,P,Q][0-9][A-Z, 0-9][A-Z, 0-9][A-Z, 0-9][0-9])(\.\d+)?$")]
+
+
 # The chebi and reactome identifier are missing their respective identifiers
 missing_prefix = defaultdict(str)
 missing_prefix["chebi"] = "CHEBI:"
@@ -63,4 +67,6 @@ reaction_ambiguitiy_map = {"kegg": 'kegg.reaction',
                            "bigg": 'bigg.reaction'}
 
 
-map_collection_validator = dict((x.miriam_collection, x.validator) for x in miriam_databases)
+def get_options(item_type):
+    filtered = [e for e in miriam_databases+gene_databases if e.miriam_collection]
+    return [x for x in filtered if x.type == item_type.lower()]

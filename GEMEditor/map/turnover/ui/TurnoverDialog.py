@@ -14,9 +14,6 @@ class Ui_TurnoverDialog(object):
         TurnoverDialog.resize(149, 146)
         self.verticalLayout = QtWidgets.QVBoxLayout(TurnoverDialog)
         self.verticalLayout.setObjectName("verticalLayout")
-        self.checkBox_hide_inactive = QtWidgets.QCheckBox(TurnoverDialog)
-        self.checkBox_hide_inactive.setObjectName("checkBox_hide_inactive")
-        self.verticalLayout.addWidget(self.checkBox_hide_inactive)
         self.splitter = QtWidgets.QSplitter(TurnoverDialog)
         self.splitter.setOrientation(QtCore.Qt.Vertical)
         self.splitter.setObjectName("splitter")
@@ -39,6 +36,5 @@ class Ui_TurnoverDialog(object):
     def retranslateUi(self, TurnoverDialog):
         _translate = QtCore.QCoreApplication.translate
         TurnoverDialog.setWindowTitle(_translate("TurnoverDialog", "Dialog"))
-        self.checkBox_hide_inactive.setText(_translate("TurnoverDialog", "Hide inactive reactions"))
 
 from PyQt5 import QtWebEngineWidgets

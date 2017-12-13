@@ -1,20 +1,18 @@
 from collections import OrderedDict
-from PyQt5 import QtCore
 from PyQt5.QtCore import Qt, QSortFilterProxyModel, pyqtSlot, QPoint
-from PyQt5.QtGui import QStandardItemModel, QStandardItem, QBrush, QKeySequence
+from PyQt5.QtGui import QKeySequence
 from PyQt5.QtWidgets import QWidget, QDialog, QAction, QMenu, QApplication, QMessageBox
 from GEMEditor.base.classes import Settings
 from GEMEditor.map.dialog import MapDisplayDialog
 from GEMEditor.map.turnover import TurnoverDialog
-from GEMEditor.model.display.tables import ReactionBaseTable, MetaboliteTable
-from GEMEditor.solution.base import status_objective_from_solution, set_objective_to_label, set_status_to_label, \
-    fluxes_from_solution, shadow_prices_from_solution
+from GEMEditor.solution.base import status_objective_from_solution, set_objective_to_label, set_status_to_label
 from GEMEditor.solution.ui import Ui_SearchTab, Ui_SolutionDialog
+from GEMEditor.solution.tables import FBATable, FBAProxy, FVATable, FVAProxy, ReactionDeletionTable, DeletionProxy, GeneDeletionTable, ShadowPriceTable
 
 
 class BaseSolutionTab(QWidget, Ui_SearchTab):
 
-    def __init__(self, ProxyModel, parent=None):
+    def __init__(self, Table, Proxy, parent=None):
         super(BaseSolutionTab, self).__init__(parent)
         self.setupUi(self)
 
@@ -23,12 +21,12 @@ class BaseSolutionTab(QWidget, Ui_SearchTab):
         self.solution = None
 
         # Setup table
-        self.dataTable = QStandardItemModel(self)
-        self.proxyModel = ProxyModel(self)
+        self.dataTable = Table(self)
+        self.proxyModel = Proxy(self)
 
         try:
             self.filterComboBox.addItems(self.proxyModel.options)
-            self.filterComboBox.currentIndexChanged.connect(self.proxyModel.set_custom_filter)
+            self.filterComboBox.currentTextChanged.connect(self.proxyModel.set_filter)
         except AttributeError:
             # No custom filter options
             self.label_filter.setVisible(False)
@@ -39,55 +37,31 @@ class BaseSolutionTab(QWidget, Ui_SearchTab):
             self.label_filter.setVisible(True)
             self.filterComboBox.setVisible(True)
             self.line.setVisible(True)
+        finally:
+            self.searchInput.textChanged.connect(self.proxyModel.setFilterFixedString)
 
         # Set filter properties
+        self.proxyModel.setSourceModel(self.dataTable)
         self.proxyModel.setFilterKeyColumn(-1)
         self.proxyModel.setDynamicSortFilter(True)
         self.proxyModel.setFilterCaseSensitivity(Qt.CaseInsensitive)
         self.dataView.setModel(self.proxyModel)
         self.dataView.setDragEnabled(False)
 
-        self.searchInput.textChanged.connect(self.proxyModel.setFilterFixedString)
-
-    def set_solution(self, solution, model):
+    def set_solution(self, model, solution):
         """ Set the solution to the widget
 
         Parameters
         ----------
-        solution: cobra.Solution
-        method:
-
-        Returns
-        -------
+        model: GEMEditor.model.classes.Model,
+            Model for which the solution has been generated
+        solution: cobra.core.Solution or pandas.Dataframe,
+            Solution to display
 
         """
         self.solution = solution
         self.model = model
-        self.populate_table(model=model, solution=solution)
-
-    def populate_table(self, model, solution):
-        raise NotImplementedError
-
-    def run_population(self, items, values, row_factory):
-        self.dataTable.blockSignals(True)
-        self.dataTable.setRowCount(0)
-
-        # Add rows to table
-        for i, item in enumerate(items):
-            row_items = row_factory(item)
-            solution_item = QStandardItem()
-            try:
-                value = values[item.id]
-            except KeyError:
-                value = 0
-            finally:
-                solution_item.setData(float(value), 2)
-
-            row_items.append(solution_item)
-            self.dataTable.appendRow(row_items)
-
-        self.dataTable.blockSignals(False)
-        self.proxyModel.setSourceModel(self.dataTable)
+        self.dataTable.set_solution(model, solution)
 
     def save_geometry(self, prefix="", settings=None):
         settings = settings or Settings()
@@ -130,41 +104,11 @@ class BaseSolutionTab(QWidget, Ui_SearchTab):
 
 class ReactionTab(BaseSolutionTab):
 
-    def __init__(self, parent=None):
-        super(ReactionTab, self).__init__(FluxTableProxyFilter, parent)
-        self.dataTable.setHorizontalHeaderLabels(ReactionBaseTable.header + ("Flux",))
+    def __init__(self, Table, Proxy, parent=None):
+        super(ReactionTab, self).__init__(Table, Proxy, parent)
 
         self.dataView.setContextMenuPolicy(Qt.CustomContextMenu)
         self.dataView.customContextMenuRequested.connect(self.show_context_menu)
-
-    def populate_table(self, model, solution):
-        self.dataTable.setRowCount(0)
-        if not solution or not model:
-            return
-        else:
-            fluxes = fluxes_from_solution(solution)
-
-        self.run_population(model.reactions, fluxes, ReactionBaseTable.row_from_item)
-        self.color_values_at_bound()
-
-    def color_values_at_bound(self):
-        if not self.model:
-            return
-
-        col = self.dataTable.columnCount() - 1
-        for i in range(self.dataTable.rowCount()):
-            flux_item = self.dataTable.item(i, col)
-            value = flux_item.data(2)
-            if not value:
-                continue
-
-            # Get reaction settings
-            lower_bound = self.dataTable.item(i, 4).data(2)
-            upper_bound = self.dataTable.item(i, 5).data(2)
-
-            # Color flux value if close to boundary
-            if value >= 0.99 * upper_bound or value <= 0.99 * lower_bound:
-                flux_item.setForeground(QBrush(Qt.red, Qt.SolidPattern))
 
     @pyqtSlot(QPoint)
     def show_context_menu(self, pos):
@@ -196,22 +140,12 @@ class ReactionTab(BaseSolutionTab):
 
 
 class MetaboliteTab(BaseSolutionTab):
-    def __init__(self, parent=None):
-        super(MetaboliteTab, self).__init__(QSortFilterProxyModel, parent)
-        self.dataTable.setHorizontalHeaderLabels(MetaboliteTable.header+("Shadow price",))
+    def __init__(self, Table, Proxy, parent=None):
+        super(MetaboliteTab, self).__init__(Table, Proxy, parent)
 
         # Allow custom context menu
         self.dataView.setContextMenuPolicy(Qt.CustomContextMenu)
         self.dataView.customContextMenuRequested.connect(self.show_context_menu)
-
-    def populate_table(self, model, solution):
-        self.dataTable.setRowCount(0)
-        if not solution or not model:
-            return
-        else:
-            prices = shadow_prices_from_solution(solution)
-
-        self.run_population(model.metabolites, prices, MetaboliteTable.row_from_item)
 
     @pyqtSlot(QPoint)
     def show_context_menu(self, pos):
@@ -237,24 +171,26 @@ class MetaboliteTab(BaseSolutionTab):
             dialog.show()
 
 
+class GeneTab(BaseSolutionTab):
+
+    def __init__(self, Table, Proxy, parent=None):
+        super(GeneTab, self).__init__(Table, Proxy, parent)
+
+
 class SolutionDialog(QDialog, Ui_SolutionDialog):
 
-    def __init__(self, solution, model):
+    def __init__(self):
         super(SolutionDialog, self).__init__()
         self.setupUi(self)
         self.solution = None
         self.model = None
 
-        # Setup dialog
-        self.tabWidget.addTab(ReactionTab(self), "Reactions")
-        self.tabWidget.addTab(MetaboliteTab(self), "Metabolite")
         self.setWindowTitle("Solution")
         self.setWindowFlags(Qt.Window)
         self.finished.connect(self.save_geometry)
 
-        # Update display
-        self.set_solution(solution, model)
-        self.restore_geometry()
+    def add_tab(self, tab, description):
+        self.tabWidget.addTab(tab, description)
 
     def set_solution(self, solution, model):
         """ Set solution to dialog
@@ -278,7 +214,7 @@ class SolutionDialog(QDialog, Ui_SolutionDialog):
 
         # Update tables
         for i in range(self.tabWidget.count()):
-            self.tabWidget.widget(i).set_solution(self.solution, self.model)
+            self.tabWidget.widget(i).set_solution(model, solution)
 
     @pyqtSlot()
     def save_geometry(self, prefix="", settings=None):
@@ -299,46 +235,43 @@ class SolutionDialog(QDialog, Ui_SolutionDialog):
             self.tabWidget.widget(i).restore_geometry(string, settings)
 
 
-class FluxTableProxyFilter(QSortFilterProxyModel):
+def factory_solution(model, solution):
+    """ Factory for solution dialogs
 
-    options = ("All", "Nonzero flux", "Flux at bound", "All boundary", "Active boundary")
+    Parameters
+    ----------
+    model: GEMEditor.model.classes.Model,
+        Model for which the solution was calculated
+    solution: cobra.core.Solution or pandas.Dataframe,
+        Simulation solution to visualized
 
-    def __init__(self, *args, **kwargs):
-        super(FluxTableProxyFilter, self).__init__(*args, **kwargs)
-        self.custom_filter = 0
+    Returns
+    -------
+    dialog: SolutionDialog,
+        SolutionDialog instance
 
-    def filterAcceptsRow(self, p_int, QModelIndex):
-        if self.filterRegExp():
-            return (self.passes_custom_filter(p_int) and
-                    super(FluxTableProxyFilter, self).filterAcceptsRow(p_int, QModelIndex))
-        else:
-            return self.passes_custom_filter(p_int)
+    """
+    dialog = SolutionDialog()
+    method = solution.method
+    if method == "fba":
+        dialog.add_tab(factory_reaction_tab(method), "Reactions")
+        dialog.add_tab(MetaboliteTab(ShadowPriceTable, QSortFilterProxyModel), "Metabolites")
+    elif method == "fva":
+        dialog.add_tab(factory_reaction_tab(method), "Reactions")
+    elif method == "single_reaction_deletion":
+        dialog.add_tab(factory_reaction_tab(method), "Reactions")
+    elif method == "single_gene_deletion":
+        dialog.add_tab(GeneTab(GeneDeletionTable, DeletionProxy), "Genes")
 
-    def passes_custom_filter(self, row):
-        if self.custom_filter == 0:
-            # All rows
-            return True
-        elif self.custom_filter == 1:
-            # Flux nonequal to zero
-            return self.sourceModel().item(row, 7).data(2) != 0.
-        elif self.custom_filter == 2:
-            # Flux at boundary
-            flux = self.sourceModel().item(row, 7).data(2)
-            lower_bound = self.sourceModel().item(row, 4).data(2)
-            upper_bound = self.sourceModel().item(row, 5).data(2)
-            return flux == lower_bound or flux == upper_bound
-        elif self.custom_filter == 3:
-            # Boundary reaction
-            reaction = self.sourceModel().item(row, 0).link
-            return reaction.boundary is True
-        elif self.custom_filter == 4:
-            reaction = self.sourceModel().item(row, 0).link
-            flux = self.sourceModel().item(row, 7).data(2)
-            return reaction.boundary and flux != 0.
-        else:
-            raise NotImplementedError
+    dialog.set_solution(solution, model)
+    dialog.restore_geometry()
+    return dialog
 
-    @QtCore.pyqtSlot(int)
-    def set_custom_filter(self, n):
-        self.custom_filter = n
-        self.invalidateFilter()
+
+def factory_reaction_tab(method):
+    if method == "fba":
+        return ReactionTab(FBATable, FBAProxy)
+    elif method == "fva":
+        return ReactionTab(FVATable, FVAProxy)
+    elif method == "single_reaction_deletion":
+        return ReactionTab(ReactionDeletionTable, DeletionProxy)

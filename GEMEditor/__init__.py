@@ -38,6 +38,8 @@ config.read(abspath(join(dirname(abspath(__file__)), "GEMEditor.cfg")))
 __version__ = config.get("DEFAULT", "version")
 __versionlookup__ = config.get("DEFAULT", "version_lookup")
 __projectpage__ = config.get("DEFAULT", "project_url")
+__citation__ = "Brandl J, Andersen MR, unpublished"
+
 
 database_path = abspath(join(dirname(abspath(__file__)), "database", "modelling.db"))
 regex_formula = r"^([A-Z][a-z]?\d*)*$"
@@ -89,5 +91,9 @@ def log_package_versions():
 
         for pkg, version in sorted(packages.items()):
             LOGGER.info("{0} version: {1!s}".format(pkg, version))
+
+        # Log threadpool size
+        pool = QtCore.QThreadPool.globalInstance()
+        LOGGER.info("Max available threads: {0!s}".format(pool.maxThreadCount()))
 
         VERSIONS_LOGGED = True

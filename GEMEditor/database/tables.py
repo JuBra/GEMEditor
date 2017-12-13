@@ -138,7 +138,7 @@ def setup_empty_database(path):
 
     # Database already exists
     if os.path.isfile(path):
-        reply = QMessageBox().question("Warning", "{} exists already.\nDo you want to override it?".format(path))
+        reply = QMessageBox().question(None, "Warning", "{} exists already.\nDo you want to override it?".format(path))
         if reply != QDialogButtonBox.Yes:
             return False
 
@@ -146,7 +146,7 @@ def setup_empty_database(path):
             os.remove(path)
         except:
             LOGGER.debug("Could not remove existing database:", exc_info=True)
-            QMessageBox().critical("Error", "Could not remove the existing database. Is it currently in use?")
+            QMessageBox().critical(None, "Error", "Could not remove the existing database. Is it currently in use?")
             return False
 
     # Setup the database engine

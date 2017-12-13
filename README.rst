@@ -19,7 +19,7 @@ You can download and install the latest version of GEM Editor from pip.
 
 Installation::
 
-    pip install GEMEditor
+    pip install GEMEditor -r requirements.txt
 
 Updating GEMEditor::
 
