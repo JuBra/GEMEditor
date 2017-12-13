@@ -1,11 +1,13 @@
 import logging
 import os
 import sqlite3
+import re
 from GEMEditor.base.classes import Settings
 from GEMEditor.database import database_path as DB_PATH
 from GEMEditor.database.ui import Ui_MetaboliteEntryDisplayWidget, Ui_ReactionEntryDisplayWidget
 from GEMEditor.model.classes.cobra import Metabolite, Reaction
 from GEMEditor.model.classes.annotation import Annotation
+from GEMEditor import formula_validator
 from PyQt5 import QtCore, QtSql
 from PyQt5.QtWidgets import QMessageBox, QWidget, QTableWidgetItem
 
@@ -240,8 +242,8 @@ class DatabaseWrapper:
 
         if metabolite_info:
             metabolite = Metabolite(name=metabolite_info[0],
-                                    formula=metabolite_info[1],
-                                    charge=metabolite_info[2])
+                                    formula=valid_formula(metabolite_info[1]),
+                                    charge=valid_charge(metabolite_info[2]))
             annotations = self.get_annotations_from_id(identifier, "Metabolite")
             metabolite.annotation.update(annotations)
             return metabolite
@@ -582,4 +584,15 @@ def pyqt_database_connection(database_path=None):
     return db
 
 
+def valid_formula(formula):
+    if isinstance(formula, str) and re.match(formula_validator, formula):
+        return formula
+    else:
+        return None
 
+
+def valid_charge(charge):
+    try:
+        return int(charge)
+    except:
+        return None
