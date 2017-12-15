@@ -91,4 +91,3 @@ class Ui_EditTestDialog(object):
 
 from GEMEditor.model.display.base import CommentDisplayWidget, ReferenceDisplayWidget
 from GEMEditor.model.display.modeltest import GeneSettingDisplayWidget, OutcomeDisplayWidget, ReactionSettingDisplayWidget
-import icons_rc
