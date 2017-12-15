@@ -71,7 +71,7 @@ class Ui_EditTestDialog(object):
         self.verticalLayout_4.addWidget(self.buttonBox)
 
         self.retranslateUi(EditTestDialog)
-        self.tabWidget.setCurrentIndex(1)
+        self.tabWidget.setCurrentIndex(0)
         self.tabWidget2.setCurrentIndex(0)
         self.buttonBox.accepted.connect(EditTestDialog.accept)
         self.buttonBox.rejected.connect(EditTestDialog.reject)

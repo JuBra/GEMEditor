@@ -1,5 +1,5 @@
 from GEMEditor.base.dialogs import CustomStandardDialog
-from GEMEditor.base import Settings
+from GEMEditor.base import Settings, restore_state
 from GEMEditor.model.edit.ui.EditTestDialog import Ui_EditTestDialog
 from PyQt5 import QtCore
 from PyQt5.QtWidgets import QDialogButtonBox
@@ -97,19 +97,13 @@ class EditModelTestDialog(CustomStandardDialog, Ui_EditTestDialog):
     def restore_dialog_geometry(self):
         super(EditModelTestDialog, self).restore_dialog_geometry()
 
-        settings = Settings()
-        spliter_h_pos = settings.value(self.__class__.__name__+"SplitterH", None)
-        if spliter_h_pos is not None:
-            self.splitter_horizontal.restoreState(spliter_h_pos)
-
-        spliter_v_pos = settings.value(self.__class__.__name__ + "SplitterV", None)
-        if spliter_v_pos is not None:
-            self.splitter_vertical.restoreState(spliter_v_pos)
+        with Settings(group=self.__class__.__name__) as settings:
+            restore_state(self.splitter_horizontal, settings.value("SplitterH"))
+            restore_state(self.splitter_vertical, settings.value("SplitterV"))
 
     def save_dialog_geometry(self):
         super(EditModelTestDialog, self).save_dialog_geometry()
 
-        settings = Settings()
-        settings.setValue(self.__class__.__name__ + "SplitterH", self.splitter_horizontal.saveState())
-        settings.setValue(self.__class__.__name__ + "SplitterV", self.splitter_vertical.saveState())
-        settings.sync()
+        with Settings(group=self.__class__.__name__) as settings:
+            settings.setValue("SplitterH", self.splitter_horizontal.saveState())
+            settings.setValue("SplitterV", self.splitter_vertical.saveState())
