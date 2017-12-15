@@ -155,8 +155,7 @@ class GeneSettingDisplayWidget(QWidget, Ui_SettingsDisplayWidget):
         if dialog.exec_():
             for gene in dialog.selected_items():
                 if gene not in set([self.dataTable.item(i).link for i in range(self.dataTable.rowCount())]):
-                    self.dataTable.update_row_from_item(GeneSetting(gene=gene,
-                                                                    activity=gene.functional))
+                    self.dataTable.update_row_from_item(GeneSetting(gene=gene, activity=False))
 
     @QtCore.pyqtSlot()
     def add_current(self):
