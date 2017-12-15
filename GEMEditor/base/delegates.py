@@ -27,10 +27,11 @@ class FloatInputDelegate(QItemDelegate):
 
 
 class ComboBoxDelegate(QItemDelegate):
-    def __init__(self, parent, choices=None):
+    def __init__(self, parent, choices=None, select_option=True):
         QItemDelegate.__init__(self, parent)
         self.choices = choices or []
-        self.choices = ["--Select--"] + self.choices
+        if select_option:
+            self.choices = ["--Select--"] + self.choices
 
     def createEditor(self, parent, option, index):
         editor = QComboBox(parent)

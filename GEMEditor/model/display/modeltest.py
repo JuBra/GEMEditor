@@ -112,7 +112,8 @@ class GeneSettingDisplayWidget(QWidget, Ui_SettingsDisplayWidget):
         self.dataTable = GeneSettingsTable(self)
         self.tableView.setModel(self.dataTable)
         self.tableView.setItemDelegateForColumn(1, ComboBoxDelegate(parent=self.tableView,
-                                                                    choices=["active", "inactive"]))
+                                                                    choices=["active", "inactive"],
+                                                                    select_option=False))
 
         self.model = None
         self.model_test = None
