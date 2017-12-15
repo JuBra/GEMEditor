@@ -13,7 +13,7 @@
   <property name="windowTitle">
    <string>Edit case</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout_7">
+  <layout class="QVBoxLayout" name="verticalLayout_4">
    <item>
     <layout class="QGridLayout" name="gridLayout">
      <item row="0" column="0">
@@ -29,8 +29,14 @@
     </layout>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_3">
-     <item>
+    <widget class="QSplitter" name="splitter_horizontal">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <widget class="QSplitter" name="splitter_vertical">
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
       <widget class="QGroupBox" name="groupBox">
        <property name="title">
         <string>Conditions:</string>
@@ -55,8 +61,6 @@
         </item>
        </layout>
       </widget>
-     </item>
-     <item>
       <widget class="QGroupBox" name="groupBox_2">
        <property name="title">
         <string>Outcomes:</string>
@@ -81,19 +85,17 @@
         </item>
        </layout>
       </widget>
-     </item>
-    </layout>
-   </item>
-   <item>
-    <widget class="QGroupBox" name="groupBox_3">
-     <property name="title">
-      <string>Comment</string>
-     </property>
-     <layout class="QVBoxLayout" name="verticalLayout_3">
-      <item>
-       <widget class="CommentDisplayWidget" name="commentWidget" native="true"/>
-      </item>
-     </layout>
+     </widget>
+     <widget class="QGroupBox" name="groupBox_3">
+      <property name="title">
+       <string>Comment</string>
+      </property>
+      <layout class="QVBoxLayout" name="verticalLayout_3">
+       <item>
+        <widget class="CommentDisplayWidget" name="commentWidget" native="true"/>
+       </item>
+      </layout>
+     </widget>
     </widget>
    </item>
    <item>

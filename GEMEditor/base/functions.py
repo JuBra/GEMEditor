@@ -282,3 +282,19 @@ def text_is_different(input, state):
     else:
         return input != state
 
+
+def restore_state(object, state):
+    """ Restore the state of an object
+
+    Parameters
+    ----------
+    object: Object which should be restored
+    state: State from settings
+
+    Returns
+    -------
+
+    """
+
+    if state:
+        object.restoreState(state)

@@ -112,7 +112,8 @@ class GeneSettingDisplayWidget(QWidget, Ui_SettingsDisplayWidget):
         self.dataTable = GeneSettingsTable(self)
         self.tableView.setModel(self.dataTable)
         self.tableView.setItemDelegateForColumn(1, ComboBoxDelegate(parent=self.tableView,
-                                                                    choices=["active", "inactive"]))
+                                                                    choices=["active", "inactive"],
+                                                                    select_option=False))
 
         self.model = None
         self.model_test = None
@@ -155,8 +156,7 @@ class GeneSettingDisplayWidget(QWidget, Ui_SettingsDisplayWidget):
         if dialog.exec_():
             for gene in dialog.selected_items():
                 if gene not in set([self.dataTable.item(i).link for i in range(self.dataTable.rowCount())]):
-                    self.dataTable.update_row_from_item(GeneSetting(gene=gene,
-                                                                    activity=gene.functional))
+                    self.dataTable.update_row_from_item(GeneSetting(gene=gene, activity=False))
 
     @QtCore.pyqtSlot()
     def add_current(self):
@@ -196,8 +196,10 @@ class OutcomeDisplayWidget(QWidget, Ui_SettingsDisplayWidget):
         self.dataTable = OutcomesTable(self)
         self.tableView.setModel(self.dataTable)
 
-        self.tableView.setItemDelegateForColumn(1, ComboBoxDelegate(parent=self.tableView, choices=["greater than", "less than"]))
-        self.tableView.setItemDelegateForColumn(2, FloatInputDelegate(parent=self.tableView, precision=2))
+        self.tableView.setItemDelegateForColumn(1, ComboBoxDelegate(parent=self.tableView,
+                                                                    choices=["greater than", "less than"],
+                                                                    select_option=False))
+        self.tableView.setItemDelegateForColumn(2, FloatInputDelegate(parent=self.tableView, precision=2, default=0.01))
 
         # There are no standard outcomes
         self.button_add_current.setVisible(False)
@@ -266,7 +268,7 @@ class OutcomeDisplayWidget(QWidget, Ui_SettingsDisplayWidget):
         if dialog.exec_():
             for reaction in dialog.selected_items():
                 if reaction not in set([self.dataTable.item(i).link for i in range(self.dataTable.rowCount())]):
-                    self.dataTable.update_row_from_item(Outcome(reaction))
+                    self.dataTable.update_row_from_item(Outcome(reaction, value=0.01, operator="greater than"))
 
     @QtCore.pyqtSlot()
     def toggle_condition_del_button(self):

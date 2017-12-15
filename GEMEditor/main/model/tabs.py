@@ -762,12 +762,31 @@ class ModelTestsTab(StandardTab):
             self.statusBar.setStyleSheet("color: orange; font-weight: bold;")
         self.statusBar.showMessage("{0!s} out of {1!s} tests passed!".format(num_passed, len(test_results)), 4000)
 
+    @QtCore.pyqtSlot()
+    def copy_testcase(self):
+        selected_tests = self.dataView.get_selected_items()
+        try:
+            copy = selected_tests[0].copy()
+        except:
+            QMessageBox().critical(self, "Error", "Could not copy testcase.")
+            LOGGER.exception("Error copying testcase")
+        else:
+            self.dataTable.update_row_from_item(copy)
+            self.model.add_test(copy)
+
     @QtCore.pyqtSlot(QtCore.QPoint)
     def showContextMenu(self, pos):
         menu = QMenu()
         self.add_standard_menu_actions(menu)
 
         actions_to_add =[]
+        if len(self.dataView.selectedIndexes()) == 1:
+            menu.addSeparator()
+            action_copy = QAction("Copy testcase")
+            action_copy.triggered.connect(self.copy_testcase)
+            menu.addAction(action_copy)
+            menu.addSeparator()
+
         if self.dataView.selectedIndexes():
             run_selected_action = QAction(self.tr("Run selected"), menu)
             run_selected_action.triggered.connect(self.run_selected)

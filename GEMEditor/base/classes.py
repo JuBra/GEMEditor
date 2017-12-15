@@ -37,9 +37,11 @@ class Settings(QtCore.QSettings):
 
     """
 
-    def __init__(self, *args):
+    def __init__(self, *args, group=None):
         super(Settings, self).__init__(*args)
         self.prefix = ""
+        if group:
+            self.beginGroup(group)
 
     def beginGroup(self, p_str):
         super(Settings, self).beginGroup(p_str)
@@ -58,6 +60,13 @@ class Settings(QtCore.QSettings):
         else:
             msg = "Setting '{0}{1!s}' changed to '{2!s:.100}'".format(self.prefix, p_str, Any)
         LOGGER.debug(msg)
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.sync()
+        self.endGroup()
 
 
 class WindowManager(QtCore.QObject):

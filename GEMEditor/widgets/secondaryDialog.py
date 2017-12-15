@@ -1,6 +1,6 @@
 from GEMEditor.base.ui.TableDisplayWidgetAddDel import Ui_TableDisplayWidgetAddDel
 from GEMEditor.base.widgets import TableDisplayWidget
-from GEMEditor.model.display.tables import LinkedReferenceTable
+from GEMEditor.model.display.tables import ReferenceTable
 from GEMEditor.model.selection.reference import ReferenceSelectionDialog
 from PyQt5 import QtCore
 from PyQt5.QtWidgets import QAction
@@ -13,7 +13,7 @@ class ReferenceDisplayWidget(TableDisplayWidget, Ui_TableDisplayWidgetAddDel):
 
     def __init__(self, parent=None):
         TableDisplayWidget.__init__(self, parent)
-        self.dataTable = LinkedReferenceTable(self)
+        self.dataTable = ReferenceTable(self)
         self.setupUi(self)
 
         self.model = None

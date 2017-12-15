@@ -1,6 +1,7 @@
 import operator
 from collections import OrderedDict
 from uuid import uuid4
+from copy import copy
 from GEMEditor.model.classes.base import ReferenceLink
 
 
@@ -40,6 +41,18 @@ class ModelTest(ReferenceLink):
         self.outcomes[:] = []
         for x in list(self.references):
             self.remove_reference(x)
+
+    def copy(self):
+        new = type(self)(description="{0!s} (Copy)".format(self.description),
+                         comment=self.comment)
+
+        new.gene_settings.extend(copy(x) for x in self.gene_settings)
+        new.reaction_settings.extend(copy(x) for x in self.reaction_settings)
+        new.outcomes.extend(copy(x) for x in self.outcomes)
+
+        for reference in self.references:
+            new.add_reference(reference)
+        return new
 
 
 class ReactionSetting:
