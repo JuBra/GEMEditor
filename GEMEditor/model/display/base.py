@@ -2,7 +2,7 @@ import webbrowser
 from GEMEditor.base.ui.TableDisplayWidgetAddDel import Ui_TableDisplayWidgetAddDel
 from GEMEditor.base.widgets import TableDisplayWidget
 from GEMEditor.model.classes.evidence import Evidence
-from GEMEditor.model.display.tables import AnnotationTable, EvidenceTable, LinkedReferenceTable
+from GEMEditor.model.display.tables import AnnotationTable, EvidenceTable, ReferenceTable
 from GEMEditor.model.display.ui.CommentDisplayWidget import Ui_CommentDisplayWidget
 from GEMEditor.model.display.ui.SettingDisplayWiget import Ui_SettingsDisplayWidget
 from GEMEditor.model.edit.annotation import EditAnnotationDialog
@@ -189,7 +189,7 @@ class ReferenceDisplayWidget(QWidget, Ui_SettingsDisplayWidget):
     def __init__(self, parent=None):
         super(ReferenceDisplayWidget, self).__init__(parent)
         self.setupUi(self)
-        self.dataTable = LinkedReferenceTable(self)
+        self.dataTable = ReferenceTable(self)
         self.tableView.setModel(self.dataTable)
         self.tableView.setEditTriggers(QAbstractItemView.NoEditTriggers)
 

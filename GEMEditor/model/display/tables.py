@@ -373,20 +373,3 @@ class OutcomesTable(ElementTable):
         return Outcome(reaction=self.item(row_idx, 0).link,
                        operator=self.item(row_idx, 1).text(),
                        value=self.item(row_idx, 2).data(2))
-
-
-class LinkedReferenceTable(ElementTable):
-
-    header = ("Authors",)
-
-    def __init__(self, *args):
-        ElementTable.__init__(self, *args)
-        self.set_header()
-
-    @staticmethod
-    def row_from_item(reference):
-        return [LinkedItem(reference.reference_string(), reference)]
-
-    def item_from_row(self, row_idx):
-        """ Return the outcome object as represented in a table row """
-        return self.item(row_idx, 0).link
