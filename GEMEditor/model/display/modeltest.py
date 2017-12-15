@@ -268,7 +268,7 @@ class OutcomeDisplayWidget(QWidget, Ui_SettingsDisplayWidget):
         if dialog.exec_():
             for reaction in dialog.selected_items():
                 if reaction not in set([self.dataTable.item(i).link for i in range(self.dataTable.rowCount())]):
-                    self.dataTable.update_row_from_item(Outcome(reaction))
+                    self.dataTable.update_row_from_item(Outcome(reaction, value=0.01, operator="greater than"))
 
     @QtCore.pyqtSlot()
     def toggle_condition_del_button(self):
