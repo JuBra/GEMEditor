@@ -1,6 +1,6 @@
 from unittest.mock import Mock
 from GEMEditor.model.classes.cobra import Reaction, Model
-from GEMEditor.model.edit.reaction import ReactionInputDialog, SetFluxValueDialog
+from GEMEditor.model.edit.reaction import EditReactionDialog, SetFluxValueDialog
 from PyQt5.QtWidgets import QApplication, QDialogButtonBox
 from PyQt5.QtTest import QTest
 from PyQt5.QtCore import Qt
@@ -16,11 +16,11 @@ if app is None:
 class TestReactionInputDialog:
 
     def test_button_disabled_upon_init(self):
-        dialog = ReactionInputDialog()
+        dialog = EditReactionDialog()
         assert dialog.buttonBox.button(QDialogButtonBox.Save).isEnabled() is False
 
     def test_set_item_passed_to_all_children(self):
-        dialog = ReactionInputDialog()
+        dialog = EditReactionDialog()
         metabolite = Reaction()
         model = Model()
 
@@ -41,7 +41,7 @@ class TestReactionInputDialog:
             dialog.tabWidget.widget(i).set_item.assert_called_once_with(metabolite, model)
 
     def test_save_state_passed_to_all_children(self):
-        dialog = ReactionInputDialog()
+        dialog = EditReactionDialog()
 
         dialog.attributeWidget.save_state = Mock()
         for i in range(dialog.tabWidget.count()):

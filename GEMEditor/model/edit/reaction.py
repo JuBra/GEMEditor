@@ -1,3 +1,4 @@
+import logging
 from GEMEditor.base.dialogs import CustomStandardDialog
 from GEMEditor.model.edit.ui.EditReactionDialog import Ui_ReactionEditDialog
 from GEMEditor.model.edit.ui.SetFluxvalueDialog import Ui_SetFluxValueDialog
@@ -5,10 +6,13 @@ from PyQt5 import QtCore
 from PyQt5.QtWidgets import QDialogButtonBox, QDialog
 
 
-class ReactionInputDialog(CustomStandardDialog, Ui_ReactionEditDialog):
+LOGGER = logging.getLogger(__name__)
+
+
+class EditReactionDialog(CustomStandardDialog, Ui_ReactionEditDialog):
 
     def __init__(self, reaction=None, model=None, parent=None):
-        CustomStandardDialog.__init__(self, parent)
+        super(EditReactionDialog, self).__init__(parent)
         self.setupUi(self)
         self.reaction = None
         self.model = None
@@ -29,8 +33,10 @@ class ReactionInputDialog(CustomStandardDialog, Ui_ReactionEditDialog):
 
     def set_item(self, reaction, model):
         """ Set the metabolite and current model """
+        LOGGER.debug("Setting item to attribute")
         self.attributeWidget.set_item(reaction, model)
         for i in range(self.tabWidget.count()):
+            LOGGER.debug("Setting item to tabwidget {0!s}".format(i))
             self.tabWidget.widget(i).set_item(reaction, model)
 
     def content_changed(self):

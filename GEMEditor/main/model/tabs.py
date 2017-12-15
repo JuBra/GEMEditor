@@ -12,7 +12,7 @@ from GEMEditor.model.display.proxymodels import ReactionProxyFilter, MetaboliteP
 from GEMEditor.model.edit.gene import GeneEditDialog
 from GEMEditor.model.edit.metabolite import MetaboliteEditDialog
 from GEMEditor.model.edit.modeltest import EditModelTestDialog
-from GEMEditor.model.edit.reaction import ReactionInputDialog, SetFluxValueDialog
+from GEMEditor.model.edit.reaction import EditReactionDialog, SetFluxValueDialog
 from GEMEditor.model.edit.reference import ReferenceEditDialog
 from GEMEditor.solution.base import status_objective_from_solution, set_objective_to_label, set_status_to_label
 from GEMEditor.solution.display import SolutionDialog, factory_solution
@@ -197,7 +197,7 @@ class ReactionTab(StandardTab):
             col_index = selected_index[0].column()
             edit_reaction = self.dataTable.item_from_row(row_index)
 
-            dialog = ReactionInputDialog(edit_reaction, self.model, parent=self)
+            dialog = EditReactionDialog(edit_reaction, self.model, parent=self)
 
             # Todo: Move this to the dialog
             if col_index == 0:
@@ -223,7 +223,7 @@ class ReactionTab(StandardTab):
     @QtCore.pyqtSlot()
     def addItemSlot(self):
         new_reaction = Reaction()
-        dialog = ReactionInputDialog(new_reaction, self.model, parent=self)
+        dialog = EditReactionDialog(new_reaction, self.model, parent=self)
         status = dialog.exec_()
         if status:
             self.model.add_reaction(new_reaction)
