@@ -1,7 +1,7 @@
 import logging
 import escher
 from collections import defaultdict
-from GEMEditor.base.classes import Settings
+from GEMEditor.base import Settings, restore_state, restore_geometry
 from GEMEditor.map.base import ESCHER_GET_HTML_OPTIONS
 from GEMEditor.map.turnover.generate import setup_turnover_map
 from GEMEditor.map.turnover.ui import Ui_TurnoverDialog
@@ -163,26 +163,10 @@ class TurnoverDialog(QDialog, Ui_TurnoverDialog):
         -------
 
         """
-
-        settings = Settings()
-        settings.beginGroup(self.__class__.__name__)
-
-        # Table header
-        header_state = settings.value("TableHeader")
-        if header_state is not None:
-            self.dataView.header().restoreState(header_state)
-
-        # Dialog geomnetry
-        geometry = settings.value("DialogGeometry")
-        if geometry is not None:
-            self.restoreGeometry(geometry)
-
-        # Splitter state
-        splitter_state = settings.value("SplitterState")
-        if splitter_state is not None:
-            self.splitter.restoreState(splitter_state)
-
-        settings.endGroup()
+        with Settings(group=self.__class__.__name__) as settings:
+            restore_state(self.dataView.header(), settings.value("TableHeader"))
+            restore_geometry(self, settings.value("DialogGeometry"))
+            restore_state(self.splitter, settings.value("SplitterState"))
 
     def save_settings(self):
         """ Store dialog geometry in settings
@@ -191,11 +175,7 @@ class TurnoverDialog(QDialog, Ui_TurnoverDialog):
         -------
         None
         """
-
-        settings = Settings()
-        settings.beginGroup(self.__class__.__name__)
-        settings.setValue("SplitterState", self.splitter.saveState())
-        settings.setValue("TableHeader", self.dataView.header().saveState())
-        settings.setValue("DialogGeometry", self.saveGeometry())
-        settings.endGroup()
-        settings.sync()
+        with Settings(group=self.__class__.__name__) as settings:
+            settings.setValue("SplitterState", self.splitter.saveState())
+            settings.setValue("TableHeader", self.dataView.header().saveState())
+            settings.setValue("DialogGeometry", self.saveGeometry())

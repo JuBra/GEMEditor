@@ -298,3 +298,20 @@ def restore_state(object, state):
 
     if state:
         object.restoreState(state)
+
+
+def restore_geometry(object, state):
+    """ Restore the geometry of an object
+
+        Parameters
+        ----------
+        object: Object which should be restored
+        state: State from settings
+
+        Returns
+        -------
+
+    """
+
+    if state:
+        object.restoreGeometry(state)

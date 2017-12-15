@@ -1,6 +1,5 @@
 from collections import defaultdict
-
-from GEMEditor.base.classes import Settings
+from GEMEditor.base import Settings, restore_state, restore_geometry
 from GEMEditor.base.widgets import SearchTableWidget
 from GEMEditor.evidence.assertions import assertion_to_group
 from GEMEditor.evidence.ui.DialogEvidenceStatus import Ui_DialogEvidenceStatus
@@ -127,32 +126,20 @@ class DialogEvidenceStatus(QDialog, Ui_DialogEvidenceStatus):
 
     @pyqtSlot()
     def save_dialog_state(self):
-        settings = Settings()
-        settings.setValue(self.__class__.__name__+"Geometry", self.saveGeometry())
-        settings.setValue(self.__class__.__name__ + "ErrorTable",
-                          self.tab_error.dataView.horizontalHeader().saveState())
-        settings.setValue(self.__class__.__name__ + "ConflictTable",
-                          self.tab_conflict.dataView.header().saveState())
-        settings.setValue(self.__class__.__name__ + "Failingtable",
-                          self.tab_failing.dataView.header().saveState())
-        settings.sync()
+        with Settings(group=self.__class__.__name__) as settings:
+            settings.setValue("Geometry", self.saveGeometry())
+            settings.setValue("ErrorTable", self.tab_error.dataView.horizontalHeader().saveState())
+            settings.setValue("ConflictTable", self.tab_conflict.dataView.header().saveState())
+            settings.setValue("Failingtable", self.tab_failing.dataView.header().saveState())
 
     def restore_dialog_geometry(self):
         # Restore the geometry of the dialog
         # Should be called in the __init__(self) of the subclass
-        settings = Settings()
-        geometry = settings.value(self.__class__.__name__+"Geometry")
-        if geometry is not None:
-            self.restoreGeometry(geometry)
-        error_header = settings.value(self.__class__.__name__ + "ErrorTable")
-        if error_header is not None:
-            self.tab_error.dataView.horizontalHeader().restoreState(error_header)
-        conflict_header = settings.value(self.__class__.__name__ + "ConflictTable")
-        if conflict_header is not None:
-            self.tab_conflict.dataView.header().restoreState(conflict_header)
-        failing_header = settings.value(self.__class__.__name__ + "Failingtable")
-        if failing_header is not None:
-            self.tab_failing.dataView.header().restoreState(failing_header)
+        with Settings(group=self.__class__.__name__) as settings:
+            restore_geometry(self, settings.value("Geometry"))
+            restore_state(self.tab_error.dataView.horizontalHeader(), settings.value("ErrorTable"))
+            restore_state(self.tab_conflict.dataView.header(), settings.value("ConflictTable"))
+            restore_state(self.tab_failing.dataView.header(), settings.value("Failingtable"))
 
 
 def sort_evidences(evidences):

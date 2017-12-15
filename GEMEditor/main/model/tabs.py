@@ -3,8 +3,7 @@ import logging
 from collections import OrderedDict
 from GEMEditor.analysis.model_test import run_tests
 from GEMEditor.base.classes import Settings, ProgressDialog
-from GEMEditor.base.functions import generate_copy_id
-from GEMEditor.base.dialogs import DataFrameDialog
+from GEMEditor.base.functions import generate_copy_id, restore_state
 from GEMEditor.main.model.ui import Ui_StandardTab, Ui_AnalysisTab, Ui_SolutionTableWidget, Ui_model_stats_tab
 from GEMEditor.model.classes.cobra import Gene, Reaction, Metabolite, find_duplicate_metabolite
 from GEMEditor.model.classes.modeltest import ModelTest
@@ -166,6 +165,14 @@ class StandardTab(QWidget, Ui_StandardTab):
     def update_row(self, row):
         """ Update datatable row from the linked object """
         self.dataTable.update_row_from_item(self.dataTable.item(row).link, row)
+
+    def save_view_state(self):
+        with Settings(group=self.__class__.__name__) as settings:
+            settings.setValue("TableHeader", self.dataView.horizontalHeader().saveState())
+
+    def restore_view_state(self):
+        with Settings(group=self.__class__.__name__) as settings:
+            restore_state(self.dataView.horizontalHeader(), settings.value("TableHeader"))
 
 
 class ReactionTab(StandardTab):
@@ -407,9 +414,7 @@ class ReactionTab(StandardTab):
         if self.model is not None:
             self.dataTable = self.model.QtReactionTable
             self.proxyModel.setSourceModel(self.dataTable)
-            header_state = Settings().value("ReactionTableViewState")
-            if header_state is not None:
-                self.dataView.horizontalHeader().restoreState(header_state)
+            self.restore_view_state()
 
 
 class MetaboliteTab(StandardTab):
@@ -457,10 +462,7 @@ class MetaboliteTab(StandardTab):
         if self.model is not None:
             self.dataTable = self.model.QtMetaboliteTable
             self.proxyModel.setSourceModel(self.dataTable)
-            self.dataTable.set_header()
-            header_state = Settings().value("MetaboliteTableViewState")
-            if header_state is not None:
-                self.dataView.horizontalHeader().restoreState(header_state)
+            self.restore_view_state()
 
     @QtCore.pyqtSlot()
     def set_charge(self):
@@ -581,9 +583,7 @@ class GeneTab(StandardTab):
         if self.model is not None:
             self.dataTable = self.model.QtGeneTable
             self.proxyModel.setSourceModel(self.dataTable)
-            header_state = Settings().value("GenesTableViewState")
-            if header_state is not None:
-                self.dataView.horizontalHeader().restoreState(header_state)
+            self.restore_view_state()
 
     def set_genome(self):
         rows = self.dataView.get_selected_rows()
@@ -654,9 +654,7 @@ class ReferenceTab(StandardTab):
         if self.model is not None:
             self.dataTable = self.model.QtReferenceTable
             self.proxyModel.setSourceModel(self.dataTable)
-            header_state = Settings().value("ReferenceTableViewState")
-            if header_state is not None:
-                self.dataView.horizontalHeader().restoreState(header_state)
+            self.restore_view_state()
 
 
 class ModelTestsTab(StandardTab):
@@ -715,9 +713,7 @@ class ModelTestsTab(StandardTab):
         if self.model is not None:
             self.dataTable = self.model.QtTestsTable
             self.proxyModel.setSourceModel(self.dataTable)
-            header_state = Settings().value("TestsTableViewState")
-            if header_state is not None:
-                self.dataView.horizontalHeader().restoreState(header_state)
+            self.restore_view_state()
 
     @QtCore.pyqtSlot()
     def run_selected(self):
