@@ -2,7 +2,7 @@ from collections import OrderedDict
 from PyQt5.QtCore import Qt, QSortFilterProxyModel, pyqtSlot, QPoint
 from PyQt5.QtGui import QKeySequence
 from PyQt5.QtWidgets import QWidget, QDialog, QAction, QMenu, QApplication, QMessageBox
-from GEMEditor.base import Settings, restore_state
+from GEMEditor.base import Settings, restore_state, restore_geometry
 from GEMEditor.map.dialog import MapDisplayDialog
 from GEMEditor.map.turnover import TurnoverDialog
 from GEMEditor.solution.base import status_objective_from_solution, set_objective_to_label, set_status_to_label
@@ -223,7 +223,7 @@ class SolutionDialog(QDialog, Ui_SolutionDialog):
 
     def restore_geometry(self):
         with Settings(group=self.__class__.__name__) as settings:
-            restore_state(self, settings.value("DialogGeometry"))
+            restore_geometry(self, settings.value("DialogGeometry"))
 
             for i in range(self.tabWidget.count()):
                 self.tabWidget.widget(i).restore_geometry(settings)
