@@ -42,12 +42,28 @@ class TestModelTest:
         self.test.add_outcome(self.outcome1)
         self.test.add_reference(self.reference1)
         self.test.add_setting(self.reaction_setting)
+        self.test.add_setting(self.gene_setting)
 
         self.test.clear_all()
         assert len(self.test.outcomes) == 0
         assert len(self.test.gene_settings) == 0
         assert len(self.test.reaction_settings) == 0
         assert len(self.test.references) == 0
+
+    def test_copying(self):
+        test = self.test
+        test.add_outcome(self.outcome1)
+        test.add_reference(self.reference1)
+        test.add_setting(self.reaction_setting)
+        test.add_setting(self.gene_setting)
+
+        copy = test.copy()
+        assert test.id != copy.id
+        assert test.description != copy.description
+        assert test.outcomes == copy.outcomes
+        assert test.gene_settings == copy.gene_settings
+        assert test.reaction_settings == copy.reaction_settings
+        assert test.references == copy.references
 
 
 class TestOutcomes:
