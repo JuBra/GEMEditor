@@ -42,6 +42,7 @@ class EditEvidenceDialog(CustomStandardDialog, Ui_new):
     def setup_connections(self):
         self.pushButton_select_eco.clicked.connect(self.select_eco)
         self.comboBox.currentIndexChanged.connect(self.stackedWidget.setCurrentIndex)
+        self.finished.connect(self.save_dialog_geometry)
         self.accepted.connect(self.save_state)
 
     def set_toolbutton_menu(self):
