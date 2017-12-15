@@ -3,10 +3,11 @@ from PyQt5.QtWidgets import QItemDelegate, QDoubleSpinBox, QComboBox
 
 
 class FloatInputDelegate(QItemDelegate):
-    def __init__(self, parent, precision=6, allowed_range=(-1000., 1000.)):
+    def __init__(self, parent, precision=6, allowed_range=(-1000., 1000.), default=0.):
         QItemDelegate.__init__(self, parent)
         self.precision = precision
         self.allowed_range = allowed_range
+        self._default = default
 
     def createEditor(self, parent, option, index):
         editor = QDoubleSpinBox(parent)
@@ -16,7 +17,10 @@ class FloatInputDelegate(QItemDelegate):
 
     def setEditorData(self, spin_box, index):
         value = index.model().data(index, QtCore.Qt.DisplayRole)
-        spin_box.setValue(value or 0.)
+        if value is None:
+            spin_box.setValue(self._default)
+        else:
+            spin_box.setValue(value)
 
     def setModelData(self, spin_box, model, index):
         value = spin_box.value()

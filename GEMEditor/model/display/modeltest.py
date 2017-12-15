@@ -197,7 +197,7 @@ class OutcomeDisplayWidget(QWidget, Ui_SettingsDisplayWidget):
         self.tableView.setModel(self.dataTable)
 
         self.tableView.setItemDelegateForColumn(1, ComboBoxDelegate(parent=self.tableView, choices=["greater than", "less than"]))
-        self.tableView.setItemDelegateForColumn(2, FloatInputDelegate(parent=self.tableView, precision=2))
+        self.tableView.setItemDelegateForColumn(2, FloatInputDelegate(parent=self.tableView, precision=2, default=0.01))
 
         # There are no standard outcomes
         self.button_add_current.setVisible(False)
