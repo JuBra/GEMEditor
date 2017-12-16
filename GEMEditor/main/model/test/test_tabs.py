@@ -81,11 +81,11 @@ class TestReactionTab:
 
     @pytest.fixture()
     def patch_edit_dialog_true(self, monkeypatch):
-        monkeypatch.setattr("GEMEditor.model.edit.reaction.ReactionInputDialog.exec_", Mock(return_value=True))
+        monkeypatch.setattr("GEMEditor.model.edit.reaction.EditReactionDialog.exec_", Mock(return_value=True))
 
     @pytest.fixture()
     def patch_edit_dialog_false(self, monkeypatch):
-        monkeypatch.setattr("GEMEditor.model.edit.reaction.ReactionInputDialog.exec_", Mock(return_value=False))
+        monkeypatch.setattr("GEMEditor.model.edit.reaction.EditReactionDialog.exec_", Mock(return_value=False))
 
     def test_setup(self):
         tab = ReactionTab()
