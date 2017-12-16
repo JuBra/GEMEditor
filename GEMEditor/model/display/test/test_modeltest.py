@@ -79,7 +79,7 @@ class TestReactionSettingDisplayWidget:
         detector = Mock()
         widget.changed.connect(detector.test)
 
-        widget.dataTable.update_row_from_item(ReactionSetting(Reaction()))
+        widget.dataTable.update_row_from_item(ReactionSetting(Reaction(), 200., -200, 0.))
         assert detector.test.called is True
         assert widget.content_changed is True
 
