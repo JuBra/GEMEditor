@@ -296,9 +296,13 @@ class ReactionSettingsTable(ElementTable):
 
     def item_from_row(self, row_idx):
         """ Return the setting object as represented in a table row """
+        # Make sure the lower boundary is smaller than the upper
+        bounds = (self.item(row_idx, 1).data(2),
+                  self.item(row_idx, 2).data(2))
+
         return ReactionSetting(reaction=self.item(row_idx, 0).link,
-                               lower_bound=self.item(row_idx, 1).data(2),
-                               upper_bound=self.item(row_idx, 2).data(2),
+                               lower_bound=min(bounds),
+                               upper_bound=max(bounds),
                                objective_coefficient=self.item(row_idx, 3).data(2))
 
 

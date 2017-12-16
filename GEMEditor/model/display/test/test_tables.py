@@ -372,6 +372,15 @@ class TestReactionSettingsTable:
         assert outcome.lower_bound == self.setting1_lower_bound
         assert outcome.objective_coefficient is not self.setting1_objective
 
+    def test_get_item_correct_order_bounds(self):
+        input = ReactionSetting(self.reaction1, upper_bound=200., lower_bound=400.)
+        self.table.update_row_from_item(input)
+
+        setting = self.table.get_items().pop()
+        assert setting.reaction == self.reaction1
+        assert setting.lower_bound == 200.
+        assert setting.upper_bound == 400.
+
     def test_populate_table(self):
         self.table.populate_table([self.setting1, self.setting2])
 
