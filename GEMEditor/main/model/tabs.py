@@ -3,8 +3,7 @@ import logging
 from collections import OrderedDict
 from GEMEditor.analysis.model_test import run_tests
 from GEMEditor.base.classes import Settings, ProgressDialog
-from GEMEditor.base.functions import generate_copy_id
-from GEMEditor.base.dialogs import DataFrameDialog
+from GEMEditor.base.functions import generate_copy_id, restore_state
 from GEMEditor.main.model.ui import Ui_StandardTab, Ui_AnalysisTab, Ui_SolutionTableWidget, Ui_model_stats_tab
 from GEMEditor.model.classes.cobra import Gene, Reaction, Metabolite, find_duplicate_metabolite
 from GEMEditor.model.classes.modeltest import ModelTest
@@ -13,7 +12,7 @@ from GEMEditor.model.display.proxymodels import ReactionProxyFilter, MetaboliteP
 from GEMEditor.model.edit.gene import GeneEditDialog
 from GEMEditor.model.edit.metabolite import MetaboliteEditDialog
 from GEMEditor.model.edit.modeltest import EditModelTestDialog
-from GEMEditor.model.edit.reaction import ReactionInputDialog, SetFluxValueDialog
+from GEMEditor.model.edit.reaction import EditReactionDialog, SetFluxValueDialog
 from GEMEditor.model.edit.reference import ReferenceEditDialog
 from GEMEditor.solution.base import status_objective_from_solution, set_objective_to_label, set_status_to_label
 from GEMEditor.solution.display import SolutionDialog, factory_solution
@@ -167,6 +166,14 @@ class StandardTab(QWidget, Ui_StandardTab):
         """ Update datatable row from the linked object """
         self.dataTable.update_row_from_item(self.dataTable.item(row).link, row)
 
+    def save_view_state(self):
+        with Settings(group=self.__class__.__name__) as settings:
+            settings.setValue("TableHeader", self.dataView.horizontalHeader().saveState())
+
+    def restore_view_state(self):
+        with Settings(group=self.__class__.__name__) as settings:
+            restore_state(self.dataView.horizontalHeader(), settings.value("TableHeader"))
+
 
 class ReactionTab(StandardTab):
 
@@ -190,7 +197,7 @@ class ReactionTab(StandardTab):
             col_index = selected_index[0].column()
             edit_reaction = self.dataTable.item_from_row(row_index)
 
-            dialog = ReactionInputDialog(edit_reaction, self.model, parent=self)
+            dialog = EditReactionDialog(edit_reaction, self.model, parent=self)
 
             # Todo: Move this to the dialog
             if col_index == 0:
@@ -216,7 +223,7 @@ class ReactionTab(StandardTab):
     @QtCore.pyqtSlot()
     def addItemSlot(self):
         new_reaction = Reaction()
-        dialog = ReactionInputDialog(new_reaction, self.model, parent=self)
+        dialog = EditReactionDialog(new_reaction, self.model, parent=self)
         status = dialog.exec_()
         if status:
             self.model.add_reaction(new_reaction)
@@ -407,9 +414,7 @@ class ReactionTab(StandardTab):
         if self.model is not None:
             self.dataTable = self.model.QtReactionTable
             self.proxyModel.setSourceModel(self.dataTable)
-            header_state = Settings().value("ReactionTableViewState")
-            if header_state is not None:
-                self.dataView.horizontalHeader().restoreState(header_state)
+            self.restore_view_state()
 
 
 class MetaboliteTab(StandardTab):
@@ -457,10 +462,7 @@ class MetaboliteTab(StandardTab):
         if self.model is not None:
             self.dataTable = self.model.QtMetaboliteTable
             self.proxyModel.setSourceModel(self.dataTable)
-            self.dataTable.set_header()
-            header_state = Settings().value("MetaboliteTableViewState")
-            if header_state is not None:
-                self.dataView.horizontalHeader().restoreState(header_state)
+            self.restore_view_state()
 
     @QtCore.pyqtSlot()
     def set_charge(self):
@@ -581,9 +583,7 @@ class GeneTab(StandardTab):
         if self.model is not None:
             self.dataTable = self.model.QtGeneTable
             self.proxyModel.setSourceModel(self.dataTable)
-            header_state = Settings().value("GenesTableViewState")
-            if header_state is not None:
-                self.dataView.horizontalHeader().restoreState(header_state)
+            self.restore_view_state()
 
     def set_genome(self):
         rows = self.dataView.get_selected_rows()
@@ -654,9 +654,7 @@ class ReferenceTab(StandardTab):
         if self.model is not None:
             self.dataTable = self.model.QtReferenceTable
             self.proxyModel.setSourceModel(self.dataTable)
-            header_state = Settings().value("ReferenceTableViewState")
-            if header_state is not None:
-                self.dataView.horizontalHeader().restoreState(header_state)
+            self.restore_view_state()
 
 
 class ModelTestsTab(StandardTab):
@@ -715,9 +713,7 @@ class ModelTestsTab(StandardTab):
         if self.model is not None:
             self.dataTable = self.model.QtTestsTable
             self.proxyModel.setSourceModel(self.dataTable)
-            header_state = Settings().value("TestsTableViewState")
-            if header_state is not None:
-                self.dataView.horizontalHeader().restoreState(header_state)
+            self.restore_view_state()
 
     @QtCore.pyqtSlot()
     def run_selected(self):

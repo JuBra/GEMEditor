@@ -2,7 +2,7 @@ from collections import OrderedDict
 from PyQt5.QtCore import Qt, QSortFilterProxyModel, pyqtSlot, QPoint
 from PyQt5.QtGui import QKeySequence
 from PyQt5.QtWidgets import QWidget, QDialog, QAction, QMenu, QApplication, QMessageBox
-from GEMEditor.base.classes import Settings
+from GEMEditor.base import Settings, restore_state, restore_geometry
 from GEMEditor.map.dialog import MapDisplayDialog
 from GEMEditor.map.turnover import TurnoverDialog
 from GEMEditor.solution.base import status_objective_from_solution, set_objective_to_label, set_status_to_label
@@ -63,16 +63,13 @@ class BaseSolutionTab(QWidget, Ui_SearchTab):
         self.model = model
         self.dataTable.set_solution(model, solution)
 
-    def save_geometry(self, prefix="", settings=None):
-        settings = settings or Settings()
-        settings.setValue(prefix+self.__class__.__name__,
+    def save_geometry(self, settings):
+        settings.setValue(self.__class__.__name__+"TableHeader",
                           self.dataView.horizontalHeader().saveState())
 
-    def restore_geometry(self, prefix="", settings=None):
-        settings = settings or Settings()
-        state = settings.value(prefix+self.__class__.__name__)
-        if state:
-            self.dataView.horizontalHeader().restoreState(state)
+    def restore_geometry(self, settings):
+        restore_state(self.dataView.horizontalHeader(),
+                      settings.value(self.__class__.__name__+"TableHeader"))
 
     def keyPressEvent(self, event):
         if event.matches(QKeySequence.Copy):
@@ -217,22 +214,19 @@ class SolutionDialog(QDialog, Ui_SolutionDialog):
             self.tabWidget.widget(i).set_solution(model, solution)
 
     @pyqtSlot()
-    def save_geometry(self, prefix="", settings=None):
-        settings = settings or Settings()
-        string = prefix+self.__class__.__name__
-        settings.setValue(string, self.saveGeometry())
-        for i in range(self.tabWidget.count()):
-            self.tabWidget.widget(i).save_geometry(string, settings)
-        settings.sync()
+    def save_geometry(self):
+        with Settings(group=self.__class__.__name__) as settings:
+            settings.setValue("DialogGeometry", self.saveGeometry())
 
-    def restore_geometry(self, prefix="", settings=None):
-        settings = settings or Settings()
-        string = prefix + self.__class__.__name__
-        state = settings.value(string)
-        if state:
-            self.restoreGeometry(state)
-        for i in range(self.tabWidget.count()):
-            self.tabWidget.widget(i).restore_geometry(string, settings)
+            for i in range(self.tabWidget.count()):
+                self.tabWidget.widget(i).save_geometry(settings)
+
+    def restore_geometry(self):
+        with Settings(group=self.__class__.__name__) as settings:
+            restore_geometry(self, settings.value("DialogGeometry"))
+
+            for i in range(self.tabWidget.count()):
+                self.tabWidget.widget(i).restore_geometry(settings)
 
 
 def factory_solution(model, solution):

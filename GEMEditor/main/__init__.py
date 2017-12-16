@@ -302,13 +302,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             dialog.exec_()
 
     def save_table_headers(self):
-        settings = Settings()
-        settings.setValue("ReactionTableViewState", self.reactionTab.dataView.horizontalHeader().saveState())
-        settings.setValue("MetaboliteTableViewState", self.metaboliteTab.dataView.horizontalHeader().saveState())
-        settings.setValue("GenesTableViewState", self.geneTab.dataView.horizontalHeader().saveState())
-        settings.setValue("TestsTableViewState", self.testsTab.dataView.horizontalHeader().saveState())
-        settings.setValue("ReferenceTableViewState", self.referenceTab.dataView.horizontalHeader().saveState())
-        settings.sync()
+        for i in range(self.tabWidget.count()):
+            try:
+                self.tabWidget.widget(i).save_view_state()
+            except AttributeError:
+                pass
 
     @QtCore.pyqtSlot()
     def browsePubmedSlot(self):
