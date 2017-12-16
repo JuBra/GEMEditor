@@ -1,11 +1,17 @@
 from unittest.mock import Mock
-
 from GEMEditor.model.classes.cobra import Model, Reaction, Gene
 from GEMEditor.model.classes.modeltest import ModelTest, ReactionSetting, GeneSetting, Outcome
 from GEMEditor.model.display.modeltest import ReactionSettingDisplayWidget, GeneSettingDisplayWidget, \
     OutcomeDisplayWidget
 from PyQt5 import QtTest, QtCore
-from PyQt5.QtWidgets import QWidget
+from PyQt5.QtWidgets import QWidget, QApplication
+
+# Make sure to only start an application
+# if there is no active one. Opening multiple
+# applications will lead to a crash.
+app = QApplication.instance()
+if app is None:
+    app = QApplication([])
 
 
 class TestReactionSettingDisplayWidget:
