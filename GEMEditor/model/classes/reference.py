@@ -40,6 +40,9 @@ class Reference:
             result.add(Annotation("doi", self.doi))
         return result
 
+    def add_author(self, author):
+        self.authors.append(author)
+
     def add_link(self, item, reciprocal=True):
         """ Remove reference link from item
 

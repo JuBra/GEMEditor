@@ -1,8 +1,12 @@
+import logging
 from GEMEditor.model.classes.reference import Reference, Author
 from GEMEditor.rw import *
 from GEMEditor.rw.annotation import annotate_xml_from_model, annotate_element_from_xml
 from PyQt5.QtWidgets import QApplication
 from lxml.etree import SubElement
+
+
+LOGGER = logging.getLogger(__name__)
 
 
 def add_references(model_node, model):
@@ -35,59 +39,67 @@ def add_references(model_node, model):
             annotate_xml_from_model(reference_node, reference)
 
 
-def parse_references(model_node, model=None, progress=None):
+def parse_references(parser, model_node, model, progress):
+    """ Parse basic model information
 
-    reference_list_node = model_node.find(ge_listOfReferences)
+    Parameters
+    ----------
+    parser: GEMEditor.rw.parsers.BaseParser,
+        Parser object reading file
+    model: GEMEditor.model.classes.Model,
+        Model being read
+    model_node:
+        XML node containing model information
+    progress: QProgressDialog
+        Progress dialog
 
-    if reference_list_node is None:
+    """
+
+    reference_list = model_node.find(ge_listOfReferences)
+    if reference_list is None or progress.wasCanceled():
         return
-    elif progress is None:
-        pass
-    elif not progress.wasCanceled():
+    else:
         progress.setLabelText("Reading references...")
-        progress.setRange(0, len(reference_list_node))
-    elif progress.wasCanceled():
-        return
+        progress.setRange(0, len(reference_list))
 
-    references = []
-    for i, reference_node in enumerate(reference_list_node.iterfind(ge_reference)):
+    # Add references to model
+    for i, reference_node in enumerate(reference_list.iterfind(ge_reference)):
 
-        if progress is None:
-            pass
-        elif not progress.wasCanceled():
+        # Update dialog
+        if progress.wasCanceled():
+            return
+        else:
+            LOGGER.debug("Parsing reference on line: {0!s}".format(reference_node.sourceline))
             progress.setValue(i)
             QApplication.processEvents()
+
+        # Parse reference
+        reference = Reference(id=reference_node.get("id"),
+                              year=reference_node.get("year"),
+                              title=reference_node.get("title"),
+                              journal=reference_node.get("journal"),
+                              url=reference_node.get("url"))
+
+        # Add authors to reference
+        author_list = reference_node.find(ge_listOfAuthors)
+        if not author_list:
+            parser.warn("Line {0!s}: Authors missing in reference '{1!s}'".format(reference_node.sourceline,
+                                                                                  reference.id))
         else:
-            return
+            for author_node in author_list.iterfind(ge_author):
+                author = Author(firstname=author_node.get("firstname"),
+                                lastname=author_node.get("lastname"),
+                                initials=author_node.get("initials"))
+                reference.add_author(author)
 
-        new_reference = Reference(id=reference_node.get("id"),
-                                  year=reference_node.get("year"),
-                                  title=reference_node.get("title"),
-                                  journal=reference_node.get("journal"),
-                                  url=reference_node.get("url"))
+        annotations = annotate_element_from_xml(reference_node)
+        if annotations:
+            mapping = {"pubmed": "pmid",
+                       "pmc": "pmc",
+                       "doi": "doi"}
 
-        author_list_node = reference_node.find(ge_listOfAuthors)
-        if author_list_node is not None:
-            authors = []
-            for child in author_list_node.iterfind(ge_author):
-                authors.append(Author(firstname=child.get("firstname"),
-                                      lastname=child.get("lastname"),
-                                      initials=child.get("initials")))
-            new_reference.authors = authors
+            for x in annotations:
+                if x.collection in mapping:
+                    setattr(reference, mapping[x.collection], x.identifier)
 
-        annotation = annotate_element_from_xml(reference_node)
-        if annotation:
-            for x in annotation:
-                if x.collection == "pubmed":
-                    new_reference.pmid = x.identifier
-                elif x.collection == "pmc":
-                    new_reference.pmc = x.identifier
-                elif x.collection == "doi":
-                    new_reference.doi = x.identifier
-
-        if model is None:
-            references.append(new_reference)
-        else:
-            model.add_reference(new_reference)
-
-    return references
+        model.add_reference(reference)

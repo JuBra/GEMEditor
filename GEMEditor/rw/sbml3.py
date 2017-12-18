@@ -7,7 +7,7 @@ from GEMEditor.rw.evidences import add_evidences_to_xml, parse_evidences_from_xm
 from GEMEditor.rw.fluxset import add_tests_to_xml, parse_test_from_xml
 from GEMEditor.rw.gene import add_genes, parse_genes
 from GEMEditor.rw.metabolite import add_metabolites, parse_metabolites
-from GEMEditor.rw.model import setup_sbml3_model, parse_sbml3_model
+from GEMEditor.rw.model import setup_sbml3_model, parse_model_info
 from GEMEditor.rw.reaction import add_reactions, parse_reaction
 from GEMEditor.rw.reference import add_references, parse_references
 from GEMEditor.rw.units import add_unit_definitions
@@ -68,11 +68,15 @@ def write_sbml3_model(path, model, progress=None):
     return sbml_node
 
 
-def read_sbml3_model(path, progress):
+def read_sbml3_model(parser, model, path, progress):
     """ Read SBML model
 
     Parameters
     ----------
+    parser: GEMEditor.rw.parser.BaseParser,
+        Parser object reading file
+    model: GEMEditor.model.classes.Model,
+        Model being read
     path: str
         Path to model file
     progress: QProgressDialog
@@ -87,11 +91,24 @@ def read_sbml3_model(path, progress):
     # Get SBML node
     sbml_node = tree.getroot()
     if sbml_node.tag is None or sbml_node.tag != sbml3_sbml:
-        raise IOError("The file does not contain a sbml3 model")
+        parser.error("The file does not contain a sbml3 model")
+        return
 
-    returned_values = parse_sbml3_model(sbml_node)
-    if returned_values is None:
-        raise IOError("No model node found!")
+    # Get model node
+    model_node = sbml_node.find(sbml3_model)
+    if model_node is None:
+        parser.error("No model node found!")
+        return
+
+    # Parse model information
+    parse_model_info(parser, model, model_node, progress)
+    parse_references(parser, model, model_node, progress)
+    parse_compartments(parser, model, model_node, progress)
+    parse_metabolites(parser, model, model_node, progress)
+    parse_genes(parser, model, model_node, progress)
+    parse_reactions(parser, model, model_node, progress)
+    parse_test_cases(parser, model, model_node, progress)
+    parse_evidences(parser, model, model_node, progress)
 
     model_node, model = returned_values
 

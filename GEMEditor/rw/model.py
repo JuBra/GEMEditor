@@ -15,15 +15,21 @@ def setup_sbml3_model(sbml_node, model):
     return model_node
 
 
-def parse_sbml3_model(sbml_node):
+def parse_model_info(parser, model, model_node, progress):
+    """ Parse basic model information
 
-    if sbml_node is not None:
-        model_node = sbml_node.find(sbml3_model)
-        if model_node is not None:
-            model = Model(id_or_model=model_node.get("id"),
-                          name=model_node.get("name"))
+    Parameters
+    ----------
+    parser: GEMEditor.rw.parsers.BaseParser,
+        Parser object reading file
+    model: GEMEditor.model.classes.Model,
+        Model being read
+    model_node:
+        XML node containing model information
+    progress: QProgressDialog
+        Progress dialog
 
-            return model_node, model
-    return None
+    """
 
-
+    model.id = model_node.get("id")
+    model.name = model_node.get("name")

@@ -5,51 +5,38 @@ from GEMEditor.model.classes.annotation import Annotation
 
 class TestReference:
 
-    @pytest.fixture(autouse=True)
-    def init_objects(self):
-        self.reference1 = Reference("test_abbrev", "name")
-        self.reference2 = Reference("test_abbrev", "name")
-        self.empty_reference = Reference()
+    def test_add_author(self):
+        reference = Reference()
+        author = Author("Family", "First", "Initials")
+        reference.add_author(author)
 
-    def test___init__(self):
-        """ Test the default values of empty reference """
-        assert self.empty_reference.authors == []
-        assert self.empty_reference.pmid == ""
-        assert self.empty_reference.pmc == ""
-        assert self.empty_reference.abstract == ""
-        assert self.empty_reference.doi == ""
-        assert self.empty_reference.title == ""
-        assert self.empty_reference.year == ""
-        assert self.empty_reference.url == ""
-        assert self.empty_reference.journal == ""
+        assert author in reference.authors
 
-    def test_author_string1(self):
-        """ Check that empty string is returned if no author is set """
-        assert self.empty_reference.reference_string() == ""
+    def test_empty_author_string(self):
+        assert Reference().reference_string() == ""
 
-    def test_author_string2(self):
-        """ Test correct string for single author """
-        self.empty_reference.authors = [Author("Family", "First", "Initials")]
-        self.empty_reference.year = "2015"
-        assert self.empty_reference.reference_string() == "Family Initials, 2015"
+    def test_single_author_string(self):
+        reference = Reference(year="2015")
+        reference.add_author(Author("Family", "First", "Initials"))
 
-    def test_author_string3(self):
-        """ Test correct string for two authors """
-        self.empty_reference.authors = [Author("FamilyFirst", "", "InitialsFirst"),
-                                        Author("FamilySecond", "", "InitialsSecond")]
+        assert reference.reference_string() == "Family Initials, 2015"
 
-        self.empty_reference.year = "2015"
+    def test_two_authors_string(self):
+        reference = Reference(year="2015")
+        reference.add_author(Author("FamilyFirst", "", "InitialsFirst"))
+        reference.add_author(Author("FamilySecond", "", "InitialsSecond"))
+
         expected = "FamilyFirst InitialsFirst and FamilySecond InitialsSecond, 2015"
-        assert self.empty_reference.reference_string() == expected
+        assert reference.reference_string() == expected
 
-    def test_author_string4(self):
-        """ Test correct string for 3 authors """
-        self.empty_reference.authors = [Author("Family1", "", "Initials1"),
-                                        Author("Family2", "", "Initials2"),
-                                        Author("Family3", "", "Initials3")]
-        self.empty_reference.year = "2015"
+    def test_multi_author_string(self):
+        reference = Reference(year="2015")
+        reference.add_author(Author("Family1", "", "Initials1"))
+        reference.add_author(Author("Family2", "", "Initials2"))
+        reference.add_author(Author("Family3", "", "Initials3"))
+
         expected = "Family1 Initials1 et al., 2015"
-        assert self.empty_reference.reference_string() == expected
+        assert reference.reference_string() == expected
 
     def test_annotation_property(self):
         reference = Reference()

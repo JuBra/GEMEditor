@@ -1,8 +1,17 @@
 import pytest
 from GEMEditor.model.classes.cobra import Model
 from GEMEditor.rw import *
-from GEMEditor.rw.model import parse_sbml3_model, setup_sbml3_model
+from GEMEditor.rw.model import parse_model_info, setup_sbml3_model
+from PyQt5.QtWidgets import QApplication
 from lxml.etree import Element
+
+
+# Make sure to only start an application
+# if there is no active one. Opening multiple
+# applications will lead to a crash.
+app = QApplication.instance()
+if app is None:
+    app = QApplication([])
 
 
 class TestModelIO:
@@ -34,13 +43,8 @@ class TestModelIO:
         root = Element("root")
         setup_sbml3_model(root, self.model)
 
-        return_values = parse_sbml3_model(root)
-        assert return_values is not None
+        new_model = Model()
+        parse_model_info(None, new_model, root[0], None)
 
-        model_node, model = return_values
-
-        assert model.id == self.test_id
-        assert model.name == self.test_name
-
-
-
+        assert new_model.id == self.model.id
+        assert new_model.name == self.model.name

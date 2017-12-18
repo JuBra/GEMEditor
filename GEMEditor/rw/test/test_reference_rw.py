@@ -1,12 +1,23 @@
 import pytest
+from PyQt5.QtWidgets import QApplication
 from GEMEditor.model.classes.cobra import Model
 from GEMEditor.model.classes.reference import Reference, Author
 from GEMEditor.model.classes.annotation import Annotation
+from GEMEditor.base.test.fixtures import progress_not_cancelled
+from GEMEditor.base.classes import ProgressDialog
 from GEMEditor.rw import *
 from GEMEditor.rw.annotation import annotate_element_from_xml
 from GEMEditor.rw.reference import add_references, parse_references
+from unittest.mock import Mock
 from lxml.etree import Element
 
+
+# Make sure to only start an application
+# if there is no active one. Opening multiple
+# applications will lead to a crash.
+app = QApplication.instance()
+if app is None:
+    app = QApplication([])
 
 class TestAddReference:
 
@@ -111,14 +122,16 @@ class TestAddReference:
         assert reference_node.get("id") == reference.id
         assert reference_node.find(sbml3_annotation) is None
 
+    @pytest.mark.usefixture("progress_not_cancelled")
     def test_parsing_consistency(self):
         root = Element("root")
         add_references(root, self.model)
 
-        references = parse_references(root)
-        assert len(references) == 1
+        model = Model()
+        progress = ProgressDialog()
+        parse_references(Mock(), root, model, progress)
 
-        reference = references[0]
+        reference = model.references[self.reference.id]
         assert reference is not self.reference
         assert reference.doi == self.test_doi
         assert reference.pmid == self.test_pmid
