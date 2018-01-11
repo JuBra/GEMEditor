@@ -1,6 +1,6 @@
 import logging
+import json
 from PyQt5 import QtCore
-from configparser import ConfigParser
 from urllib.request import urlopen, URLError, HTTPError
 from distutils.version import StrictVersion
 from GEMEditor import __versionlookup__, __version__
@@ -39,7 +39,8 @@ class UpdateCheck(QtCore.QRunnable):
         LOGGER.debug("Checking for updates..")
         # Check if there is a new version
         try:
-            url_object = urlopen(__versionlookup__)
+            request = urlopen(__versionlookup__)
+            url_data = request.read().decode('utf-8')
         except HTTPError:
             LOGGER.exception("Check for Update unsuccessful:")
             return
@@ -48,18 +49,25 @@ class UpdateCheck(QtCore.QRunnable):
             return
 
         # Read config file
-        LOGGER.debug("Parsing config file..")
-        url_data = url_object.read().decode('utf-8')
-        config = ConfigParser()
-        config.read_string(url_data)
+        try:
+            json_data = json.loads(url_data)
+        except json.JSONDecodeError:
+            LOGGER.exception("Invalid json returned by pypi.")
+            return
 
-        # Get version in Git repository
-        current_version = config.get("DEFAULT", "version")
-        LOGGER.debug("Remote version: {0!s}".format(current_version))
-        LOGGER.debug("Local version: {0!s}".format(__version__))
+        # Extract version
+        try:
+            remote_version = json_data["info"]["version"]
+        except:
+            LOGGER.exception("Unexpected json structure from pypi.")
+            return
+        else:
+            LOGGER.debug("Remote version: {0!s}".format(remote_version))
+            LOGGER.debug("Local version: {0!s}".format(__version__))
 
-        if StrictVersion(current_version) > StrictVersion(__version__):
+        # Compare Versions
+        if StrictVersion(remote_version) > StrictVersion(__version__):
             LOGGER.info("A new version is available!")
-            self.signals.new_version.emit(current_version)
+            self.signals.new_version.emit(remote_version)
         else:
             LOGGER.debug("Installation is up-to-date!")
