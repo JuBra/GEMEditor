@@ -1,6 +1,7 @@
 import logging
 from PyQt5 import QtCore
 from PyQt5.QtWidgets import QPushButton, QDialogButtonBox, QDialog
+from GEMEditor.base import Settings, restore_geometry, restore_state
 from GEMEditor.database.match.ui.ManualMetaboliteMatchDialog import Ui_ManualMatchDialog
 from GEMEditor.database.base import MetaboliteEntryDisplayWidget
 
@@ -38,6 +39,9 @@ class ManualMatchDialog(QDialog, Ui_ManualMatchDialog):
         if self.unmatched_items:
             self.next_metabolite()
 
+        # Restore appearance
+        self.restore_appearance()
+
     def connect_signals(self):
 
         # Connect entry buttons
@@ -53,6 +57,9 @@ class ManualMatchDialog(QDialog, Ui_ManualMatchDialog):
         # Connect buttonbox buttons
         self.button_prev_item.clicked.connect(self.previous_metabolite)
         self.button_next_item.clicked.connect(self.next_metabolite)
+
+        # Store appearance upon closing
+        self.finished.connect(self.save_appearance)
 
     @property
     def current_entry_id(self):
@@ -212,3 +219,13 @@ class ManualMatchDialog(QDialog, Ui_ManualMatchDialog):
             return self.manual_mapped[self.current_metabolite] == entry_id
         except KeyError:
             return False
+
+    def restore_appearance(self):
+        settings = Settings(group=self.__class__.__name__)
+        restore_geometry(self, settings.value("Geometry"))
+        restore_state(self.splitter, settings.value("SplitterState"))
+
+    def save_appearance(self):
+        with Settings(group=self.__class__.__name__) as settings:
+            settings.setValue("Geometry", self.saveGeometry())
+            settings.setValue("SplitterState", self.splitter.saveState())
