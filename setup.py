@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 setup(
     name="GEMEditor",
-    version="0.3.3",
+    version="0.3.4",
     packages=find_packages(),
     install_requires=['cobra',
                       'escher',
