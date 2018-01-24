@@ -28,6 +28,28 @@ class ProgressDialog(QtWidgets.QProgressDialog):
         self.deleteLater()
 
 
+class IncrementingProgressDialog(ProgressDialog):
+
+    def __init__(self, *args, **kwargs):
+        super(IncrementingProgressDialog, self).__init__(*args, **kwargs)
+        self._value = 0
+
+    def setRange(self, p_int, p_int_1):
+        super(IncrementingProgressDialog, self).setRange(p_int, p_int_1)
+        self._value = p_int
+
+    def setValue(self, p_int):
+        super(IncrementingProgressDialog, self).setValue(p_int)
+        self._value = p_int
+
+    def increment(self):
+        self._value += 1
+        self.update_value()
+
+    def update_value(self):
+        self.setValue(self._value)
+
+
 class Settings(QtCore.QSettings):
     """ Access to program settings
 
