@@ -315,3 +315,38 @@ def restore_geometry(object, state):
 
     if state:
         object.restoreGeometry(state)
+
+
+def split_dict_by_value(dictionary):
+    """ Split dictionary by values
+
+    This functions splits dictionary entries based
+    on the value into positive, negative and zero
+    dictionaries.
+
+    Parameters
+    ----------
+    dictionary: dict,
+        Input dictionary
+
+    Returns
+    -------
+    positive: dict,
+        Dictionary containg all items with positive value
+    negative: dict,
+        Dictionary cotaining all items with negative value
+    zero: dict,
+        Dictionary containing all items with zero value
+    """
+
+    positive, negative, zero = {}, {}, {}
+
+    for k, v in dictionary.items():
+        if v > 0.:
+            positive[k] = v
+        elif v < 0.:
+            negative[k] = v
+        else:
+            zero[k] = v
+
+    return positive, negative, zero

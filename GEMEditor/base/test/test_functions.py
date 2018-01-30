@@ -128,3 +128,18 @@ class Test_unpack:
                                                             ("", "A", True), ("A", "A", False), ("A", "B", True)])
 def test_text_is_different(input, state, expectation):
     assert text_is_different(input, state) is expectation
+
+
+class Test_split_dict_by_value:
+
+    def test_splitting(self):
+        data = {"positive": 1,
+                "negative": -1,
+                "zero": 0}
+
+        # Action
+        positive, negative, zero = split_dict_by_value(data)
+
+        assert positive == {"positive": 1}
+        assert negative == {"negative": -1}
+        assert zero == {"zero": 0}

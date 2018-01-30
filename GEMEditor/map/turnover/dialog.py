@@ -84,20 +84,14 @@ class TurnoverDialog(QDialog, Ui_TurnoverDialog):
             # Can not display map if metabolite is not set
             return
 
-        # Standard settings for drawing map
-        reactions = self.metabolite.reactions
-        fluxes = None
-
         # Change settings according to state
         if self.solution:
-            fluxes = dict(fluxes_from_solution(self.solution))
-            reactions = [r for r in self.metabolite.reactions
-                         if r.id in fluxes and fluxes[r.id] > 0]
+            fluxes = fluxes_from_solution(self.solution)
 
-        # Generate escher turnover map
-        map_json = setup_turnover_map(self.metabolite, reactions)
-        builder = escher.Builder(map_json=map_json, reaction_data=fluxes)
-        self.mapView.setHtml(builder._get_html(**ESCHER_GET_HTML_OPTIONS))
+            # Generate escher turnover map
+            map_json = setup_turnover_map(self.metabolite, fluxes)
+            builder = escher.Builder(map_json=map_json, reaction_data=fluxes.to_dict())
+            self.mapView.setHtml(builder._get_html(**ESCHER_GET_HTML_OPTIONS))
 
     def _populate_tree(self):
         """ Populate the datamodel from reactions
