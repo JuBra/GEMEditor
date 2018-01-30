@@ -25,8 +25,6 @@ class Counter:
         self.count += 1
         return str(self.count)
 
-counter = Counter()
-
 
 def get_subnodes(reaction):
     """ Get all the subnodes for a reaction
@@ -56,7 +54,7 @@ def entry_from_metabolite(metabolite, position, scaling=1, x_margin=0, y_margin=
             "node_is_primary": is_primary}
 
 
-def entry_from_reaction(graph, reaction, node_index, positions, scaling, x_margin, y_margin):
+def entry_from_reaction(graph, reaction, node_index, positions, scaling, x_margin, y_margin, counter):
 
     segments = {}
     json_metabolites = []
@@ -103,6 +101,7 @@ def get_escher_graph(reactions, graph, final_positions, scaling=1, x_margin=0, y
 
     nodes = {}
     node_index = {}
+    counter = Counter()
 
     for node in graph.nodes():
         index = counter()
@@ -127,7 +126,7 @@ def get_escher_graph(reactions, graph, final_positions, scaling=1, x_margin=0, y
 
     reactions_dict = {}
     for reaction in reactions:
-        reactions_dict[counter()] = entry_from_reaction(graph, reaction, node_index, final_positions, scaling, x_margin, y_margin)
+        reactions_dict[counter()] = entry_from_reaction(graph, reaction, node_index, final_positions, scaling, x_margin, y_margin, counter)
 
     result.append({"reactions": reactions_dict,
                    "nodes": nodes,
