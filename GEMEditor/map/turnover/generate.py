@@ -7,23 +7,13 @@ from GEMEditor.base import split_dict_by_value
 
 
 params = {
-    "reaction_width": 10,
-    "reaction_height": 30,
-    "y_margin": 10,
-    "x_margin": 10,
-    "reaction_x_padding": 10,
-    "center_y_padding": 20,
-    "met_y_offset": 10}
-
-
-class Counter:
-
-    def __init__(self):
-        self.count = -1
-
-    def __call__(self, *args, **kwargs):
-        self.count += 1
-        return str(self.count)
+    "reaction_width": 200,
+    "reaction_height": 400,
+    "y_margin": 100,
+    "x_margin": 100,
+    "reaction_x_padding": 100,
+    "center_y_padding": 200,
+    "met_y_offset": 100}
 
 
 def get_subnodes(reaction):
@@ -40,21 +30,53 @@ def get_subnodes(reaction):
     return (reaction, "educts"), (reaction, "middle"), (reaction, "products")
 
 
-def entry_from_metabolite(metabolite, position, scaling=1, x_margin=0, y_margin=0, is_primary=False):
-    x = position[0] * scaling + x_margin
-    y = position[1] * scaling + y_margin
-    label_offset = 25 if is_primary else 10
-    return {"node_type": "metabolite",
-            "x": x,
-            "y": y,
-            "bigg_id": metabolite.id,
-            "name": metabolite.name,
-            "label_x": x+label_offset,
-            "label_y": y+label_offset,
-            "node_is_primary": is_primary}
+def entry_from_metabolite_node(node, x, y):
+    """ Generate a metabolite entry for use in Escher map
+
+    Nodes are expected to be of the form:
+    <Metabolite>
+    (<Reaction>, <Metabolite>)
+    (<Reaction>, "middle")
+    (<Reaction>, "educts")
+    (<Reaction>, "products")
 
 
-def entry_from_reaction(graph, reaction, node_index, positions, scaling, x_margin, y_margin, counter):
+    Parameters
+    ----------
+    node: Metabolite or tuple,
+        The node for which to generate an entry
+    x: float or int,
+        x position of the metabolite on the map
+    y: float or int,
+        y position of the metabolite on the map
+
+    Returns
+    -------
+
+    """
+
+    entry = {"x": x, "y": y}
+
+    def add_metabolite_info(metabolite, is_primary):
+        label_offset = 25 if is_primary else 10
+        entry.update({"bigg_id": metabolite.id, "name": metabolite.name,
+                      "label_x": x + label_offset, "label_y": y + label_offset,
+                      "node_is_primary": is_primary, "node_type": "metabolite"})
+
+    # Add appropriate information
+    if isinstance(node, Metabolite):
+        add_metabolite_info(node, is_primary=True)
+    elif isinstance(node[1], Metabolite):
+        add_metabolite_info(node[1], is_primary=False)
+    elif node[1] == "middle":
+        entry["node_type"] = "midmarker"
+    else:
+        entry["node_type"] = "multimarker"
+
+    return entry
+
+
+def entry_from_reaction(graph, reaction, node_index, positions, counter):
 
     segments = {}
     json_metabolites = []
@@ -62,9 +84,7 @@ def entry_from_reaction(graph, reaction, node_index, positions, scaling, x_margi
 
     # Get the middle node of the reaction
     middle_node_id = node_index[middle_node]
-    mid_pos = positions[middle_node]
-    x = mid_pos[0] * scaling + x_margin
-    y = mid_pos[1] * scaling + y_margin
+    x, y = positions[middle_node]
 
     for metabolite, stoichiometry in reaction.metabolites.items():
         json_metabolites.append({"coefficient": stoichiometry, "bigg_id": metabolite.id})
@@ -91,7 +111,20 @@ def entry_from_reaction(graph, reaction, node_index, positions, scaling, x_margi
             "segments": segments}
 
 
-def get_escher_graph(reactions, graph, final_positions, scaling=1, x_margin=0, y_margin=0, canvas_width=2000, canvas_height=2000):
+def get_escher_graph(reactions, graph, positions, canvas_width=2000, canvas_height=2000):
+
+
+    # Generate unique numeric ids
+    class Counter:
+
+        def __init__(self):
+            self.count = -1
+
+        def __call__(self, *args, **kwargs):
+            self.count += 1
+            return str(self.count)
+
+    counter = Counter()
 
     result = [{"map_name": "test_name",
                "map_id": "1234565",
@@ -101,36 +134,19 @@ def get_escher_graph(reactions, graph, final_positions, scaling=1, x_margin=0, y
 
     nodes = {}
     node_index = {}
-    counter = Counter()
 
     for node in graph.nodes():
         index = counter()
         node_index[node] = index
 
-        pos = final_positions[node]
-        x = pos[0] * scaling + x_margin
-        y = pos[1] * scaling + y_margin
-        if isinstance(node, Metabolite):
-            entry = entry_from_metabolite(node, final_positions[node], scaling, x_margin, y_margin, is_primary=True)
-        elif isinstance(node[1], Metabolite):
-            entry = entry_from_metabolite(node[1], final_positions[node], scaling, x_margin, y_margin, is_primary=False)
-        elif node[1] == "middle":
-            entry = {"node_type": "midmarker",
-                     "x": x,
-                     "y": y}
-        else:
-            entry = {"node_type": "multimarker",
-                     "x": x,
-                     "y": y}
-        nodes[index] = entry
+        x, y = positions[node]
+        nodes[index] = entry_from_metabolite_node(node, x, y)
 
     reactions_dict = {}
     for reaction in reactions:
-        reactions_dict[counter()] = entry_from_reaction(graph, reaction, node_index, final_positions, scaling, x_margin, y_margin, counter)
+        reactions_dict[counter()] = entry_from_reaction(graph, reaction, node_index, positions, counter)
 
-    result.append({"reactions": reactions_dict,
-                   "nodes": nodes,
-                   "text_labels": {},
+    result.append({"reactions": reactions_dict, "nodes": nodes, "text_labels": {},
                    "canvas": {"x": 0., "y": 0., "width": canvas_width, "height": canvas_height}})
     return result
 
@@ -230,7 +246,7 @@ def total_width_reactions(n, params):
         return 0
     else:
         width = params["reaction_width"]
-        return n * width + (n-1) * params["reaction_x_padding"]
+        return (n * width) + ((n-1) * params["reaction_x_padding"])
 
 
 def centering_shift(num_producing, num_consuming, params):
@@ -333,7 +349,6 @@ def layout_turnover(metabolite, rates, params):
 def canvas_size(max_num_reactions, params):
     width = total_width_reactions(max_num_reactions, params) + 2 * params["x_margin"]
     height = 2 * (params["y_margin"] + params["reaction_height"] + params["center_y_padding"])
-
     return width, height
 
 
@@ -343,9 +358,8 @@ def setup_turnover_map(metabolite, fluxes):
     reactions = [r for r, v in rates.items() if v != 0.]
     graph, pos = layout_turnover(metabolite, rates, params)
 
-    consuming = sum(1 for v in rates.values() if v > -1)
+    positive, negative, _ = split_dict_by_value(rates)
+    width, height = canvas_size(max(len(positive), len(negative)), params)
 
-    width, height = canvas_size(max(consuming, len(reactions) - consuming), params)
-
-    escher_json = get_escher_graph(reactions, graph, pos, 10, 0, 0, width * 2.2, height * 10)
+    escher_json = get_escher_graph(reactions, graph, pos, width, height)
     return json.dumps(escher_json)
