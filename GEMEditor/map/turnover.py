@@ -149,6 +149,26 @@ def centering(num_producing, num_consuming, params):
 
 
 def add_metabolites(graph, positions, origin, reaction, metabolites, subnode, params):
+    """ Add metabolites to graph
+
+    Parameters
+    ----------
+    graph: MapGraph
+        Graph containing map nodes
+    positions: dict
+        Positions of map nodes
+    origin: np.array
+        Origin of plotting
+    reaction: GEMEditor.main.classes.Reaction
+        Reaction of which the metabolites are part of
+    metabolites: iterable
+        Metabolites to be added
+    subnode: tuple
+        Reaction subnode to which to connect the metabolite node
+    params: dict
+        Layout parameters
+
+    """
 
     met_positions = metabolite_positions(origin, metabolites, params)
 
@@ -159,8 +179,29 @@ def add_metabolites(graph, positions, origin, reaction, metabolites, subnode, pa
         positions[node] = met_positions[i]
 
 
-def add_reaction(graph, positions, origin, reaction, metabolite, met_connection_node, params):
+def add_reaction(graph, positions, origin, reaction, metabolite, connect_to_central, params):
+    """ Add reaction to graph
 
+    Parameters
+    ----------
+    graph: MapGraph
+        Graph containing map nodes
+    positions: dict
+        Positions of map nodes
+    origin: np.array
+        Origin of plotting
+    reaction: GEMEditor.main.classes.Reaction
+        Reaction to add
+    metabolite: GEMEditor.main.classes.Metabolite
+        Center metabolite for which the turnover is displayed
+    connect_to_central: {'top', 'bottom'}
+        Reaction subnode which should be connected to the central metabolite
+    params: dict
+        Layout parameters
+
+    """
+
+    # Set up reaction nodes
     top_node, middle_node, bottom_node = add_subnodes(graph, reaction)
     top, middle, bottom = middle_node_positions(origin, params)
 
@@ -168,6 +209,7 @@ def add_reaction(graph, positions, origin, reaction, metabolite, met_connection_
     positions[middle_node] = middle
     positions[bottom_node] = bottom
 
+    # Get metabolites on the same and other side of the equation
     products, educts, _ = split_dict_by_value(reaction.metabolites)
 
     if metabolite in products:
@@ -183,13 +225,16 @@ def add_reaction(graph, positions, origin, reaction, metabolite, met_connection_
             continue
         graph.add_node((reaction, m))
 
+    # Calculate shift for bottom nodes
     reaction_shift = np.array((0, params["reaction_height"]))
 
-    if met_connection_node == "top":
+    if connect_to_central == "top":
+        # Place metabolites on the same side of the equation on the top side of the reaction
         graph.add_edge(top_node, metabolite)
         add_metabolites(graph, positions, origin, reaction, same.keys(), top_node, params)
         add_metabolites(graph, positions, origin+reaction_shift, reaction, other.keys(), bottom_node, params)
     else:
+        # Place metabolites on the same side of the equation on the bottom side of the reaction
         graph.add_edge(bottom_node, metabolite)
         add_metabolites(graph, positions, origin+reaction_shift, reaction, same.keys(), bottom_node, params)
         add_metabolites(graph, positions, origin, reaction, other.keys(), top_node, params)
