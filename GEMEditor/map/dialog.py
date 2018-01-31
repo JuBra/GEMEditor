@@ -328,7 +328,7 @@ class TurnoverDialog(QDialog, Ui_TurnoverDialog):
 
         # Add nodes
         root = self.datatable.invisibleRootItem()
-        for i, item in enumerate((consuming, producing, inactive)):
+        for i, item in enumerate((producing, consuming, inactive)):
             item.setText(item.text() + " ({0!s})".format(item.rowCount()))
             root.setChild(i, item)
 
