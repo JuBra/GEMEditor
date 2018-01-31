@@ -3,7 +3,6 @@ import escher
 import tempfile
 import os
 import uuid
-import numpy
 from GEMEditor.base import Settings, restore_state, restore_geometry
 from GEMEditor.map.base import ESCHER_OPTIONS_LOCAL, replace_css_paths
 from GEMEditor.map.turnover.generate import setup_turnover_map
