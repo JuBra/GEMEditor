@@ -1,14 +1,16 @@
 import logging
 import escher
+import tempfile
+import os
 from collections import defaultdict
 from GEMEditor.base import Settings, restore_state, restore_geometry
-from GEMEditor.map.base import ESCHER_GET_HTML_OPTIONS
+from GEMEditor.map.base import ESCHER_HTML_OPTIONS_LOCAL, replace_css_paths
 from GEMEditor.map.turnover.generate import setup_turnover_map
 from GEMEditor.map.turnover.ui import Ui_TurnoverDialog
 from GEMEditor.model.display.tables import ReactionBaseTable
 from GEMEditor.solution.analysis import get_turnover
 from GEMEditor.solution.base import fluxes_from_solution
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, QUrl
 from PyQt5.QtGui import QStandardItemModel, QStandardItem
 from PyQt5.QtWebEngineWidgets import QWebEngineSettings, QWebEnginePage
 from PyQt5.QtWidgets import QDialog, QAbstractItemView
@@ -47,9 +49,6 @@ class TurnoverDialog(QDialog, Ui_TurnoverDialog):
 
         self.webpage = QWebEnginePage(self)
         self.mapView.setPage(self.webpage)
-        self.mapView.settings().setAttribute(QWebEngineSettings.JavascriptEnabled, True)
-        self.mapView.settings().setAttribute(QWebEngineSettings.LocalContentCanAccessRemoteUrls, True)
-        self.mapView.settings().setAttribute(QWebEngineSettings.JavascriptCanOpenWindows, True)
         self.mapView.settings().setAttribute(QWebEngineSettings.LocalContentCanAccessFileUrls, True)
 
         # Connect signals/slots
@@ -91,7 +90,20 @@ class TurnoverDialog(QDialog, Ui_TurnoverDialog):
             # Generate escher turnover map
             map_json = setup_turnover_map(self.metabolite, fluxes)
             builder = escher.Builder(map_json=map_json, reaction_data=fluxes.to_dict())
-            self.mapView.setHtml(builder._get_html(**ESCHER_GET_HTML_OPTIONS))
+            html = builder._get_html(**ESCHER_HTML_OPTIONS_LOCAL)
+
+            # As Qt does not allow the loading of local files
+            # from html set via the setHtml method, write map
+            # to file and read it back to webview
+            temp = os.path.join(tempfile.gettempdir(), "temp.html")
+            with open(temp, "w") as ofile:
+                ofile.write(replace_css_paths(html))
+
+            self.mapView.load(QUrl("file:///"+temp.replace("\\", "/")))
+            try:
+                os.remove(temp)
+            except:
+                pass
 
     def _populate_tree(self):
         """ Populate the datamodel from reactions

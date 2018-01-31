@@ -6,14 +6,24 @@ from GEMEditor.solution.analysis import get_rates
 from GEMEditor.base import split_dict_by_value
 
 
-params = {
+PARAMS_TURNOVER = {
     "reaction_width": 200,
     "reaction_height": 400,
     "y_margin": 100,
     "x_margin": 100,
     "reaction_x_padding": 100,
-    "center_y_padding": 200,
+    "center_y_padding": 600,
     "met_y_offset": 100}
+
+
+class MapGraph(nx.Graph):
+
+    def __init__(self, *args, **kwargs):
+        super(MapGraph, self).__init__(*args, **kwargs)
+
+    @property
+    def reactions(self):
+        return set(t[0] for t in self.nodes() if isinstance(t, tuple))
 
 
 def get_subnodes(reaction):
@@ -52,7 +62,8 @@ def entry_from_metabolite_node(node, x, y):
 
     Returns
     -------
-
+    dict,
+        Metabolite entry
     """
 
     entry = {"x": x, "y": y}
@@ -111,7 +122,7 @@ def entry_from_reaction(graph, reaction, node_index, positions, counter):
             "segments": segments}
 
 
-def get_escher_graph(reactions, graph, positions, canvas_width=2000, canvas_height=2000):
+def get_escher_json(graph, positions, params):
 
 
     # Generate unique numeric ids
@@ -143,12 +154,14 @@ def get_escher_graph(reactions, graph, positions, canvas_width=2000, canvas_heig
         nodes[index] = entry_from_metabolite_node(node, x, y)
 
     reactions_dict = {}
-    for reaction in reactions:
+    for reaction in graph.reactions:
         reactions_dict[counter()] = entry_from_reaction(graph, reaction, node_index, positions, counter)
 
+    width, height = canvas_size(positions, params)
     result.append({"reactions": reactions_dict, "nodes": nodes, "text_labels": {},
-                   "canvas": {"x": 0., "y": 0., "width": canvas_width, "height": canvas_height}})
-    return result
+                   "canvas": {"x": 0., "y": 0., "width": width, "height": height}})
+
+    return json.dumps(result)
 
 
 def add_subnodes(graph, reaction):
@@ -324,7 +337,7 @@ def position_center(n, params):
 
 def layout_turnover(metabolite, rates, params):
 
-    graph = nx.Graph()
+    graph = MapGraph()
     positions = {}
 
     producing, consuming, _ = split_dict_by_value(rates)
@@ -346,20 +359,17 @@ def layout_turnover(metabolite, rates, params):
     return graph, {k: tuple(v) for k, v in positions.items()}
 
 
-def canvas_size(max_num_reactions, params):
-    width = total_width_reactions(max_num_reactions, params) + 2 * params["x_margin"]
-    height = 2 * (params["y_margin"] + params["reaction_height"] + params["center_y_padding"])
+def canvas_size(pos, params):
+    width = max(p[0] for p in pos.values()) + 2 * params["x_margin"]
+    height = max(p[1] for p in pos.values()) + 2 * params["y_margin"]
     return width, height
 
 
-def setup_turnover_map(metabolite, fluxes):
+def setup_turnover_map(metabolite, fluxes, params=PARAMS_TURNOVER):
 
     rates = get_rates(fluxes, metabolite)
-    reactions = [r for r, v in rates.items() if v != 0.]
     graph, pos = layout_turnover(metabolite, rates, params)
 
     positive, negative, _ = split_dict_by_value(rates)
-    width, height = canvas_size(max(len(positive), len(negative)), params)
 
-    escher_json = get_escher_graph(reactions, graph, pos, width, height)
-    return json.dumps(escher_json)
+    return get_escher_json(graph, pos, params)
