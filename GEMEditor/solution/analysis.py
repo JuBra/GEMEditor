@@ -1,6 +1,28 @@
 from collections import defaultdict
 
 
+def get_rates(fluxes, metabolite):
+    """ Calculate the rates of the individual reactions
+
+    Parameters
+    ----------
+    fluxes: dict or pandas.Series
+    metabolite: GEMEditor.model.classes.cobra.Metabolite
+
+    Returns
+    -------
+    rates: dict,
+        Partial rates of the individual reactions
+    """
+
+    rates = dict()
+
+    for reaction in metabolite.reactions:
+        rates[reaction] = float(fluxes[reaction.id] * reaction.metabolites[metabolite])
+
+    return rates
+
+
 def get_turnover(fluxes, metabolite):
     """ Calculate the turnover for a specific metabolite
 
@@ -11,16 +33,13 @@ def get_turnover(fluxes, metabolite):
 
     Returns
     -------
-    float:
+    float or int:
         Turnover of the metabolite
     """
-    sum_rates = 0
 
-    for reaction in metabolite.reactions:
-        rate = fluxes[reaction.id] * reaction.metabolites[metabolite]
-        sum_rates += abs(rate)
+    rates = get_rates(fluxes, metabolite)
 
-    return float(sum_rates / 2)
+    return sum(v for v in rates.values() if v > 0.)
 
 
 def get_yields(fluxes, model):
