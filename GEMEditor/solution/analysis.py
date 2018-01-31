@@ -33,14 +33,13 @@ def get_turnover(fluxes, metabolite):
 
     Returns
     -------
-    float:
+    float or int:
         Turnover of the metabolite
     """
 
     rates = get_rates(fluxes, metabolite)
-    sum_rates = sum(abs(x) for x in rates.values())
 
-    return float(sum_rates / 2)
+    return sum(v for v in rates.values() if v > 0.)
 
 
 def get_yields(fluxes, model):
