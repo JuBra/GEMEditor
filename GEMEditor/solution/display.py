@@ -3,8 +3,7 @@ from PyQt5.QtCore import Qt, QSortFilterProxyModel, pyqtSlot, QPoint
 from PyQt5.QtGui import QKeySequence
 from PyQt5.QtWidgets import QWidget, QDialog, QAction, QMenu, QApplication, QMessageBox
 from GEMEditor.base import Settings, restore_state, restore_geometry
-from GEMEditor.map.dialog import MapDisplayDialog
-from GEMEditor.map.turnover import TurnoverDialog
+from GEMEditor.map.dialog import MapDisplayDialog, TurnoverDialog
 from GEMEditor.solution.base import status_objective_from_solution, set_objective_to_label, set_status_to_label
 from GEMEditor.solution.ui import Ui_SearchTab, Ui_SolutionDialog
 from GEMEditor.solution.tables import FBATable, FBAProxy, FVATable, FVAProxy, ReactionDeletionTable, DeletionProxy, GeneDeletionTable, ShadowPriceTable
