@@ -18,7 +18,7 @@ def get_rates(fluxes, metabolite):
     rates = dict()
 
     for reaction in metabolite.reactions:
-        rates[reaction] = fluxes[reaction.id] * reaction.metabolites[metabolite]
+        rates[reaction] = float(fluxes[reaction.id] * reaction.metabolites[metabolite])
 
     return rates
 

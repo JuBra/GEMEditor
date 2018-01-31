@@ -2,7 +2,6 @@ import networkx as nx
 import numpy as np
 from cobra import Metabolite
 import json
-from GEMEditor.solution.analysis import get_rates
 from GEMEditor.base import split_dict_by_value
 
 
@@ -365,9 +364,7 @@ def canvas_size(pos, params):
     return width, height
 
 
-def setup_turnover_map(metabolite, fluxes, params=PARAMS_TURNOVER):
-
-    rates = get_rates(fluxes, metabolite)
+def setup_turnover_map(metabolite, rates, params=PARAMS_TURNOVER):
     graph, pos = layout_turnover(metabolite, rates, params)
 
     positive, negative, _ = split_dict_by_value(rates)
