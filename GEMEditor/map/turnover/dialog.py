@@ -1,7 +1,8 @@
 import logging
 import escher
-import tempfile
+import tempfile as tf
 import os
+import uuid
 from collections import defaultdict
 from GEMEditor.base import Settings, restore_state, restore_geometry
 from GEMEditor.map.base import ESCHER_OPTIONS_LOCAL, replace_css_paths
@@ -40,6 +41,8 @@ class TurnoverDialog(QDialog, Ui_TurnoverDialog):
         # Store input
         self.metabolite = None
         self.solution = None
+        self.temp_file = os.path.join(tf.gettempdir(),
+                                      "{0!s}.html".format(uuid.uuid4()))
 
         # Setup data structures
         self.datatable = QStandardItemModel(self)
@@ -47,12 +50,11 @@ class TurnoverDialog(QDialog, Ui_TurnoverDialog):
         self.dataView.setModel(self.datatable)
         self.dataView.setEditTriggers(QAbstractItemView.NoEditTriggers)
 
-        self.webpage = QWebEnginePage(self)
-        self.mapView.setPage(self.webpage)
         self.mapView.settings().setAttribute(QWebEngineSettings.LocalContentCanAccessFileUrls, True)
 
         # Connect signals/slots
         self.finished.connect(self.save_settings)
+        self.finished.connect(self.delete_temp_file)
 
         # Restore settings
         self._restore_settings()
@@ -95,15 +97,9 @@ class TurnoverDialog(QDialog, Ui_TurnoverDialog):
             # As Qt does not allow the loading of local files
             # from html set via the setHtml method, write map
             # to file and read it back to webview
-            temp = os.path.join(tempfile.gettempdir(), "temp.html")
-            with open(temp, "w") as ofile:
+            with open(self.temp_file, "w") as ofile:
                 ofile.write(replace_css_paths(html))
-
-            self.mapView.load(QUrl("file:///"+temp.replace("\\", "/")))
-            try:
-                os.remove(temp)
-            except:
-                pass
+            self.mapView.load(QUrl("file:///"+self.temp_file.replace("\\", "/")))
 
     def _populate_tree(self):
         """ Populate the datamodel from reactions
@@ -185,3 +181,16 @@ class TurnoverDialog(QDialog, Ui_TurnoverDialog):
             settings.setValue("SplitterState", self.splitter.saveState())
             settings.setValue("TableHeader", self.dataView.header().saveState())
             settings.setValue("DialogGeometry", self.saveGeometry())
+
+    def delete_temp_file(self):
+        """ Delete temporary file created when displaying map
+
+        Returns
+        -------
+
+        """
+
+        try:
+            os.remove(self.temp_file)
+        except:
+            pass

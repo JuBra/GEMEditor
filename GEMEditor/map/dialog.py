@@ -13,13 +13,6 @@ from PyQt5.QtWidgets import QDialog, QFileDialog, QListWidgetItem, QMessageBox, 
 LOGGER = logging.getLogger(__name__)
 
 
-get_html_options = {"js_source": "web",
-                    "menu": "none",
-                    "scroll_behavior": "zoom",
-                    "html_wrapper": True,
-                    "protocol": "https"}
-
-
 class MapListDialog(QDialog, Ui_MapListDialog):
     """ Open escher maps dialog
 
@@ -127,9 +120,7 @@ class MapDisplayWidget(QWidget):
         self.setLayout(layout)
 
         # Change view settings
-        self.webView.settings().setAttribute(QWebEngineSettings.JavascriptEnabled, True)
         self.webView.settings().setAttribute(QWebEngineSettings.LocalContentCanAccessRemoteUrls, True)
-        self.webView.settings().setAttribute(QWebEngineSettings.JavascriptCanOpenWindows, True)
         self.webView.settings().setAttribute(QWebEngineSettings.LocalContentCanAccessFileUrls, True)
 
     def update_map(self, **kwargs):
