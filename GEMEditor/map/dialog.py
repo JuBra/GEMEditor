@@ -303,8 +303,8 @@ class TurnoverDialog(QDialog, Ui_TurnoverDialog):
         self.datatable.setRowCount(0)
 
         # Setup items
-        consuming, producing, inactive = QStandardItem("Consuming"), QStandardItem("Producing"), QStandardItem(
-            "Inactive")
+        consuming, producing, inactive = QStandardItem("Consuming"), QStandardItem("Producing"), \
+                                         QStandardItem("Inactive")
 
         turnover = sum(v for v in rates.values() if v > 0.)
 
@@ -367,7 +367,6 @@ class TurnoverDialog(QDialog, Ui_TurnoverDialog):
         -------
 
         """
-
         try:
             os.remove(self.temp_file)
         except:
