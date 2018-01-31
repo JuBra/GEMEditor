@@ -8,17 +8,14 @@ import sys
 LOGGER = logging.getLogger(__name__)
 
 
-ESCHER_HTML_OPTIONS_WEB = {"js_source": "web",
-                           "menu": "none",
-                           "scroll_behavior": "zoom",
-                           "html_wrapper": True,
-                           "protocol": "https"}
+ESCHER_OPTIONS_WEB = {"js_source": "web",
+                      "menu": "none",
+                      "scroll_behavior": "zoom",
+                      "html_wrapper": True,
+                      "protocol": "https"}
 
-ESCHER_HTML_OPTIONS_LOCAL = {"js_source": "local",
-                            "menu": "none",
-                            "scroll_behavior": "zoom",
-                            "html_wrapper": True,
-                            "protocol": "https"}
+ESCHER_OPTIONS_LOCAL = ESCHER_OPTIONS_WEB.copy()
+ESCHER_OPTIONS_LOCAL["js_source"] = "local"
 
 
 class WrongEscherFormat(BaseException):
@@ -97,7 +94,7 @@ class MapWrapper:
                                  reaction_data=reaction_data,
                                  gene_data=gene_data,
                                  metabolite_data=metabolite_data)
-        return builder._get_html(**ESCHER_HTML_OPTIONS_WEB)
+        return builder._get_html(**ESCHER_OPTIONS_WEB)
 
     @property
     def display_path(self):

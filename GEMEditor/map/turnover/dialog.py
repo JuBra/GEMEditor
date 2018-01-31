@@ -4,7 +4,7 @@ import tempfile
 import os
 from collections import defaultdict
 from GEMEditor.base import Settings, restore_state, restore_geometry
-from GEMEditor.map.base import ESCHER_HTML_OPTIONS_LOCAL, replace_css_paths
+from GEMEditor.map.base import ESCHER_OPTIONS_LOCAL, replace_css_paths
 from GEMEditor.map.turnover.generate import setup_turnover_map
 from GEMEditor.map.turnover.ui import Ui_TurnoverDialog
 from GEMEditor.model.display.tables import ReactionBaseTable
@@ -90,7 +90,7 @@ class TurnoverDialog(QDialog, Ui_TurnoverDialog):
             # Generate escher turnover map
             map_json = setup_turnover_map(self.metabolite, fluxes)
             builder = escher.Builder(map_json=map_json, reaction_data=fluxes.to_dict())
-            html = builder._get_html(**ESCHER_HTML_OPTIONS_LOCAL)
+            html = builder._get_html(**ESCHER_OPTIONS_LOCAL)
 
             # As Qt does not allow the loading of local files
             # from html set via the setHtml method, write map
