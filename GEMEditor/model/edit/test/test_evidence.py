@@ -51,7 +51,7 @@ class TestEvidenceInputDialog:
 
     def test_set_current_evidence(self):
 
-        evidence = Evidence(entity=Reaction("id"), link=Gene("test"), term="Term", eco="ECO:0000ß", assertion="Presence", comment="Comment")
+        evidence = Evidence(entity=Reaction("id"), term="Term", eco="ECO:0000ß", assertion="Presence", comment="Comment")
         evidence.add_reference(Reference())
 
         # Action
@@ -61,7 +61,6 @@ class TestEvidenceInputDialog:
         assert self.dialog.lineEdit_term.text() == evidence.term
         assert self.evidence.eco in self.dialog.label_eco.text()
         assert self.dialog.textBox_comment.toPlainText() == evidence.comment
-        assert self.dialog.label_link.text() == evidence.link.id
 
         # Todo: Move to a test of reference display widget
         # assert self.dialog.referenceTable.rowCount() == 1
@@ -87,7 +86,6 @@ class TestEvidenceInputDialog:
 
         evidence = Evidence(entity=Reaction(""))
         new_ref = Reference()
-        new_link = Gene()
         new_eco = "ECO:0000000"
 
         # Setup
@@ -98,7 +96,6 @@ class TestEvidenceInputDialog:
 
         # Todo: Move to reference widget test
         #self.dialog.referenceTable.populate_table([new_ref])
-        self.dialog.set_linked_item(new_link)
         self.dialog.comboBox.setCurrentIndex(1)
         self.dialog.set_eco(new_eco)
 
@@ -110,7 +107,6 @@ class TestEvidenceInputDialog:
         assert evidence.comment == self.dialog.textBox_comment.toPlainText()
         # Todo: Move to reference widget test
         # assert evidence.references == set([new_ref])
-        assert evidence.link == new_link
         assert evidence.eco == new_eco
 
     def test_save_changes2(self):
@@ -118,25 +114,21 @@ class TestEvidenceInputDialog:
 
         evidence = Evidence(entity=Reaction(""))
         new_term = "New term"
-        new_link = Gene("id")
 
         self.dialog.set_evidence(evidence)
 
         # Set dialog attributes
         self.dialog.lineEdit_term.setText(new_term)
-        self.dialog.set_linked_item(new_link)
 
         # Check saving of term
         self.dialog.comboBox.setCurrentIndex(0)
         self.dialog.save_state()
         assert evidence.term == new_term
-        assert evidence.link is None
 
         # Check saving of linked item
         self.dialog.comboBox.setCurrentIndex(1)
         self.dialog.save_state()
         assert evidence.term == ""
-        assert evidence.link is new_link
 
     # Todo: Replace with test of button status changed
     # def test_content_changed_type(self):

@@ -36,8 +36,7 @@ class TestEvidence:
         self.eco = "ECO:0000000"
         self.comment = "test"
         self.term = "term"
-        self.evidence = Evidence(entity=self.reaction, link=self.gene,
-                                 term=self.term, eco=self.eco,
+        self.evidence = Evidence(entity=self.reaction, term=self.term, eco=self.eco,
                                  assertion=self.assertion, comment=self.comment, target=self.target)
 
         self.evidence.add_reference(self.reference)
@@ -48,7 +47,6 @@ class TestEvidence:
 
     def test_setup(self):
         assert self.evidence.entity is self.reaction
-        assert self.evidence.link is self.gene
         assert self.evidence.target is self.target
 
         assert len(self.evidence.references) == 1
@@ -174,11 +172,9 @@ class TestEvidence:
         xml_tree = ET.fromstring(full_evidence)
         model = Model()
         reaction = Reaction("Test")
-        link_item = Gene("link_id")
         target_item = Gene("target_id")
         reference = Reference("ref_id")
         model.add_reaction(reaction)
-        model.add_gene(link_item)
         model.add_gene(target_item)
         model.add_reference(reference)
 
@@ -192,7 +188,6 @@ class TestEvidence:
 
         evidence = list(reaction.evidences)[0]
         assert evidence.entity is reaction
-        assert evidence.link is link_item
         assert evidence.target is target_item
         assert evidence.assertion == "Catalyzed by"
         assert evidence.eco == "ECO:0000000"

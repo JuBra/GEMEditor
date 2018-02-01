@@ -8,20 +8,17 @@ class TestEvidence:
 
     def test_evidence_init(self):
         entity = Reaction()
-        link = Gene()
         target = Gene("id2")
         eco = "ECO:000000"
         assertion = "Presence"
         comment = "test comment"
         reference = Reference()
-        evidence = Evidence(entity=entity, link=link, eco=eco, assertion=assertion, comment=comment, target=target)
+        evidence = Evidence(entity=entity, eco=eco, assertion=assertion, comment=comment, target=target)
         evidence.add_reference(reference)
 
         # Check proper linking
         assert evidence.entity is entity
         assert evidence in entity.evidences
-        assert evidence.link is link
-        assert evidence in link.evidences
         assert evidence.target is target
         assert evidence in target.evidences
 
@@ -55,23 +52,6 @@ class TestEvidence:
         assert evidence.entity is new_reaction
         assert evidence not in entity.evidences
 
-    def test_override_link(self):
-        entity = Reaction()
-        link = Gene()
-        eco = "ECO:000000"
-        assertion = "Presence"
-        comment = "test comment"
-        reference = Reference()
-        evidence = Evidence(entity=entity, link=link, eco=eco, assertion=assertion, comment=comment)
-        evidence.add_reference(reference)
-
-        new_gene = Gene()
-        evidence.set_linked_item(new_gene)
-
-        # Check disconnection of old reaction
-        assert evidence.link is new_gene
-        assert evidence not in link.evidences
-
     def test_override_target(self):
         entity = Reaction()
         target = Gene()
@@ -91,22 +71,19 @@ class TestEvidence:
 
     def test_delete_links(self):
         entity = Reaction()
-        link = Gene()
         target=Gene()
         eco = "ECO:000000"
         assertion = "Presence"
         comment = "test comment"
         reference = Reference()
-        evidence = Evidence(entity=entity, link=link, eco=eco, assertion=assertion, comment=comment, target=target)
+        evidence = Evidence(entity=entity, eco=eco, assertion=assertion, comment=comment, target=target)
         evidence.add_reference(reference)
 
         evidence.delete_links()
 
         assert evidence.entity is None
-        assert evidence.link is None
         assert len(evidence.references) == 0
         assert evidence not in entity.evidences
-        assert evidence not in link.evidences
         assert evidence not in target.evidences
 
     def test_setup_links(self):
@@ -140,13 +117,12 @@ class TestEvidence:
 
     def test_copy_evidence(self):
         entity = Reaction()
-        link = Gene()
         target = Gene()
         eco = "ECO:000000"
         assertion = "Presence"
         comment = "test comment"
         reference = Reference()
-        evidence = Evidence(entity=entity, link=link, eco=eco, assertion=assertion, comment=comment, target=target)
+        evidence = Evidence(entity=entity, eco=eco, assertion=assertion, comment=comment, target=target)
         evidence.add_reference(reference)
 
         # Create copy
@@ -154,7 +130,6 @@ class TestEvidence:
 
         # Check the correctness of the copy
         assert evidence.entity is copy.entity
-        assert evidence.link is copy.link
         assert evidence.target is copy.target
         assert evidence.eco == copy.eco
         assert evidence.assertion == copy.assertion

@@ -261,17 +261,15 @@ class TestEvidenceDisplayWidget:
 
     def test_saving_changes(self):
         reaction = Reaction()
-        gene = Gene()
         reference = Reference()
         model = Model()
-        evidence = Evidence(entity=reaction, link=gene)
+        evidence = Evidence(entity=reaction)
         evidence.add_reference(reference)
         widget = EvidenceDisplayWidget()
 
         model.all_evidences[evidence.internal_id] = evidence
 
         assert evidence in reaction.evidences
-        assert evidence in gene.evidences
         assert evidence.internal_id in model.all_evidences
         assert reference in evidence.references
 
@@ -287,15 +285,11 @@ class TestEvidenceDisplayWidget:
         new_evidence.assertion = "Catalyzed by"
         new_evidence.entity = reaction
 
-        gene = Gene("G_id")
-        new_evidence.link = gene
-
         reference = Reference()
         new_evidence.add_reference(reference, reciprocal=False)
 
         # Test the setup i.e. that items are only linked in a one way (evidence -> item) fashion
         assert new_evidence not in reaction.evidences
-        assert new_evidence not in gene.evidences
         assert new_evidence not in reference.linked_items
 
         # Add new reference to widget table
@@ -308,8 +302,6 @@ class TestEvidenceDisplayWidget:
 
         # Check that old instance is detached from all links
         assert evidence not in reaction.evidences
-        assert evidence not in gene.evidences
-        assert evidence.link is None
         assert len(evidence.references) == 0
 
         # Old evidence still kept alive by this test
@@ -321,7 +313,6 @@ class TestEvidenceDisplayWidget:
 
         # Check that new evidence is linked properly
         assert new_evidence in reaction.evidences
-        assert new_evidence in gene.evidences
         assert new_evidence.internal_id in model.all_evidences
 
 
