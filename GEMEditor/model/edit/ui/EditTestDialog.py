@@ -89,5 +89,6 @@ class Ui_EditTestDialog(object):
         self.tabWidget2.setTabText(self.tabWidget2.indexOf(self.referenceTab), _translate("EditTestDialog", "References"))
         self.groupBox_3.setTitle(_translate("EditTestDialog", "Comment"))
 
-from GEMEditor.model.display.base import CommentDisplayWidget, ReferenceDisplayWidget
+from GEMEditor.model.display.base import CommentDisplayWidget
+from GEMEditor.model.display.reference import ReferenceDisplayWidget
 from GEMEditor.model.display.modeltest import GeneSettingDisplayWidget, OutcomeDisplayWidget, ReactionSettingDisplayWidget

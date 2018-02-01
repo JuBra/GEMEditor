@@ -25,7 +25,7 @@
       </attribute>
       <layout class="QGridLayout" name="gridLayout">
        <item row="0" column="1">
-        <widget class="QComboBox" name="comboBox_assertion"/>
+        <widget class="QComboBox" name="combo_assertion"/>
        </item>
        <item row="0" column="0">
         <widget class="QLabel" name="label">
@@ -66,7 +66,7 @@
           </spacer>
          </item>
          <item>
-          <widget class="QPushButton" name="pushButton_select_eco">
+          <widget class="QPushButton" name="button_select_eco">
            <property name="text">
             <string>Select</string>
            </property>
@@ -84,7 +84,7 @@
           </widget>
          </item>
          <item>
-          <widget class="QToolButton" name="toolButton_select_targe">
+          <widget class="QToolButton" name="toolbutton_select_target">
            <property name="text">
             <string>Select</string>
            </property>
@@ -179,7 +179,7 @@
   <customwidget>
    <class>ReferenceDisplayWidget</class>
    <extends>QWidget</extends>
-   <header>GEMEditor.widgets.secondaryDialog</header>
+   <header>GEMEditor.model.display.base</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
