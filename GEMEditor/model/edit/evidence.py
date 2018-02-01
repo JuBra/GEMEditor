@@ -7,58 +7,49 @@ from GEMEditor.base.tables import LinkedItem
 from GEMEditor.model.classes.evidence import Evidence
 from GEMEditor.model.edit.ui.BatchEvidenceDialog import Ui_BatchEvidenceDialog
 from GEMEditor.model.edit.ui.EcoSelectionDialog import Ui_EcoSelectionDialog as Ui_eco
-from GEMEditor.model.edit.ui.EditEvidenceDialog import Ui_EditEvidenceDialog as Ui_new
+from GEMEditor.model.edit.ui.EditEvidenceDialog import Ui_EditEvidenceDialog
 from GEMEditor.base.proxy import RecursiveProxyFilter
 from PyQt5 import QtCore, QtGui
 from PyQt5.QtWidgets import QMenu, QAction, QDialogButtonBox, QMessageBox, QErrorMessage, QInputDialog
 
 
-class EditEvidenceDialog(CustomStandardDialog, Ui_new):
+class EditEvidenceDialog(CustomStandardDialog, Ui_EditEvidenceDialog):
 
     options = {Metabolite: ("Present",),
                Reaction: ("Present", "Absent", "Reversible", "Irreversible", "Active", "Passive"),
                Gene: ("Localization", "Catalyzing reaction", "Not catalyzing reaction"),
                None.__class__: ()}
 
-    def __init__(self, parent, model=None, evidence=None, **kwargs):
+    def __init__(self, parent=None, model=None, evidence=None, **kwargs):
         super(EditEvidenceDialog, self).__init__(parent, **kwargs)
         self.setupUi(self)
+        self.model = None
+
+        # Keep track of initial state
         self.evidence = None
-        self.linked_item = None
-        self.target_item = None
+        self.target = None
         self.eco = ""
-        self.set_evidence(evidence)
+        self.assertion = ""
+
+        # Set passed information
+        self.set_evidence(evidence, model)
         self.referenceWidget.set_item(evidence, model)
-        self.model = model
-        self.referenceWidget.model = model
 
-        self.setup_connections()
-        self.set_toolbutton_menu()
-        self.set_toolbutton_target_menu()
-
-        self.restore_dialog_geometry()
-
-    # noinspection PyUnresolvedReferences
-    def setup_connections(self):
-        self.pushButton_select_eco.clicked.connect(self.select_eco)
-        self.comboBox.currentIndexChanged.connect(self.stackedWidget.setCurrentIndex)
+        # Connect signals/slots
+        self.button_select_eco.clicked.connect(self.select_eco)
         self.finished.connect(self.save_dialog_geometry)
         self.accepted.connect(self.save_state)
 
-    def set_toolbutton_menu(self):
-        menu = QMenu()
-        action1 = QAction("Metabolite", menu)
-        action1.triggered.connect(lambda x: self.select_link(MetaboliteSelectionDialog))
-        action2 = QAction("Reaction", menu)
-        action2.triggered.connect(lambda x: self.select_link(ReactionSelectionDialog))
-        action3 = QAction("Gene", menu)
-        action3.triggered.connect(lambda x: self.select_link(GeneSelectionDialog))
-        menu.addAction(action1)
-        menu.addAction(action2)
-        menu.addAction(action3)
-        self.toolButton_select.setMenu(menu)
+        # Setup dialog
+        self._setup_target_button()
 
-    def set_toolbutton_target_menu(self):
+        self.restore_dialog_geometry()
+
+    def _setup_target_button(self):
+        """ Populate the target button with options
+
+        """
+
         menu = QMenu()
         action1 = QAction("Metabolite", menu)
         action1.triggered.connect(lambda x: self.select_target(MetaboliteSelectionDialog))
@@ -71,112 +62,67 @@ class EditEvidenceDialog(CustomStandardDialog, Ui_new):
             action4 = QAction("Compartment", menu)
             action4.triggered.connect(lambda x: self.select_target(CompartmentSelectionDialog))
             menu.addAction(action4)
-        self.toolButton_select_targe.setMenu(menu)
+        self.toolbutton_select_target.setMenu(menu)
 
-    def select_link(self, dialog_class):
-        dialog = dialog_class(self.model)
+    def select_target(self, cls):
+        dialog = cls(self.model)
         if dialog.exec_():
-            self.set_linked_item(dialog.selected_items()[0])
-
-    def select_target(self, dialog_class):
-        dialog = dialog_class(self.model)
-        if dialog.exec_():
-            self.set_target_item(dialog.selected_items()[0])
+            self.set_target(dialog.selected_items()[0])
 
     def select_compartment(self):
         compartment_id, status = QInputDialog().getItem(self, "Select compartment", "Select compartment:",
                                                               sorted(self.model.gem_compartments.keys()), 0, False)
         if status:
-            self.set_target_item(self.model.gem_compartments[compartment_id])
-
-    def set_evidence(self, evidence):
-        if evidence is None:
-            return
-        elif not isinstance(evidence, Evidence):
-            QErrorMessage().showMessage("The instance passed to .set_evidence is not of type Evidence")
-            return
-
-        self.evidence = evidence
-        self.populate_propertybox()
-        self.set_assertion(evidence.assertion)
-        self.set_linked_item(evidence.link)
-        self.set_target_item(evidence.target)
-        try:
-            self.set_eco(all_ecos[evidence.eco])
-        except KeyError:
-            self.set_eco(None)
-        self.textBox_comment.setPlainText(evidence.comment)
-        self.lineEdit_term.setText(evidence.term)
-        self.referenceWidget.dataTable.populate_table(evidence.references)
-
-    def set_linked_item(self, item):
-        if item:
-            self.linked_item = item
-            self.label_link.setText(item.id)
-            self.comboBox.setCurrentIndex(1)
-            self.stackedWidget.setCurrentIndex(1)
-        else:
-            self.linked_item = None
-            self.label_link.clear()
-
-    def set_target_item(self, item):
-        if item:
-            self.target_item = item
-            self.label_target.setText(item.id)
-        else:
-            self.target_item = None
-            self.label_target.clear()
-
-    def set_assertion(self, assertion):
-        self.comboBox_assertion.setCurrentIndex(self.comboBox_assertion.findText(assertion))
-
-    def populate_propertybox(self):
-        """ Populate the combobox with the appropriate options"""
-        self.comboBox_assertion.clear()
-        try:
-            self.comboBox_assertion.addItems(self.options[self.evidence.entity.__class__])
-        except KeyError:
-            QErrorMessage().showMessage("Unexpected base item of type {}.".format(str(type(self.evidence.entity))))
-            return
-
-    @QtCore.pyqtSlot()
-    def save_state(self):
-        """ Save the state of the evidence when the user accepts the dialog
-
-        Returns
-        -------
-        None
-        """
-
-        # Add new data to evidence
-        self.evidence.set_assertion(self.comboBox_assertion.currentText())
-        if self.eco:
-            self.evidence.set_eco(self.eco)
-        self.evidence.set_comment(self.textBox_comment.toPlainText())
-
-        # Update references
-        # Todo: Move to independent reference widget
-        self.evidence.remove_all_references()
-        for reference in self.referenceWidget.dataTable.get_items():
-            self.evidence.add_reference(reference)
-
-        # Set either a term or a linked object depending on the current
-        # selection.
-        if self.comboBox.currentIndex() == 0:
-            self.evidence.set_term(self.lineEdit_term.text())
-            self.evidence.set_linked_item(None, reciprocal=False)
-        elif self.comboBox.currentIndex() == 1:
-            self.evidence.set_linked_item(self.linked_item, reciprocal=False)
-            self.evidence.set_term(None)
-
-        self.evidence.set_target(self.target_item, reciprocal=False)
+            self.set_target(self.model.gem_compartments[compartment_id])
 
     @QtCore.pyqtSlot()
     def select_eco(self):
         dialog = EvidenceCodeSelectionDialog()
-        status = dialog.exec_()
-        if status:
+        if dialog.exec_():
             self.set_eco(dialog.get_selected())
+
+    def set_evidence(self, evidence, model):
+
+        # Set items
+        self.evidence = evidence
+        self.model = model
+
+        if evidence:
+            # Update widgets
+            self.populate_propertybox()
+            self.set_assertion(evidence.assertion)
+            self.set_target(evidence.target)
+            self.set_eco(evidence.eco)
+            self.set_comment(evidence.comment)
+            self.referenceWidget.set_item(evidence, model)
+
+    def set_target(self, item):
+        """ Set the selected item as target
+
+        Parameters
+        ----------
+        item:
+            Target item
+
+        """
+
+        if item:
+            self.target = item
+            self.label_target.setText(item.id)
+        else:
+            self.target = None
+            self.label_target.clear()
+
+    def set_assertion(self, assertion):
+        """ Set current assertion
+
+        Parameters
+        ----------
+        assertion: str,
+            Assertion to be set
+
+        """
+        self.combo_assertion.setCurrentIndex(self.combo_assertion.findText(assertion))
 
     def set_eco(self, eco):
         if eco and isinstance(eco, str):
@@ -193,6 +139,39 @@ class EditEvidenceDialog(CustomStandardDialog, Ui_new):
         else:
             self.label_eco.setText("")
             self.eco = None
+
+    def set_comment(self, comment):
+        if comment:
+            self.textBox_comment.setPlainText(comment)
+        else:
+            self.textBox_comment.clear()
+
+    def populate_propertybox(self):
+        """ Populate the combobox with the appropriate options"""
+        self.combo_assertion.clear()
+        try:
+            self.combo_assertion.addItems(self.options[self.evidence.entity.__class__])
+        except KeyError:
+            QErrorMessage().showMessage("Unexpected base item of type {}.".format(str(type(self.evidence.entity))))
+            return
+
+    @QtCore.pyqtSlot()
+    def save_state(self):
+        """ Save the state of the evidence when the user accepts the dialog
+
+        Returns
+        -------
+        None
+        """
+
+        # Add new data to evidence
+        self.evidence.set_assertion(self.combo_assertion.currentText())
+        self.evidence.set_eco(self.eco)
+        self.evidence.set_comment(self.textBox_comment.toPlainText())
+        self.evidence.set_target(self.target)
+
+        # Save references
+        self.referenceWidget.save_state()
 
 
 class EvidenceCodeSelectionDialog(CustomStandardDialog, Ui_eco):

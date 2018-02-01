@@ -36,11 +36,6 @@ def add_evidences_to_xml(model_node, model):
                                                "eco": evidence.eco})
             if evidence.comment:
                 evidence_node.set("comment", evidence.comment)
-            if evidence.term:
-                evidence_node.set("term", evidence.term)
-            if evidence.link:
-                evidence_node.set("link_id", evidence.link.id)
-                evidence_node.set("link_type", type(evidence.link).__name__)
             if evidence.target:
                 evidence_node.set("target_id", evidence.target.id)
                 evidence_node.set("target_type", type(evidence.target).__name__)
@@ -76,9 +71,8 @@ def parse_evidences_from_xml(model_node, model, progress=None):
         else:
             return
 
-        new_evidence = Evidence(internal_id=evidence_node.get("id"), term=evidence_node.get("term"),
-                                assertion=evidence_node.get("assertion"), comment=evidence_node.get("comment"),
-                                eco=evidence_node.get("eco"))
+        new_evidence = Evidence(internal_id=evidence_node.get("id"), assertion=evidence_node.get("assertion"),
+                                comment=evidence_node.get("comment"), eco=evidence_node.get("eco"))
 
         entity_id = evidence_node.get("entity_id")
         entity_type = evidence_node.get("entity_type")
@@ -86,13 +80,7 @@ def parse_evidences_from_xml(model_node, model, progress=None):
         entity = get_item_from_model(entity_type, entity_id, model)
         new_evidence.set_entity(entity)
 
-        # Add linked item if present
-        link_id = evidence_node.get("link_id")
-        link_type = evidence_node.get("link_type")
-        if link_id and link_type:
-            link = get_item_from_model(link_type, link_id, model)
-            new_evidence.set_linked_item(link)
-
+        # Add target item if present
         target_id = evidence_node.get("target_id")
         target_type = evidence_node.get("target_type")
         if target_id and target_type:
@@ -106,12 +94,6 @@ def parse_evidences_from_xml(model_node, model, progress=None):
                 new_evidence.add_reference(model.references[refLink_node.get("id")])
 
         model.all_evidences[new_evidence.internal_id] = new_evidence
-
-
-def add_linked_item(linked_items_list_node, item, item_type):
-    SubElement(linked_items_list_node, item_type,
-               attrib={"id": item.id,
-                       "type": type(item).__name__})
 
 
 def get_item_from_model(item_type, item_id, model):

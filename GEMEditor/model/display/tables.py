@@ -219,7 +219,7 @@ class StoichiometryTable(ElementTable):
 
 class EvidenceTable(ElementTable):
 
-    header = ("Entity", "Assertion", "ECO", "Link", "Comment", "References")
+    header = ("Entity", "Assertion", "Target", "ECO", "Comment", "References")
 
     def __init__(self, *args):
         ElementTable.__init__(self, *args)
@@ -237,8 +237,11 @@ class EvidenceTable(ElementTable):
         -------
         list
         """
-        return [LinkedItem(item.entity.id, item), LinkedItem(item.assertion, item), LinkedItem(item.eco, item),
-                LinkedItem(str(item.link), item), LinkedItem(item.comment, item),
+
+        target_id = item.target.id if item.target else "None"
+
+        return [LinkedItem(item.entity.id, item), LinkedItem(item.assertion, item),
+                LinkedItem(target_id), LinkedItem(item.eco, item), LinkedItem(item.comment, item),
                 LinkedItem("; ".join([x.reference_string() for x in item.references]))]
 
     def get_items(self):

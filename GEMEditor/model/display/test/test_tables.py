@@ -973,8 +973,8 @@ class TestEvidenceTable:
         assert return_values[0].link is evidence
         assert return_values[0].text() == gene1.id
         assert return_values[1].text() == evidence.assertion
-        assert return_values[2].text() == evidence.eco
-        assert return_values[3].text() == str(evidence.link)
+        assert return_values[2].text() == evidence.target.id
+        assert return_values[3].text() == evidence.eco
         assert return_values[4].text() == evidence.comment
         assert return_values[5].text() == ""
 

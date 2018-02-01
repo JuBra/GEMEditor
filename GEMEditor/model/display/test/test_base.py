@@ -2,12 +2,10 @@ import gc
 import pytest
 from unittest.mock import Mock
 from GEMEditor.model.classes.annotation import Annotation
-from GEMEditor.model.classes.cobra import Model, Reaction, Gene
-from GEMEditor.model.classes.modeltest import ModelTest
+from GEMEditor.model.classes.cobra import Model, Reaction
 from GEMEditor.model.classes.reference import Reference
 from GEMEditor.model.classes.evidence import Evidence
-from GEMEditor.model.display.base import AnnotationDisplayWidget, CommentDisplayWidget, EvidenceDisplayWidget, \
-    ReferenceDisplayWidget
+from GEMEditor.model.display.base import AnnotationDisplayWidget, CommentDisplayWidget, EvidenceDisplayWidget
 from GEMEditor.model.display.test.fixture import MockSlot
 from PyQt5 import QtTest, QtCore
 from PyQt5.QtWidgets import QWidget
@@ -261,17 +259,15 @@ class TestEvidenceDisplayWidget:
 
     def test_saving_changes(self):
         reaction = Reaction()
-        gene = Gene()
         reference = Reference()
         model = Model()
-        evidence = Evidence(entity=reaction, link=gene)
+        evidence = Evidence(entity=reaction)
         evidence.add_reference(reference)
         widget = EvidenceDisplayWidget()
 
         model.all_evidences[evidence.internal_id] = evidence
 
         assert evidence in reaction.evidences
-        assert evidence in gene.evidences
         assert evidence.internal_id in model.all_evidences
         assert reference in evidence.references
 
@@ -287,15 +283,11 @@ class TestEvidenceDisplayWidget:
         new_evidence.assertion = "Catalyzed by"
         new_evidence.entity = reaction
 
-        gene = Gene("G_id")
-        new_evidence.link = gene
-
         reference = Reference()
         new_evidence.add_reference(reference, reciprocal=False)
 
         # Test the setup i.e. that items are only linked in a one way (evidence -> item) fashion
         assert new_evidence not in reaction.evidences
-        assert new_evidence not in gene.evidences
         assert new_evidence not in reference.linked_items
 
         # Add new reference to widget table
@@ -308,8 +300,6 @@ class TestEvidenceDisplayWidget:
 
         # Check that old instance is detached from all links
         assert evidence not in reaction.evidences
-        assert evidence not in gene.evidences
-        assert evidence.link is None
         assert len(evidence.references) == 0
 
         # Old evidence still kept alive by this test
@@ -321,81 +311,4 @@ class TestEvidenceDisplayWidget:
 
         # Check that new evidence is linked properly
         assert new_evidence in reaction.evidences
-        assert new_evidence in gene.evidences
         assert new_evidence.internal_id in model.all_evidences
-
-
-class TestReferenceDisplayWidget:
-
-    def test_setting_item(self):
-        parent = QWidget()
-        widget = ReferenceDisplayWidget(parent)
-        test = ModelTest()
-        model = Model()
-
-        widget.dataTable.populate_table = Mock()
-
-        widget.set_item(test, model)
-
-        widget.dataTable.populate_table.assert_called_once_with(test.references)
-        assert widget.model is model
-        assert widget.item is test
-
-    def test_saving_items(self):
-
-        parent = QWidget()
-        widget = ReferenceDisplayWidget(parent)
-        test = ModelTest()
-        reference = Reference()
-        test.add_reference(reference)
-
-        model = Model()
-
-        widget.set_item(test, model)
-
-        new_test = ModelTest()
-        widget.item = new_test
-
-        assert len(new_test.references) == 0
-        widget.save_state()
-        assert len(new_test.references) == 1
-
-        new_reference = list(new_test.references)[0]
-
-        assert new_reference is reference
-
-    def test_addition_emits_changed(self):
-        parent = QWidget()
-        widget = ReferenceDisplayWidget(parent)
-        test = ModelTest()
-        reference = Reference()
-        test.add_reference(reference)
-        model = Model()
-
-        widget.set_item(test, model)
-
-        detector = Mock()
-        widget.changed.connect(detector.test)
-
-        widget.dataTable.update_row_from_item(Reference())
-        assert detector.test.called is True
-        assert widget.content_changed is True
-
-    def test_deletion_emits_changed(self):
-        parent = QWidget()
-        widget = ReferenceDisplayWidget(parent)
-        test = ModelTest()
-        reference = Reference()
-        test.add_reference(reference)
-        model = Model()
-
-        widget.set_item(test, model)
-
-        detector = Mock()
-        widget.changed.connect(detector.test)
-
-        widget.tableView.selectRow(0)
-        QtTest.QTest.mouseClick(widget.button_del_item, QtCore.Qt.LeftButton)
-        assert widget.dataTable.rowCount() == 0
-        assert detector.test.called is True
-        assert widget.content_changed is True
