@@ -124,6 +124,7 @@ class FBAProxy(CustomProxy):
         self._options["Flux at bound"] = self._filter_flux_at_bound
         self._options["All boundaries"] = self._filter_all_boundary
         self._options["Active boundaries"] = self._filter_active_boundary
+        self._options["Active transport"] = self._filter_active_transport
 
     def _filter_flux_nonzero(self, row, _):
         return self.sourceModel().get_flux(row) != 0.
@@ -138,6 +139,11 @@ class FBAProxy(CustomProxy):
     def _filter_active_boundary(self, *args):
         return self._filter_all_boundary(*args) and \
                self._filter_flux_nonzero(*args)
+
+    def _filter_active_transport(self, row, _):
+        reaction = self.sourceModel().get_reaction(row)
+        return self.sourceModel().get_flux(row) != 0 and \
+               len({m.compartment for m in reaction.metabolites}) > 1
 
 
 class FVATable(CustomSolutionTable):
