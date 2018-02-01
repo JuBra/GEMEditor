@@ -7,13 +7,13 @@ from GEMEditor.base.tables import LinkedItem
 from GEMEditor.model.classes.evidence import Evidence
 from GEMEditor.model.edit.ui.BatchEvidenceDialog import Ui_BatchEvidenceDialog
 from GEMEditor.model.edit.ui.EcoSelectionDialog import Ui_EcoSelectionDialog as Ui_eco
-from GEMEditor.model.edit.ui.EditEvidenceDialog import Ui_EditEvidenceDialog as Ui_new
+from GEMEditor.model.edit.ui.EditEvidenceDialog import Ui_EditEvidenceDialog
 from GEMEditor.base.proxy import RecursiveProxyFilter
 from PyQt5 import QtCore, QtGui
 from PyQt5.QtWidgets import QMenu, QAction, QDialogButtonBox, QMessageBox, QErrorMessage, QInputDialog
 
 
-class EditEvidenceDialog(CustomStandardDialog, Ui_new):
+class EditEvidenceDialog(CustomStandardDialog, Ui_EditEvidenceDialog):
 
     options = {Metabolite: ("Present",),
                Reaction: ("Present", "Absent", "Reversible", "Irreversible", "Active", "Passive"),
@@ -33,7 +33,6 @@ class EditEvidenceDialog(CustomStandardDialog, Ui_new):
         self.referenceWidget.model = model
 
         self.setup_connections()
-        self.set_toolbutton_menu()
         self.set_toolbutton_target_menu()
 
         self.restore_dialog_geometry()
@@ -41,22 +40,8 @@ class EditEvidenceDialog(CustomStandardDialog, Ui_new):
     # noinspection PyUnresolvedReferences
     def setup_connections(self):
         self.pushButton_select_eco.clicked.connect(self.select_eco)
-        self.comboBox.currentIndexChanged.connect(self.stackedWidget.setCurrentIndex)
         self.finished.connect(self.save_dialog_geometry)
         self.accepted.connect(self.save_state)
-
-    def set_toolbutton_menu(self):
-        menu = QMenu()
-        action1 = QAction("Metabolite", menu)
-        action1.triggered.connect(lambda x: self.select_link(MetaboliteSelectionDialog))
-        action2 = QAction("Reaction", menu)
-        action2.triggered.connect(lambda x: self.select_link(ReactionSelectionDialog))
-        action3 = QAction("Gene", menu)
-        action3.triggered.connect(lambda x: self.select_link(GeneSelectionDialog))
-        menu.addAction(action1)
-        menu.addAction(action2)
-        menu.addAction(action3)
-        self.toolButton_select.setMenu(menu)
 
     def set_toolbutton_target_menu(self):
         menu = QMenu()
@@ -72,11 +57,6 @@ class EditEvidenceDialog(CustomStandardDialog, Ui_new):
             action4.triggered.connect(lambda x: self.select_target(CompartmentSelectionDialog))
             menu.addAction(action4)
         self.toolButton_select_targe.setMenu(menu)
-
-    def select_link(self, dialog_class):
-        dialog = dialog_class(self.model)
-        if dialog.exec_():
-            self.set_linked_item(dialog.selected_items()[0])
 
     def select_target(self, dialog_class):
         dialog = dialog_class(self.model)
@@ -99,25 +79,13 @@ class EditEvidenceDialog(CustomStandardDialog, Ui_new):
         self.evidence = evidence
         self.populate_propertybox()
         self.set_assertion(evidence.assertion)
-        self.set_linked_item(evidence.link)
         self.set_target_item(evidence.target)
         try:
             self.set_eco(all_ecos[evidence.eco])
         except KeyError:
             self.set_eco(None)
         self.textBox_comment.setPlainText(evidence.comment)
-        self.lineEdit_term.setText(evidence.term)
         self.referenceWidget.dataTable.populate_table(evidence.references)
-
-    def set_linked_item(self, item):
-        if item:
-            self.linked_item = item
-            self.label_link.setText(item.id)
-            self.comboBox.setCurrentIndex(1)
-            self.stackedWidget.setCurrentIndex(1)
-        else:
-            self.linked_item = None
-            self.label_link.clear()
 
     def set_target_item(self, item):
         if item:
@@ -159,17 +127,6 @@ class EditEvidenceDialog(CustomStandardDialog, Ui_new):
         self.evidence.remove_all_references()
         for reference in self.referenceWidget.dataTable.get_items():
             self.evidence.add_reference(reference)
-
-        # Set either a term or a linked object depending on the current
-        # selection.
-        if self.comboBox.currentIndex() == 0:
-            self.evidence.set_term(self.lineEdit_term.text())
-            self.evidence.set_linked_item(None, reciprocal=False)
-        elif self.comboBox.currentIndex() == 1:
-            self.evidence.set_linked_item(self.linked_item, reciprocal=False)
-            self.evidence.set_term(None)
-
-        self.evidence.set_target(self.target_item, reciprocal=False)
 
     @QtCore.pyqtSlot()
     def select_eco(self):

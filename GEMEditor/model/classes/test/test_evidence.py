@@ -37,12 +37,11 @@ class TestEvidence:
 
     def test_override_entity(self):
         entity = Reaction()
-        link = Gene()
         eco = "ECO:000000"
         assertion = "Presence"
         comment = "test comment"
         reference = Reference()
-        evidence = Evidence(entity=entity, link=link, eco=eco, assertion=assertion, comment=comment)
+        evidence = Evidence(entity=entity, eco=eco, assertion=assertion, comment=comment)
         evidence.add_reference(reference)
 
         new_reaction = Reaction()
@@ -88,7 +87,6 @@ class TestEvidence:
 
     def test_setup_links(self):
         entity = Reaction()
-        link = Gene()
         target = Gene()
         eco = "ECO:000000"
         assertion = "Presence"
@@ -96,7 +94,6 @@ class TestEvidence:
         reference = Reference()
         evidence = Evidence()
         evidence.entity = entity
-        evidence.link = link
         evidence.target = target
         evidence.eco = eco
         evidence.assertion = assertion
@@ -104,14 +101,12 @@ class TestEvidence:
         evidence.add_reference(reference, reciprocal=False)
 
         assert evidence not in entity.evidences
-        assert evidence not in link.evidences
         assert evidence not in reference.linked_items
         assert evidence not in target.evidences
 
         evidence.setup_links()
 
         assert evidence in entity.evidences
-        assert evidence in link.evidences
         assert evidence in reference.linked_items
         assert evidence in target.evidences
 
@@ -139,37 +134,33 @@ class TestEvidence:
 
         # Check that the copy is not linked
         assert copy not in entity.evidences
-        assert copy not in link.evidences
         assert copy not in reference.linked_items
         assert copy not in target.evidences
 
     def test_equality(self):
         entity = Reaction()
-        link = Gene()
         target = Gene()
         eco = "ECO:000000"
         assertion = "Presence"
         comment = "test comment"
         reference = Reference()
-        evidence = Evidence(entity=entity, link=link, eco=eco, assertion=assertion, comment=comment, target=target)
+        evidence = Evidence(entity=entity, eco=eco, assertion=assertion, comment=comment, target=target)
         evidence.add_reference(reference)
         assert evidence.copy() == evidence
 
     @pytest.mark.parametrize("attribute,new_value", [("entity", Reaction()),
-                                                      ("link", Gene()),
-                                                      ("target", Gene()),
-                                                      ("eco", "new eco"),
-                                                      ("assertion", "new assertion"),
-                                                      ("comment", "new comment")])
+                                                     ("target", Gene()),
+                                                     ("eco", "new eco"),
+                                                     ("assertion", "new assertion"),
+                                                     ("comment", "new comment")])
     def test_inequality(self, attribute, new_value):
         entity = Reaction()
-        link = Gene()
         target = Gene()
         eco = "ECO:000000"
         assertion = "Presence"
         comment = "test comment"
         reference = Reference()
-        evidence = Evidence(entity=entity, link=link, eco=eco, assertion=assertion, comment=comment, target=target)
+        evidence = Evidence(entity=entity, eco=eco, assertion=assertion, comment=comment, target=target)
         evidence.add_reference(reference)
 
         new_copy = evidence.copy()
@@ -179,13 +170,12 @@ class TestEvidence:
 
     def test_inequality_reference(self):
         entity = Reaction()
-        link = Gene()
         target = Gene()
         eco = "ECO:000000"
         assertion = "Presence"
         comment = "test comment"
         reference = Reference()
-        evidence = Evidence(entity=entity, link=link, eco=eco, assertion=assertion, comment=comment, target=target)
+        evidence = Evidence(entity=entity, eco=eco, assertion=assertion, comment=comment, target=target)
         evidence.add_reference(reference)
 
         new_copy = evidence.copy()

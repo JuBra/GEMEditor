@@ -5,11 +5,10 @@ from GEMEditor.evidence.assertions import ASSERTIONS
 
 
 class Evidence(ReferenceLink):
-
     _validity = dict((x.text, x.func_validity) for x in ASSERTIONS)
     _fixes = dict((x.text, x.func_fix) for x in ASSERTIONS)
 
-    def __init__(self, internal_id=None, entity=None, term=None, eco=None, assertion=None, comment=None,
+    def __init__(self, internal_id=None, entity=None, eco=None, assertion=None, comment=None,
                  target=None):
         super(Evidence, self).__init__()
         self.internal_id = internal_id or str(uuid4())
@@ -17,14 +16,12 @@ class Evidence(ReferenceLink):
         self.assertion = None
         self.eco = None
         self.comment = None
-        self.term = None
         self.target = None
 
         self.set_entity(entity)
         self.set_eco(eco)
         self.set_assertion(assertion)
         self.set_comment(comment)
-        self.set_term(term)
         self.set_target(target)
 
     def set_entity(self, new_entity, reciprocal=True):
@@ -75,9 +72,6 @@ class Evidence(ReferenceLink):
 
     def set_eco(self, eco):
         self.eco = eco or ""
-
-    def set_term(self, term):
-        self.term = term or ""
 
     def set_comment(self, comment):
         self.comment = comment or ""
@@ -174,26 +168,27 @@ class Evidence(ReferenceLink):
             return False
 
     def __str__(self):
-        return "ID: {id}\nEntity: {entity}\nAssertion: {assertion}\n" \
-               "ECO: {eco}\nComment: {comment}\nLink: {link}\nTerm: {term}\n" \
-               "Ref: {ref}".format(id=self.internal_id,
-                                   entity=self.entity,
-                                   assertion=self.assertion,
-                                   eco=self.eco,
-                                   comment=self.comment,
-                                   term=self.term,
-                                   ref=";".join(x.reference_string for x in self.references))
+        return "ID: {id}\nEntity: {entity}\n" \
+               "Assertion: {assertion}\n " \
+               "Target: {target}\nECO: {eco}\n" \
+               "Comment: {comment}\nRef: {ref}".format(id=self.internal_id,
+                                                       entity=self.entity,
+                                                       assertion=self.assertion,
+                                                       target=self.target,
+                                                       eco=self.eco,
+                                                       comment=self.comment,
+                                                       ref=";".join(x.reference_string for x in
+                                                                    self.references))
 
     def __eq__(self, other):
         if (isinstance(other, Evidence) and
-                    self.internal_id == other.internal_id and
-                    self.entity is other.entity and
-                    self.target is other.target and
-                    self.eco == other.eco and
-                    self.assertion == other.assertion and
-                    self.comment == other.comment and
-                    self.term == other.term and
-                    self.references == other.references):
+                self.internal_id == other.internal_id and
+                self.entity is other.entity and
+                self.target is other.target and
+                self.eco == other.eco and
+                self.assertion == other.assertion and
+                self.comment == other.comment and
+                self.references == other.references):
             return True
         else:
             return False

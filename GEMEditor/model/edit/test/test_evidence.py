@@ -35,7 +35,6 @@ class TestEvidenceInputDialog:
 
         # Check that all labels are emtpy
         assert self.dialog.label_eco.text() == ""
-        assert self.dialog.label_link.text() == ""
         assert self.dialog.textBox_comment.toPlainText() == ""
 
         # Assert that the state of the reference table is right
@@ -43,22 +42,19 @@ class TestEvidenceInputDialog:
         # assert self.dialog.referenceTab.referenceTable.rowCount() == 0
         # assert self.dialog.referenceView.model() is self.dialog.referenceTable
 
-        # Check that there are as many mapped mehtod options as in the option
+        # Check that there are as many mapped method options as in the option
         assert self.dialog.comboBox_assertion.count() == 0
 
-        # Check that the stacked widgets is on the first tab
-        assert self.dialog.stackedWidget.currentIndex() == 0
 
     def test_set_current_evidence(self):
 
-        evidence = Evidence(entity=Reaction("id"), term="Term", eco="ECO:0000ß", assertion="Presence", comment="Comment")
+        evidence = Evidence(entity=Reaction("id"), eco="ECO:0000ß", assertion="Presence", comment="Comment")
         evidence.add_reference(Reference())
 
         # Action
         self.dialog.set_evidence(evidence)
 
         # Check correctness of changes
-        assert self.dialog.lineEdit_term.text() == evidence.term
         assert self.evidence.eco in self.dialog.label_eco.text()
         assert self.dialog.textBox_comment.toPlainText() == evidence.comment
 
@@ -76,10 +72,8 @@ class TestEvidenceInputDialog:
         # Action
         self.dialog.set_evidence(Evidence())
 
-        assert self.dialog.lineEdit_term.text() == ""
         assert self.dialog.label_eco.text() == ""
         assert self.dialog.textBox_comment.toPlainText() == ""
-        assert self.dialog.label_link.text() == ""
         assert self.dialog.comboBox_assertion.currentText() == ""
 
     def test_save_information(self):
@@ -96,7 +90,6 @@ class TestEvidenceInputDialog:
 
         # Todo: Move to reference widget test
         #self.dialog.referenceTable.populate_table([new_ref])
-        self.dialog.comboBox.setCurrentIndex(1)
         self.dialog.set_eco(new_eco)
 
         # Action
@@ -109,26 +102,6 @@ class TestEvidenceInputDialog:
         # assert evidence.references == set([new_ref])
         assert evidence.eco == new_eco
 
-    def test_save_changes2(self):
-        """ Test that only the selected page of term/link is saved to the evidence"""
-
-        evidence = Evidence(entity=Reaction(""))
-        new_term = "New term"
-
-        self.dialog.set_evidence(evidence)
-
-        # Set dialog attributes
-        self.dialog.lineEdit_term.setText(new_term)
-
-        # Check saving of term
-        self.dialog.comboBox.setCurrentIndex(0)
-        self.dialog.save_state()
-        assert evidence.term == new_term
-
-        # Check saving of linked item
-        self.dialog.comboBox.setCurrentIndex(1)
-        self.dialog.save_state()
-        assert evidence.term == ""
 
     # Todo: Replace with test of button status changed
     # def test_content_changed_type(self):
@@ -243,24 +216,6 @@ class TestEvidenceInputDialog:
         self.dialog.save_state()
         assert self.evidence.assertion == "New assertion"
 
-    def test_save_changes_items(self):
-        self.dialog.set_evidence(self.evidence)
-        new_gene = Gene()
-        self.dialog.link = new_gene
-        assert self.dialog.comboBox.currentIndex() == 0
-
-        # Check tha the linked item is saved depending on the options
-        # selected in the combobox
-        for i in range(self.dialog.comboBox.count()):
-            self.dialog.evidence.link = None
-            self.dialog.comboBox.setCurrentIndex(i)
-            self.dialog.save_state()
-
-            # Todo: Remove link support
-            # if self.dialog.comboBox.currentText() in self.dialog.link_visibility:
-            #     assert self.dialog.current_evidence.link is new_gene
-            # else:
-            #     assert self.dialog.current_evidence.link is None
 
     # def test_save_changes_references(self):
     #     # Todo: Move to reference widget test
