@@ -400,7 +400,7 @@ class ReactionTab(StandardTab):
 
             # Update existing reactions with new metabolites if moving
             else:
-                reaction.clear_metabolites()
+                reaction.subtract_metabolites(reaction.metabolites)
                 reaction.add_metabolites(metabolites)
                 self.model.QtReactionTable.update_row_from_link(rows[n])
 
